@@ -53,7 +53,7 @@
     <ClInclude Include="range.h">
       <Filter>头文件\tree</Filter>
     </ClInclude>
-    <ClInclude Include="lib\tree.hh">
+    <ClInclude Include="tree.hh">
       <Filter>头文件\lib</Filter>
     </ClInclude>
   </ItemGroup>

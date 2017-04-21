@@ -126,9 +126,9 @@
   <ItemGroup>
     <ClInclude Include="c4.5.h" />
     <ClInclude Include="data.h" />
-    <ClInclude Include="lib\tree.hh" />
     <ClInclude Include="range.h" />
     <ClInclude Include="tree.h" />
+    <ClInclude Include="tree.hh" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="in.txt" />
