@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\tree">
+      <UniqueIdentifier>{c67eef37-878e-40f6-86cb-d2a7bcc07504}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\tree">
+      <UniqueIdentifier>{59346a13-f5c2-43d0-be07-4acca185d9a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\lib">
+      <UniqueIdentifier>{f009aea8-a97c-4a2e-bf67-236fb14f9ff5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="data.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_pool.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tree.cpp">
+      <Filter>源文件\tree</Filter>
+    </ClCompile>
+    <ClCompile Include="c4.5.cpp">
+      <Filter>源文件\tree</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tree.h">
+      <Filter>头文件\tree</Filter>
+    </ClInclude>
+    <ClInclude Include="c4.5.h">
+      <Filter>头文件\tree</Filter>
+    </ClInclude>
+    <ClInclude Include="range.h">
+      <Filter>头文件\tree</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\tree.hh">
+      <Filter>头文件\lib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="in.txt" />
+  </ItemGroup>
+</Project>
