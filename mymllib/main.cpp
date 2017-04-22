@@ -22,7 +22,7 @@ int main()
 	//tree.train();
 	//cerr << m.size() << "," << m.dimension() << endl;
 	tree<string> tr;
-	auto root = tr.insert(tr.begin(),"²ÙÄãÂè");
+	auto root = tr.insert(tr.begin(),"ccc");
 	tr.append_child(root, "hello");
 	tr.append_child(root, "hello1");
 	tr.append_child(root, "hello2");
