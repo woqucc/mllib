@@ -5,7 +5,6 @@ namespace myml
 {
 	c45_tree_node::c45_tree_node(matrix_p data) :_data(data)
 	{
-		tree_node_v::tree_node_v();
 		calc_discrete_gain();
 	}
 

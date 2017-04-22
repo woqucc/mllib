@@ -1,11 +1,12 @@
 #ifndef C45_H
 #define C45_H
-#include"tree.h"
 #include"range.h"
+#include"data.h"
 #include<unordered_map>
 #include<memory>
 namespace myml
 {
+	using namespace std;
 	using count_result = unordered_map<long double, int>;
 	using matrix_p = shared_ptr<matrix<long double>>;
 	class c45_tree_node

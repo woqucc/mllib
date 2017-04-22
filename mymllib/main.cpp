@@ -3,7 +3,9 @@
 #include<memory>
 #include<unordered_map>
 #include<ctime>
-#include"lib/tree.hh"
+#include<cstring>
+#include<string>
+#include"tree.hh"
 #include"data.h"
 #include"c4.5.h"
 using namespace std;
@@ -19,16 +21,14 @@ int main()
 	//c45_tree tree(x);
 	//tree.train();
 	//cerr << m.size() << "," << m.dimension() << endl;
-	tree<int> tree;
-	tree = 1;
-	tree.insert_after(tree.begin(), 33);
-	tree.append_child(tree.begin_leaf(),3);
-	tree.append_child(tree.begin_leaf(), 4);
-	tree<int>::fixed_depth_iterator a= tr.begin();
-	for (auto i = tree.begin_fixed(tree.) ;i !=tree.end(); ++i)
+	tree<string> tr;
+	auto root = tr.insert(tr.begin(),"²ÙÄãÂè");
+	tr.append_child(root, "hello");
+	tr.append_child(root, "hello1");
+	tr.append_child(root, "hello2");
+	for (auto i = tr.begin_leaf(); i != tr.end_leaf(); i++)
 	{
 		cerr << *i << endl;
 	}
-	
-	return 0;
+
 }

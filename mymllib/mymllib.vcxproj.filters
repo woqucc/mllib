@@ -33,9 +33,6 @@
     <ClCompile Include="memory_pool.h">
       <Filter>头文件</Filter>
     </ClCompile>
-    <ClCompile Include="tree.cpp">
-      <Filter>源文件\tree</Filter>
-    </ClCompile>
     <ClCompile Include="c4.5.cpp">
       <Filter>源文件\tree</Filter>
     </ClCompile>
@@ -43,9 +40,6 @@
   <ItemGroup>
     <ClInclude Include="data.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="tree.h">
-      <Filter>头文件\tree</Filter>
     </ClInclude>
     <ClInclude Include="c4.5.h">
       <Filter>头文件\tree</Filter>
