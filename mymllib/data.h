@@ -7,6 +7,7 @@
 #include<memory>
 #include<valarray>
 #include<functional>
+#include<cassert>
 
 namespace myml
 {
@@ -79,8 +80,8 @@ namespace myml
 			virtual typename matrix<T>::column_iterator& operator +(size_t iv);
 			virtual size_t operator -(const column_iterator& i);
 		};
+		/*默认构造函数，构造空矩阵，无法使用*/
 		matrix() = default;
-		matrix(matrix & m);
 		/*
 		@brief 打印矩阵中的所有元素
 		*/
@@ -94,35 +95,41 @@ namespace myml
 		/*
 		@brief 获取元素个数
 		*/
-		virtual size_t size() const = 0;
+		virtual size_t size() const;
 		/*
 		@brief 获取元素维数
 		*/
-		virtual size_t dimension() const = 0;
+		virtual size_t dimension() const;
 		/*
 		@brief 增加行
 		@param row 元素行的首地址指针
 		@param size 元素维数
 		*/
-		virtual void push_back(T *row, size_t size) = 0;
+		virtual void push_back(T *row, size_t size);
 		/*
 		@brief 检查矩阵中每行数据列数是否相同,即数据是否合法
 		@return true 每行数据列数相同，合法
 		@return false 每行数据列数不同，非法;矩阵为空
 		*/
-		virtual bool rect_check() const = 0;
+		virtual bool rect_check() const;
 		/*
 		@brief 交换两行
 		@param row1 待交换的行1
 		@param row2 待交换的行2
 		*/
-		virtual void swap_row(size_t row1, size_t row2) = 0;
+		virtual void swap_row(size_t row1, size_t row2);
 		/*
 		@brief 获取某一元素
 		@param row_num 行数
 		@param col_num 列数
 		*/
-		virtual T& at(size_t row_num, size_t col_num) = 0;
+		virtual T& at(size_t row_num, size_t col_num);
+		/*
+		@brief 获取某一元素
+		@param row_num 行数
+		@param col_num 列数
+		*/
+		virtual const T at(size_t row_num, size_t col_num) const;
 		/*
 		@brief 返回第一个矩阵元素迭代器
 		*/
@@ -147,7 +154,7 @@ namespace myml
 		@param column_end	最后一个元素纵坐标，由0开始
 		@return 指向新子阵的指针（shared_ptr）
 		*/
-		virtual shared_ptr<matrix<T>> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end) = 0;
+		virtual shared_ptr<matrix<T>> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end);
 		/*
 		@brief 赋值操作符
 		*/
@@ -157,27 +164,27 @@ namespace myml
 		/*
 		@brief 提取指定行成为新的矩阵
 		*/
-		virtual shared_ptr<matrix<T>> fetch_row(const index_array& row_indexs) const = 0;
+		virtual shared_ptr<matrix<T>> fetch_row(const index_array& row_indexs) const;
 
 		/*
 		@brief 提取满足指定条件的行
 		*/
-		virtual shared_ptr<matrix<T>> fetch_row(function<bool(const valarray<T> &va)> condition) const = 0;
+		virtual shared_ptr<matrix<T>> fetch_row(function<bool(const valarray<T> &va)> condition) const;
 
 		/*
 		@brief 提取指定行成为新的矩阵
 		*/
-		virtual shared_ptr<matrix<T>> fetch_column(const index_array& column_indexs) const = 0;
+		virtual shared_ptr<matrix<T>> fetch_column(const index_array& column_indexs) const;
 
 		/*
 		@brief 删除指定行
 		*/
-		virtual void remove_row(const index_array& column_indexs) = 0;
+		virtual void remove_row(const index_array& column_indexs);
 
 		/*
 		@brief 删除指定列
 		*/
-		virtual void remove_column(const index_array& column_indexs) = 0;
+		virtual void remove_column(const index_array& column_indexs);
 
 		/*
 		@brief 删除指定列
@@ -188,6 +195,24 @@ namespace myml
 		@brief 不排序，仅仅获取其顺序
 		*/
 		virtual index_array get_order(size_t column_num);
+
+		/*初始化列表形式初始化*/
+		void push_back(valarray<T> && row);
+		void push_back(const valarray<T>& row);
+
+		/*真正构造函数*/
+		matrix<T>(size_t row_size, size_t col_size);
+		/*转移构造函数*/
+		matrix<T>(matrix&& m);
+		/*复制构造函数*/
+		matrix<T>(const matrix& m);
+		/**/
+	private:
+		T* _data = nullptr;
+		size_t _row_size = 0;
+		size_t _col_size = 0;
+		size_t _cur_row_pos = 0;
+		size_t _cur_col_pos = 0;
 	};
 
 	template<class T>
@@ -206,25 +231,9 @@ namespace myml
 	}
 
 	template<class T>
-	inline matrix<T>::matrix(matrix & m)
-	{
-		*this = m;
-	}
-
-	template<class T>
 	inline matrix<T>& matrix<T>::operator= (matrix & m)
 	{
-		size_t dms = m.dimension();
-		auto *row = new T[dms]();
-		for (size_t row_num = 0; row_num < m.size(); row_num++)
-		{
-			for (size_t column_count = 0; column_count < dms; column_count++)
-			{
-				row[i] = m.at(i);
-				push_back(row, dms);
-			}
-		}
-		delete[] row;
+		matrix(m);
 		return *this;
 	}
 	//TODO :优化逻辑
@@ -371,6 +380,11 @@ namespace myml
 		return _index;
 	}
 	template<class T>
+	inline const T  matrix<T>::at(size_t row_num, size_t col_num) const
+	{
+		return _data[row_num * _col_size + col_num];
+	}
+	template<class T>
 	typename matrix<T>::iterator matrix<T>::begin()
 	{
 		return iterator(*this, 0);
@@ -430,213 +444,149 @@ namespace myml
 				qs_stack.push({ i + 1, end });
 		}
 	}
-
-	/*
-	@brief 矩阵类，通过vector存储valarray实现
-	*/
-	template <class T>
-	class matrix_va :public matrix<T>
-	{
-	public:
-		void push_back(T *row, size_t size);
-		void push_back(valarray<T> && row);
-		void push_back(const valarray<T>& row);
-		bool rect_check() const;
-		shared_ptr<matrix<T>> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end);
-		shared_ptr<matrix<T>> fetch_row(const index_array& row_indexs) const override;
-		shared_ptr<matrix<T>> fetch_row(function<bool(const valarray<T> &va)> condition) const override;
-		shared_ptr<matrix<T>> fetch_column(const index_array& fetch_column)const override;
-		void remove_column(const index_array& column_indexs) override;
-		void remove_row(const index_array& column_indexs) override;
-		matrix_va<T>() = default;
-		matrix_va<T>(matrix_va&& m);
-		matrix_va<T>(const matrix_va& m);
-		size_t size() const override;
-		size_t dimension() const override;
-		void swap_row(size_t row1, size_t row2) override;
-		T& at(size_t row_num, size_t col_num) override;
-	private:
-		vector<valarray<T>> _data;
-	};
 	template<class T>
-	inline void matrix_va<T>::push_back(T * row, size_t size)
+	inline void matrix<T>::push_back(T * row, size_t size)
 	{
-		auto&& temp = valarray<T>(size);
-		for (size_t i = 0; i < size; i++)
+		assert(_data != nullptr);
+		assert(_row_size > 0);
+		assert(_col_size > 0);
+		assert(_row_size > _cur_row_pos);
+		assert(_col_size > _cur_col_pos);
+		for (size_t i = 0; i < size; ++i)
 		{
-			temp[i] = row[i];
+			_data[_cur_row_pos * _col_size] = row[i];
 		}
-		_data.push_back(move(temp));
+		++_cur_row_pos;
 	}
 	template<class T>
-	inline void matrix_va<T>::push_back(valarray<T>&& row)
+	inline void matrix<T>::push_back(valarray<T>&& row)
 	{
-		_data.push_back(forward<valarray<T>>(row));
-	}
-	template<class T>
-	inline void matrix_va<T>::push_back(const valarray<T>& row)
-	{
-		_data.push_back(row);
-	}
-	template<class T>
-	inline bool matrix_va<T>::rect_check() const
-	{
-		if (_data.size() == 0)return false;
-		auto column_size = (_data.begin())->size();
-		for (auto row = _data.begin()++; row != _data.end(); row++)
+		for (size_t i = 0; i < row.size(); ++i)
 		{
-			if (row->size() != column_size)
-				return false;
+			_data[_cur_row_pos * _col_size] = row[i];
 		}
+		++_cur_row_pos;
+	}
+	template<class T>
+	inline void matrix<T>::push_back(const valarray<T>& row)
+	{
+		for (size_t i = 0; i < row.size(); ++i)
+		{
+			_data[_cur_row_pos * _col_size] = row[i];
+		}
+		++_cur_row_pos;
+	}
+	template<class T>
+	inline bool matrix<T>::rect_check() const
+	{
 		return true;
 	}
 
 	template<class T>
-	shared_ptr<matrix<T>> matrix_va<T>::sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end)
+	shared_ptr<matrix<T>> matrix<T>::sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end)
 	{
-		shared_ptr<matrix_va<T>> m(new matrix_va<T>());
+		shared_ptr<matrix<T>> m(new matrix<T>(row_end - row_begin, column_end - column_begin));
 		for (auto row_i = row_begin; row_i < row_end; row_i++)
 		{
-			auto row = _data.begin() + row_i;
-			m->push_back(
-				[column_begin, column_end, row]
-			{
-				auto&& temp = valarray<T>(column_end - column_begin);
-				for (size_t i = column_begin; i < column_end; ++i)
-				{
-					temp[i - column_begin] = (*row)[i];
-				};
-				return move(temp);
-			}());
+			m->push_back(_data + row_begin * _col_size + column_begin, column_end - column_begin);
 		}
 		return m;
 	}
 
 	template<class T>
-	inline shared_ptr<matrix<T>> matrix_va<T>::fetch_row(const index_array & row_indexs) const
+	inline shared_ptr<matrix<T>> matrix<T>::fetch_row(const index_array & row_indexs) const
 	{
-		auto temp = shared_ptr<matrix_va<T>>(new matrix_va());
-		for (auto i : row_indexs)
+		shared_ptr<matrix<T>> m(new matrix<T>(row_indexs.size(),dimension()));
+		for (auto row_i : row_indexs)
 		{
-			temp->push_back(_data[i]);
+			m->push_back(_data + row_i * _col_size, dimension());
 		}
+		return m;
+	}
+
+	template<class T>
+	inline shared_ptr<matrix<T>> matrix<T>::fetch_row(function<bool(const valarray<T> &va)> condition) const
+	{
+		auto temp = shared_ptr<matrix<T>>(new matrix());
+		//TODO finish it
+		static_assert(true);
 		return temp;
 	}
 
 	template<class T>
-	inline shared_ptr<matrix<T>> matrix_va<T>::fetch_row(function<bool(const valarray<T> &va)> condition) const
+	inline shared_ptr<matrix<T>>  matrix<T>::fetch_column(const index_array & fetch_column) const
 	{
-		auto temp = shared_ptr<matrix_va<T>>(new matrix_va());
-		size_t row_begin = 0;
-
-		for (const auto& row : _data)
-		{
-			if (condition(row))
-				temp->push_back(row);
-		}
-
+		auto temp = shared_ptr<matrix<T>>(new matrix());
+		//TODO finish it
+		static_assert(true);
 		return temp;
 	}
 
 	template<class T>
-	inline shared_ptr<matrix<T>>  matrix_va<T>::fetch_column(const index_array & fetch_column) const
+	inline void matrix<T>::remove_column(const index_array & column_indexs)
 	{
-		auto temp = shared_ptr<matrix_va<T>>(new matrix_va());
-		valarray<T> temp_row(fetch_column.size());
-		for (size_t i = 0; i < _data.size(); ++i)
-		{
-			for (size_t j = 0; j < fetch_column.size(); ++j)
-			{
-				temp_row[j] = _data[i][fetch_column[j]];
-			}
-			temp->push_back(temp_row);
-		}
-		return temp;
+		//TODO finish it
+		static_assert(true);
 	}
 
 	template<class T>
-	inline void matrix_va<T>::remove_column(const index_array & column_indexs)
+	inline void matrix<T>::remove_row(const index_array & column_indexs)
 	{
-		if (column_indexs.size() == 0)
-			return;
-		if (column_indexs.size() == dimension())
-		{
-			_data.clear();
-			return;
-		}
-		vector<valarray<T>> temp_data;
-		valarray<T> temp_row(dimension() - column_indexs.size());
-		_data.swap(temp_data);
-		for (auto& row : temp_data)
-		{
-			size_t dn = 0;
-			for (size_t cn = 0; cn < row.size(); ++cn)
-			{
-				if ([column_indexs, cn] {
-					for (auto i : column_indexs)
-					{
-						if (cn == i)
-							return false;
-					}
-					return true;
-				}())
-					temp_row[dn++] = row[cn];
-			}
-			_data.push_back(temp_row);
-		}
+		//TODO finish it
+		static_assert(true);
 	}
 
 	template<class T>
-	inline void matrix_va<T>::remove_row(const index_array & column_indexs)
+	inline size_t matrix<T>::size() const
 	{
-		for (size_t i = 0; i < column_indexs.size(); ++i)
-		{
-			_data.erase(_data.begin() + (column_indexs[i] - i));
-		}
+		return _row_size;
 	}
 
 	template<class T>
-	inline size_t matrix_va<T>::size() const
+	inline size_t matrix<T>::dimension() const
 	{
-		return _data.size();
+		return _col_size;
 	}
 
 	template<class T>
-	inline size_t matrix_va<T>::dimension() const
+	inline void matrix<T>::swap_row(size_t row1, size_t row2)
 	{
-		if (_data.size() == 0)
-			return 0;
-		return (_data.begin())->size();
+		T * temp_line = new T[_col_size]();
+		//row1 2 temp
+		memcpy(temp_line, _data + row1 * _col_size, sizeof(T) / sizeof(char) *  _col_size);
+		//row 2 to row1
+		memcpy(_data + row1 * _col_size, _data + row2 * _col_size, sizeof(T) / sizeof(char) *  _col_size);
+		//temp to row2
+		memcpy(_data + row2 * _col_size, temp_line, sizeof(T) / sizeof(char) *  _col_size);
 	}
 
 	template<class T>
-	inline void matrix_va<T>::swap_row(size_t row1, size_t row2)
+	T& matrix<T>::at(size_t row_num, size_t col_num)
 	{
-		std::swap(_data[row1], _data[row2]);
+		return _data[row_num * _col_size + col_num];
 	}
 
 	template<class T>
-	T& matrix_va<T>::at(size_t row_num, size_t col_num)
+	inline matrix<T>::matrix(size_t row_size, size_t col_size)
 	{
-		return _data[row_num][col_num];
+		_data = new T[row_size * col_size]();
+		_row_size = row_size;
+		_col_size = col_size;
 	}
 
 	template<class T>
-	inline matrix_va<T>::matrix_va(matrix_va<T> && m)
+	inline matrix<T>::matrix(matrix<T> && m)
 	{
-		_data.swap(forward(m));
-		//for (auto &&v : m._data)
-		//{
-		//	_data.push_back(forward(v));
-		//}
+		_data = m._data;
+		_col_size = m._col_size;
+		_row_size = m._row_size;
+		m._data = nullptr;
 	}
 	template<class T>
-	inline matrix_va<T>::matrix_va(const matrix_va<T>& m)
+	inline matrix<T>::matrix(const matrix<T>& m)
 	{
-		for (auto v : m._data)
-		{
-			_data.push_back(v);
-		}
+		this->matrix(m._row_size, m._col_size);
+		memcpy(_data, m._data, sizeof(T) / sizeof(char) *_row_size* _col_size);
 	}
 
 	/*导入数据部分的全局函数*/
