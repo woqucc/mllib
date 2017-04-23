@@ -431,7 +431,6 @@ namespace myml
 		}
 	}
 
-
 	/*
 	@brief 矩阵类，通过vector存储valarray实现
 	*/
@@ -573,7 +572,7 @@ namespace myml
 			size_t dn = 0;
 			for (size_t cn = 0; cn < row.size(); ++cn)
 			{
-				if ([column_indexs,cn] {
+				if ([column_indexs, cn] {
 					for (auto i : column_indexs)
 					{
 						if (cn == i)

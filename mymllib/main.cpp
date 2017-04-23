@@ -12,7 +12,7 @@ using namespace std;
 using namespace myml;
 int main()
 {
-	//matrix_va<long double> m;
+	//matrix_a<long double> m;
 	////ifstream f(R"(in.txt)", ios::in);
 	////ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)",ios::in);
 	////ifstream f(R"(D:\paper\featuresÊµÑé\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
