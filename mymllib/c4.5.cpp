@@ -22,7 +22,7 @@ namespace myml
 	void c45_tree_node::calc_discrete_gain()
 	{
 		//类标位置
-		size_t label_pos = _data->dimension() - 1;
+		size_t label_pos = _data->col_size() - 1;
 		//获取类标的<类别，该类个数>
 		_labels_count = _get_column_classes_count(label_pos, _data);
 		if (_labels_count.size() == 1)
@@ -57,7 +57,7 @@ namespace myml
 				max_gain = _gain;
 				_gain_attr = attr_num;
 			}
-			cerr << "数据大小:" << _data->size() << endl;
+			cerr << "数据大小:" << _data->row_size() << endl;
 			cerr << "信息增益：" << _gain << '\t';
 			cerr << "当前节点熵：" << _ent << endl;
 			cerr << "信息增益率：" << _gain_ratio << endl;
@@ -87,8 +87,8 @@ namespace myml
 		for (const auto& attr : selected_attr_counts)
 		{
 			auto temp_gr = _gain_ratio_attr;
-			auto temp_matrix = _data->fetch_row([attr, temp_gr](const valarray<long double> &va) ->bool {
-				if (va[temp_gr] == attr.first)
+			auto temp_matrix = _data->fetch_row([attr, temp_gr](const long double* val, size_t col_size) ->bool {
+				if (val[temp_gr] == attr.first)
 					return true;
 				return false;
 			});
@@ -148,14 +148,14 @@ namespace myml
 	long double c45_tree_node::_calc_gain(matrix_p data, size_t column_num, const count_result& cr)
 	{
 		//获取类标位置
-		size_t lable_pos = data->dimension() - 1;
+		size_t lable_pos = data->col_size() - 1;
 		auto index_map = unordered_map<long double, count_result>(cr.size());
 		for (const auto& i : cr)
 		{
 			index_map.insert({ i.first, unordered_map<long double,int>() });
 		}
 
-		for (size_t i = 0; i < data->size(); ++i)
+		for (size_t i = 0; i < data->row_size(); ++i)
 		{
 			auto column_i = data->at(i, column_num);
 			auto label = data->at(i, lable_pos);
@@ -192,7 +192,7 @@ namespace myml
 
 	count_result c45_tree_node::_get_specified_value_labels_count(long double value, matrix_p data, size_t column_num)
 	{
-		auto label_pos = data->dimension() - 1;
+		auto label_pos = data->col_size() - 1;
 		count_result&& cr = count_result();
 		for (auto i = data->cbegin(column_num); i != data->cend(column_num); ++i)
 		{
