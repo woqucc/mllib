@@ -206,7 +206,12 @@ namespace myml
 		matrix<T>(matrix&& m);
 		/*复制构造函数*/
 		matrix<T>(const matrix& m);
-		/**/
+		/*析构函数*/
+		~matrix<T>();
+		/*获取只读row*/
+		const matrix<T> row(size_t row_index);
+		/*重新分配大小*/
+		void resize(size_t row_size, size_t col_size);
 	private:
 		T* _data = nullptr;
 		size_t _row_size = 0;
@@ -477,6 +482,14 @@ namespace myml
 		++_cur_row_pos;
 	}
 	template<class T>
+	inline void matrix<T>::resize(size_t row_size, size_t col_size)
+	{
+		delete[]_data;
+		_data = new T[row_size * col_size]();
+		_row_size = row_size;
+		_col_size = col_size;
+	}
+	template<class T>
 	inline bool matrix<T>::rect_check() const
 	{
 		return true;
@@ -569,9 +582,7 @@ namespace myml
 	template<class T>
 	inline matrix<T>::matrix(size_t row_size, size_t col_size)
 	{
-		_data = new T[row_size * col_size]();
-		_row_size = row_size;
-		_col_size = col_size;
+		resize(row_size, col_size);
 	}
 
 	template<class T>
@@ -589,6 +600,33 @@ namespace myml
 		memcpy(_data, m._data, sizeof(T) / sizeof(char) *_row_size* _col_size);
 	}
 
+	template<class T>
+	inline matrix<T>::~matrix()
+	{
+		delete[] _data;
+	}
+
+	/*
+	单列类
+	*/
+	template<class T>
+	class column:matrix<T>
+	{
+	public:
+		column(size_t row_size);
+		~column();
+	private:
+
+	};
+	template<class T>
+	column::column(size_t row_size)
+	{
+		resize(row_size, 1);
+	}
+	template<class T>
+	column::~column()
+	{
+	}
 	/*导入数据部分的全局函数*/
 	template<class T>
 	bool import_matrix_data(matrix<T>& matrix, ifstream& in, char split = ',', int line_width = 2048)
@@ -600,23 +638,30 @@ namespace myml
 		/*获取列数*/
 		char *line = new char[line_width]();
 		in.getline(line, line_width);
-		size_t column_num = count(line, line + strlen(line), split) + 1;
-		delete[] line;
-		if (column_num == 0)
+		size_t col_size = count(line, line + strlen(line), split) + 1;
+		size_t row_size = 1;
+		
+		if (col_size == 0)
 			return false;
-		/*将文件指针重置到文件首部*/
-		in.seekg(ios::beg);
-		T *num_line = new T[line_width]();
+		
 		while (!in.eof())
 		{
-			for (size_t i = 0; i < column_num - 1; i++)
-			{
-				in >> num_line[i] >> split;
-			}
-			in >> num_line[column_num - 1];
-			matrix.push_back(num_line, column_num);
+			in.getline(line, line_width);
+			row_size++;
 		}
-		delete[] num_line;
+		matrix.resize(row_size, col_size);
+
+		/*将文件指针重置到文件首部*/
+		in.seekg(ios::beg);
+		for (size_t row_index = 0; row_index < row_size; ++row_index)
+		{
+			for (size_t col_index = 0; col_index < col_size - 1; ++col_index)
+			{
+				in >> matrix.at(row_index, col_index) >> split;
+			}
+			in >> matrix.at(row_index, col_size - 1);
+		}
+		delete[] line;
 		return true;
 	};
 	/*

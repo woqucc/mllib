@@ -20,6 +20,7 @@ int main()
 	//auto x = m.sub_matrix(0, 0, m.size(), m.dimension());
 	//c45_tree tree(x);
 	//tree.train();
+	m.print();
 	cerr << m.size() << "," << m.dimension() << endl;
 	//tree<string> tr;
 	//auto root = tr.insert(tr.begin(),"ccc");
