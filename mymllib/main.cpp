@@ -21,10 +21,14 @@ int main()
 	//c45_tree tree(x);
 	//tree.train();
 	matrix<long double> c = m.row(1);
-	auto x = m.col(1);
-	x.print();
-	m.at(0, 0) = 55;
-	m.print();
+	c.print();
+	matrix<long double> col(1,3);
+	col.push_back({ 1,2,3 });
+	
+	c = col + 3;
+	c.print();
+	col.at(0, 2) = 99;
+	col.print();
 	c.print();
 	//auto c = m.row(4);
 	//c.print();

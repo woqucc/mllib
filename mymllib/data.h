@@ -166,7 +166,27 @@ namespace myml
 		/*
 		@brief 赋值操作符
 		*/
-		matrix& operator =(matrix& rn);
+		matrix& operator =(const matrix& rn);
+		/*
+		@brief 加号操作符
+		*/
+		matrix& operator +(const T t);
+		/*
+		@brief 减号操作符
+		*/
+		matrix& operator -(const T t);
+		/*
+		@brief 减号操作符
+		*/
+		matrix& operator *(const T t);
+		/*
+		@brief 减号操作符
+		*/
+		matrix& operator /(const T t);
+		/*
+		@brief 减号操作符
+		*/
+		matrix& operator %(const T t);
 
 		using index_array = valarray<size_t>;//将valarray作为暂定的存储下标的数据结构
 		/*
@@ -220,10 +240,12 @@ namespace myml
 		/*析构函数*/
 		virtual ~matrix<T>();
 		/*获取某一行数据，仅用于读取*/
-		const pseudo_matrix<T> row(size_t row_index);
-		const pseudo_matrix<T> col(size_t col_index);
+		pseudo_matrix<T> row(size_t row_index);
+		/*获取某列数据，仅用于读取*/
+		pseudo_matrix<T> col(size_t col_index);
 		/*重新分配大小*/
 		void resize(size_t row_size, size_t col_size);
+				
 	protected:
 		T* _memory = nullptr;
 		T** _data = nullptr;
@@ -248,9 +270,82 @@ namespace myml
 	}
 
 	template<class T>
-	inline matrix<T>& matrix<T>::operator= (matrix & m)
+	inline matrix<T>& matrix<T>::operator= (const matrix & rn)
 	{
-		matrix(m);
+		//已经是实体矩阵了，不能随意赋值
+		if (_data != nullptr && _memory != nullptr)
+		{
+			assert(rn.row_size() == _row_size && rn.col_size() == _col_size);
+		}
+		//矩阵尚未实体化
+		else
+		{
+			resize(rn.row_size(), rn.col_size());
+		}
+		for (size_t row_i = 0; row_i < _row_size; row_i++)
+		{
+			memcpy(_data[row_i], rn._data[row_i], sizeof(T) / sizeof(char) * _col_size);
+		}
+		return *this;
+	}
+	template<class T>
+	inline matrix<T> & matrix<T>::operator+(const T t)
+	{
+		for (size_t row_i = 0; row_i < _row_size; row_i++)
+		{
+			for (size_t col_i = 0; col_i < _col_size; col_i++)
+			{
+				_data[row_i][col_i] += t;
+			}
+		}
+		return *this;
+	}
+	template<class T>
+	inline matrix & matrix<T>::operator-(const T t)
+	{
+		for (size_t row_i = 0; row_i < _row_size; row_i++)
+		{
+			for (size_t col_i = 0; col_i < _col_size; col_i++)
+			{
+				_data[row_i][col_i] -= t;
+			}
+		}
+		return *this;
+	}
+	template<class T>
+	inline matrix & matrix<T>::operator*(const T t)
+	{
+		for (size_t row_i = 0; row_i < _row_size; row_i++)
+		{
+			for (size_t col_i = 0; col_i < _col_size; col_i++)
+			{
+				_data[row_i][col_i] *= t;
+			}
+		}
+		return *this;
+	}
+	template<class T>
+	inline matrix & matrix<T>::operator/(const T t)
+	{
+		for (size_t row_i = 0; row_i < _row_size; row_i++)
+		{
+			for (size_t col_i = 0; col_i < _col_size; col_i++)
+			{
+				_data[row_i][col_i] /= t;
+			}
+		}
+		return *this;
+	}
+	template<class T>
+	inline matrix & matrix<T>::operator%(const T t)
+	{
+		for (size_t row_i = 0; row_i < _row_size; row_i++)
+		{
+			for (size_t col_i = 0; col_i < _col_size; col_i++)
+			{
+				_data[row_i][col_i] %= t;
+			}
+		}
 		return *this;
 	}
 	//TODO :优化逻辑
@@ -470,25 +565,27 @@ namespace myml
 		assert(_row_size > _cur_row_pos);
 		for (size_t i = 0; i < size; ++i)
 		{
-			_data[_cur_row_pos][_col_size + i] = row[i];
+			_data[_cur_row_pos][i] = row[i];
 		}
 		++_cur_row_pos;
 	}
 	template<class T>
 	inline void matrix<T>::push_back(valarray<T>&& row)
 	{
+		assert(_row_size > _cur_row_pos);
 		for (size_t i = 0; i < row.size(); ++i)
 		{
-			_data[_cur_row_pos][_col_size + i] = row[i];
+			_data[_cur_row_pos][i] = row[i];
 		}
 		++_cur_row_pos;
 	}
 	template<class T>
 	inline void matrix<T>::push_back(const valarray<T>& row)
 	{
+		assert(_row_size > _cur_row_pos);
 		for (size_t i = 0; i < row.size(); ++i)
 		{
-			_data[_cur_row_pos][_col_size + i] = row[i];
+			_data[_cur_row_pos][i] = row[i];
 		}
 		++_cur_row_pos;
 	}
@@ -503,13 +600,13 @@ namespace myml
 		return _data;
 	}
 	template<class T>
-	inline const pseudo_matrix<T> matrix<T>::row(size_t row_index)
+	inline pseudo_matrix<T> matrix<T>::row(size_t row_index)
 	{
 		assert(row_index < _row_size);
 		return pseudo_matrix<T>::get_row(*this,row_index);
 	}
 	template<class T>
-	inline const pseudo_matrix<T> matrix<T>::col(size_t col_index)
+	inline pseudo_matrix<T> matrix<T>::col(size_t col_index)
 	{
 		assert(col_index < _col_size);
 		return pseudo_matrix<T>::get_col(*this, col_index);
@@ -640,11 +737,25 @@ namespace myml
 	inline matrix<T>::matrix(matrix<T> && m)
 	{
 		_data = m._data;
-		_memory = _memory;
+		_memory = m._memory;
 		_col_size = m._col_size;
 		_row_size = m._row_size;
 		m._data = nullptr;
 		m._memory = nullptr;
+		//从伪矩阵中拷贝
+		if (_memory == nullptr)
+		{
+			//分配新内存
+			_memory = new T[_row_size*_col_size]();
+			for (size_t row_i = 0; row_i < _row_size; row_i++)
+			{
+				T* origin_row = _data[row_i];
+				//重新给index矩阵赋值
+				_data[row_i] = _memory + row_i * _col_size;
+				//拷贝数据
+				memcpy(_data[row_i], origin_row, sizeof(T) / sizeof(char) * _col_size);
+			}
+		}
 	}
 	template<class T>
 	inline matrix<T>::matrix(const matrix<T>& m)
@@ -661,7 +772,7 @@ namespace myml
 		delete[] _data;
 		delete[] _memory;
 	}
-
+	/*伪矩阵，仅供临时读取使用*/
 	template<class T>
 	class pseudo_matrix :public matrix<T>
 	{
@@ -678,10 +789,14 @@ namespace myml
 	{
 		_row_size = m._row_size;
 		_col_size = m._col_size;
+		//分配index内存，不分配实际内存
+		_data = new T*[row_size]();
+		memcpy(_data, m._data, sizeof(T*) / sizeof(char)*_row_size);
 	}
 	template<class T>
 	inline pseudo_matrix<T>::pseudo_matrix(const matrix<T>& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size)
 	{
+		//分配index内存，不分配实际内存
 		_data = new T*[row_size]();
 		for (size_t row_i = 0; row_i < row_size; ++row_i)
 		{
