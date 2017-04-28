@@ -122,6 +122,8 @@
     <ClCompile Include="data.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="memory_pool.h" />
+    <ClCompile Include="softmax_regreesion.cpp" />
+    <ClCompile Include="softmax_regression.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="c4.5.h" />

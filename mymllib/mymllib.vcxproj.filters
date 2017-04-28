@@ -22,6 +22,12 @@
     <Filter Include="头文件\lib">
       <UniqueIdentifier>{f009aea8-a97c-4a2e-bf67-236fb14f9ff5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\classifier">
+      <UniqueIdentifier>{851676bf-729f-4972-9075-e890ed74886a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\classifier">
+      <UniqueIdentifier>{613d95ce-f05b-4cba-b1f2-bdea3cfea3b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -35,6 +41,12 @@
     </ClCompile>
     <ClCompile Include="c4.5.cpp">
       <Filter>源文件\tree</Filter>
+    </ClCompile>
+    <ClCompile Include="softmax_regression.h">
+      <Filter>头文件\classifier</Filter>
+    </ClCompile>
+    <ClCompile Include="softmax_regreesion.cpp">
+      <Filter>源文件\classifier</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

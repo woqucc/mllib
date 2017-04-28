@@ -87,11 +87,11 @@ namespace myml
 		for (const auto& attr : selected_attr_counts)
 		{
 			auto temp_gr = _gain_ratio_attr;
-			auto temp_matrix = _data->fetch_row([attr, temp_gr](const long double* val, size_t col_size) ->bool {
+			matrix_p temp_matrix(&(_data->fetch_row([attr, temp_gr](const long double* val, size_t col_size) ->bool {
 				if (val[temp_gr] == attr.first)
 					return true;
 				return false;
-			});
+			})));
 			temp_matrix->remove_column({ _gain_ratio_attr });
 			append_child(c45_tree_node(temp_matrix));
 			_children_range[_children.size() - 1].reset_to({ attr.first,attr.first });
