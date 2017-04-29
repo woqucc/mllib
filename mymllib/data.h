@@ -224,14 +224,14 @@ namespace myml
 
 
 		/*
-		@brief 提取指定行成为新的矩阵
+		@brief 选取矩阵中的指定行
 		*/
-		virtual matrix<T> fetch_row(const index_array& row_indexs) const;
+		virtual pseudo_matrix<T> fetch_row(const index_array& row_indexs) const;
 
 		/*
 		@brief 提取满足指定条件的行
 		*/
-		virtual matrix<T> fetch_row(function<bool(const T* val, size_t col_size)> condition) const;
+		virtual pseudo_matrix<T> fetch_row(function<bool(const T* val, size_t col_size)> condition) const;
 
 		/*
 		@brief 提取指定行成为新的矩阵
@@ -318,6 +318,7 @@ namespace myml
 		{
 			memcpy(_data[row_i], rn._data[row_i], sizeof(T) / sizeof(char) * _col_size);
 		}
+		_cur_row_pos = rn._cur_row_pos;
 		return *this;
 	}
 	template<class T>
@@ -720,11 +721,12 @@ namespace myml
 		/*范围正确*/
 		assert(row_begin <= row_end && col_begin <= col_end);
 		assert(row_end - row_begin < _row_size && col_end - col_begin < _col_size);
+		assert(row_end < _row_size && col_end < _col_size);
 		return pseudo_matrix<T>(*this, row_begin, col_begin, row_end - row_begin + 1, col_end - col_begin + 1);
 	}
 
 	template<class T>
-	inline matrix<T> matrix<T>::fetch_row(const index_array & row_indexs) const
+	inline pseudo_matrix<T> matrix<T>::fetch_row(const index_array & row_indexs) const
 	{
 		matrix<T> temp(row_indexs.size(), _col_size);
 		for (auto row_i : row_indexs)
@@ -736,7 +738,7 @@ namespace myml
 	}
 
 	template<class T>
-	inline matrix<T> matrix<T>::fetch_row(function<bool(const T* val, size_t col_size)> condition) const
+	inline pseudo_matrix<T> matrix<T>::fetch_row(function<bool(const T* val, size_t col_size)> condition) const
 	{
 		matrix<T> temp(_row_size, _col_size);
 		for (size_t row_i = 0; row_i < row_size(); row_i++)
@@ -826,6 +828,7 @@ namespace myml
 		_memory = m._memory;
 		_col_size = m._col_size;
 		_row_size = m._row_size;
+		_cur_row_pos = m._cur_row_pos;
 		m._data = nullptr;
 		m._memory = nullptr;
 		//从伪矩阵中拷贝
@@ -866,6 +869,10 @@ namespace myml
 		pseudo_matrix(const matrix& m);
 		pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size, size_t row_begin, size_t col_begin);
 		~pseudo_matrix();
+		/*向未真实分配内存的矩阵中添加数据，具体行为不知道是啥*/
+		void push_back(valarray<T> && row) { assert(false); }
+		void push_back(const valarray<T>& row) { assert(false); }
+		void push_back(T *row, size_t size) { assert(false); }
 		static pseudo_matrix<T> get_row(const matrix<T>& m, size_t row_index);
 		static pseudo_matrix<T> get_col(const matrix<T>& m, size_t col_index);
 	private:

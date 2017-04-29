@@ -42,14 +42,8 @@
     <ClCompile Include="c4.5.cpp">
       <Filter>源文件\tree</Filter>
     </ClCompile>
-    <ClCompile Include="softmax_regression.h">
-      <Filter>头文件\classifier</Filter>
-    </ClCompile>
-    <ClCompile Include="softmax_regreesion.cpp">
-      <Filter>源文件\classifier</Filter>
-    </ClCompile>
     <ClCompile Include="softmax_regression.cpp">
-      <Filter>源文件</Filter>
+      <Filter>源文件\classifier</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="tree.hh">
       <Filter>头文件\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="softmax_regression.h">
+      <Filter>头文件\classifier</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

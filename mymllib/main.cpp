@@ -5,7 +5,6 @@
 #include<ctime>
 #include<cstring>
 #include<string>
-#include"tree.hh"
 #include"data.h"
 #include"softmax_regression.h"
 #include<vector>
@@ -25,7 +24,7 @@ int main()
 	matrix<int> cpp = matrix_normalized::convert_matrix_type<long double,int>(c);
 	cpp.print();
 	softmax_regression sr;
-	m.sub_matrix(1, 1, 2, 2).print();
+	sr.import_data(m.sub_matrix(0, 0, m.row_size() - 1, m.col_size() - 2), m.col( m.col_size() - 1));
 	//auto c = m.row(4);
 	//c.print();
 	//auto p = m.fetch_column({1,2});
