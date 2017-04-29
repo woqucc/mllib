@@ -7,7 +7,8 @@
 #include<string>
 #include"tree.hh"
 #include"data.h"
-#include"c4.5.h"
+#include"softmax_regression.h"
+#include<vector>
 using namespace std;
 using namespace myml;
 int main()
@@ -21,19 +22,10 @@ int main()
 	//c45_tree tree(x);
 	//tree.train();
 	matrix<long double> c = m.row(1);
-
-	matrix<long double> col(3, 2);
-	col.push_back({ 3,7 });
-	col.push_back({ 5,2 });
-	col.push_back({ 1,4 });
-	col.remove_row({ 0,2 });
-	col.print();
-	for (auto x : col.get_order(1))
-	{
-		col.row(x).print();
-	}
-
-
+	matrix<int> cpp = matrix_normalized::convert_matrix_type<long double,int>(c);
+	cpp.print();
+	softmax_regression sr;
+	m.sub_matrix(1, 1, 2, 2).print();
 	//auto c = m.row(4);
 	//c.print();
 	//auto p = m.fetch_column({1,2});

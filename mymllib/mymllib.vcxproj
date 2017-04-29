@@ -123,6 +123,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="memory_pool.h" />
     <ClCompile Include="softmax_regreesion.cpp" />
+    <ClCompile Include="softmax_regression.cpp" />
     <ClCompile Include="softmax_regression.h" />
   </ItemGroup>
   <ItemGroup>

@@ -48,6 +48,9 @@
     <ClCompile Include="softmax_regreesion.cpp">
       <Filter>源文件\classifier</Filter>
     </ClCompile>
+    <ClCompile Include="softmax_regression.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data.h">

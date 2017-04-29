@@ -166,7 +166,7 @@ namespace myml
 		@param column_end	最后一个元素纵坐标，由0开始
 		@return 指向新子阵的指针（shared_ptr）
 		*/
-		virtual matrix<T> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end);
+		virtual pseudo_matrix<T> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end);
 		/*
 		@brief 赋值操作符
 		*/
@@ -239,7 +239,7 @@ namespace myml
 		virtual matrix<T> fetch_column(const index_array& column_indexs) const;
 
 		/*
-		@brief 删除指定行
+		@brief 删除本矩阵中指定的行
 		*/
 		virtual void remove_row(const index_array& row_indexs);
 
@@ -276,6 +276,8 @@ namespace myml
 		void resize(size_t row_size, size_t col_size);
 		/*设置所有元素为指定值*/
 		void fill(const T &t);
+		/*是否有数据*/
+		bool has_data();
 	protected:
 		T* _memory = nullptr;
 		T** _data = nullptr;
@@ -702,20 +704,23 @@ namespace myml
 		each_ele(_data[row_i][col_i] = t);
 	}
 	template<class T>
+	inline bool matrix<T>::has_data()
+	{
+		return _data != nullptr && _col_size > 0 && _row_size > 0;
+	}
+	template<class T>
 	inline bool matrix<T>::rect_check() const
 	{
 		return true;
 	}
 
 	template<class T>
-	matrix<T> matrix<T>::sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end)
+	pseudo_matrix<T> matrix<T>::sub_matrix(size_t row_begin, size_t col_begin, size_t row_end, size_t col_end)
 	{
-		matrix<T> temp(row_end - row_begin, column_end - column_begin);
-		for (auto row_i = row_begin; row_i < row_end; row_i++)
-		{
-			temp.push_back(_data[row_i] + column_begin, column_end - column_begin);
-		}
-		return move(temp);
+		/*范围正确*/
+		assert(row_begin <= row_end && col_begin <= col_end);
+		assert(row_end - row_begin < _row_size && col_end - col_begin < _col_size);
+		return pseudo_matrix<T>(*this, row_begin, col_begin, row_end - row_begin + 1, col_end - col_begin + 1);
 	}
 
 	template<class T>
@@ -942,10 +947,11 @@ namespace myml
 	/*
 	标准化数据类
 	*/
-	template<class T>
-	class normalized {
-	public:
-		static void set_range(matrix<T>& matrix, size_t column_num, T lower_bound, T upper_bound) {
+	/*矩阵数据标准化类*/
+	namespace matrix_normalized {
+		/*设置元素值的范围，将大于上限upper_bound的元素设置为最大值，将小于下限lower_bound的元素设置为最小值*/
+		template<class T>
+		void set_range(matrix<T>& matrix, size_t column_num, T lower_bound, T upper_bound) {
 			for (auto i = matrix.cbegin(column_num); i != matrix.cend(column_num); ++i)
 			{
 				if (*i < lower_bound)
@@ -953,6 +959,19 @@ namespace myml
 				else if (*i > upper_bound)
 					*i = upper_bound;
 			}
+		}
+		template<class SRC, class DST>
+		matrix<DST> convert_matrix_type(const matrix<SRC>& m)
+		{
+			matrix<DST> temp(m.row_size(), m.col_size());
+			for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
+			{
+				for (size_t col_i = 0; col_i < m.col_size(); ++col_i)
+				{
+					temp.at(row_i, col_i) = DST(m.at(row_i, col_i));
+				}
+			}
+			return move(temp);
 		}
 	};
 
