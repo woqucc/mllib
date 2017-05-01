@@ -92,7 +92,7 @@ namespace myml
 					return true;
 				return false;
 			})));
-			temp_matrix->remove_column({ _gain_ratio_attr });
+		//	temp_matrix->remove_column({ _gain_ratio_attr });
 			append_child(c45_tree_node(temp_matrix));
 			_children_range[_children.size() - 1].reset_to({ attr.first,attr.first });
 		}

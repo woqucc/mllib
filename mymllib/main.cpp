@@ -14,17 +14,21 @@ int main()
 {
 	matrix<long double> m;
 	ifstream f(R"(in.txt)", ios::in);
-	////ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)",ios::in);
-	////ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
+//	ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
+	//ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 	import_matrix_data(m, f);
+//	m.print();
+	//matrix<long double> m1 = m;
+	//m.transpose();
+//	m.print();
 	//auto x = m.sub_matrix(0, 0, m.row_size(), m.col_size());
 	//c45_tree tree(x);
 	//tree.train();
-	matrix<long double> c = m.row(1);
+	/*matrix<long double> c = m.row(1);
 	matrix<int> cpp = matrix_normalized::convert_matrix_type<long double,int>(c);
-	cpp.print();
+	cpp.print();*/
 	softmax_regression sr;
-	sr.import_data(m.sub_matrix(0, 0, m.row_size() - 1, m.col_size() - 2), m.col( m.col_size() - 1));
+	sr.import_data(m.cols(0, m.col_size() - 2), m.col( m.col_size() - 1));
 	//auto c = m.row(4);
 	//c.print();
 	//auto p = m.fetch_column({1,2});
