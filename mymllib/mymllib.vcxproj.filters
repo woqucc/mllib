@@ -64,6 +64,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="in.txt" />
+    <Text Include="binary_classification.txt" />
+    <Text Include="multi_classification.txt" />
   </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@
 #include<valarray>
 #include<functional>
 #include<cassert>
+#include<map>
 
 namespace myml
 {
@@ -158,6 +159,7 @@ namespace myml
 		@brief 返回某一列的结尾迭代器（指向null）
 		*/
 		virtual column_iterator cend(size_t column);
+
 		/*
 		@brief 返回子阵
 		@param row_begin	第一个元素横坐标，由0开始
@@ -210,17 +212,20 @@ namespace myml
 		/*
 		@brief 矩阵中只有一个元素时可将其直接转换为单个的T类型变量
 		*/
-		operator T() const;
-
+		operator const T&() const;
+		/*
+		@brief 矩阵中只有一个元素时可将其直接转换为单个的T类型变量
+		*/
+		operator T&();
 		/*
 		@brief 矩阵相加
 		*/
-		matrix<T> operator +=(const matrix<T>& t) const;
+		matrix<T> operator +=(const matrix<T>& t);
 
 		/*
 		@brief 矩阵相减
 		*/
-		matrix<T> operator -=(const matrix<T>& t) const;
+		matrix<T> operator -=(const matrix<T>& t);
 
 
 		/*
@@ -277,8 +282,10 @@ namespace myml
 		void fill(const T &t);
 		/*是否有数据*/
 		bool has_data();
-		/*transpose*/
+		/*翻转本矩阵*/
 		void transpose();
+		/*生成新的矩阵*/
+		matrix<T> t();
 	protected:
 		T* _memory = nullptr;
 		T** _data = nullptr;
@@ -290,7 +297,7 @@ namespace myml
 	template<class T>
 	inline void matrix<T>::print(char split, ostream& out)
 	{
-		out.precision(6);
+		out.precision(10);
 		out << fixed;
 		for (size_t row = 0; row < row_size(); row++)
 		{
@@ -303,7 +310,7 @@ namespace myml
 	}
 
 	template<class T>
-	inline matrix<T>& matrix<T>::operator= (const matrix & rn)
+	inline matrix<T>& matrix<T>::operator = (const matrix & rn)
 	{
 		//已经是实体矩阵了，不能随意赋值
 		if (_data != nullptr && _memory != nullptr)
@@ -405,21 +412,27 @@ namespace myml
 		return move(temp);
 	}
 	template<class T>
-	inline matrix<T>::operator T() const
+	inline matrix<T>::operator const T&() const
 	{
 		assert(_row_size == 1 && _col_size == 1);
 		return _data[0][0];
 	}
 	template<class T>
-	inline matrix<T> matrix<T>::operator+=(const matrix<T>& t) const
+	inline matrix<T>::operator T&()
 	{
-		each_ele(_data[row_i][col_i] += t.at(row_i)(col_i));
+		assert(_row_size == 1 && _col_size == 1);
+		return _data[0][0];
+	}
+	template<class T>
+	inline matrix<T> matrix<T>::operator+=(const matrix<T>& t)
+	{
+		each_ele(_data[row_i][col_i] += t.at(row_i, col_i));
 		return *this;
 	}
 	template<class T>
-	inline matrix<T> matrix<T>::operator-=(const matrix<T>& t) const
+	inline matrix<T> matrix<T>::operator-=(const matrix<T>& t)
 	{
-		each_ele(_data[row_i][col_i] -= t.at(row_i)(col_i));
+		each_ele(_data[row_i][col_i] -= t.at(row_i, col_i));
 		return *this;
 	}
 	//TODO :优化逻辑
@@ -595,6 +608,7 @@ namespace myml
 		return column_iterator(*this, row_size(), column);
 	}
 
+
 	template<class T>
 	inline void matrix<T>::sort_by(size_t column_num)
 	{
@@ -748,6 +762,19 @@ namespace myml
 		_memory = t_memory;
 	}
 	template<class T>
+	inline matrix<T> matrix<T>::t()
+	{
+		matrix<T> temp(_col_size, _row_size);
+		for (size_t row_i = 0; row_i < _col_size; ++row_i)
+		{
+			for (size_t col_i = 0; col_i < _row_size; ++col_i)
+			{
+				temp.at(row_i, col_i) = _data[col_i][row_i];
+			}
+		}
+		return temp;
+	}
+	template<class T>
 	inline bool matrix<T>::rect_check() const
 	{
 		return true;
@@ -882,6 +909,7 @@ namespace myml
 	class pseudo_matrix :public matrix<T>
 	{
 	public:
+		pseudo_matrix& operator =(const pseudo_matrix& rn);
 		pseudo_matrix() = default;
 		pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size);
 		pseudo_matrix(const matrix<T>& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size);
@@ -894,6 +922,16 @@ namespace myml
 	private:
 		//T **_data;
 	};
+	template<class T>
+	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const pseudo_matrix & rn)
+	{
+		for (size_t row_i = 0; row_i < _row_size; row_i++)
+		{
+			memcpy(_data[row_i], rn._data[row_i], sizeof(T) / sizeof(char) * _col_size);
+		}
+		return *this;
+		// TODO: 在此处插入 return 语句
+	}
 	template<class T>
 	inline pseudo_matrix<T>::pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size)
 	{
@@ -921,7 +959,6 @@ namespace myml
 		/*不释放真正矩阵的内存*/
 		_memory = nullptr;
 	}
-
 	/*导入数据部分的全局函数*/
 	template<class T>
 	bool import_matrix_data(matrix<T>& matrix, ifstream& in, char split = ',', int line_width = 2048)
@@ -954,7 +991,8 @@ namespace myml
 		{
 			for (size_t col_index = 0; col_index < col_size - 1; ++col_index)
 			{
-				in >> matrix.at(row_index, col_index) >> split;
+				in >> matrix.at(row_index, col_index);
+				split = in.get();
 			}
 			in >> matrix.at(row_index, col_size - 1);
 		}
@@ -962,10 +1000,42 @@ namespace myml
 		in.close();
 		return true;
 	};
-	/*
-	标准化数据类
-	*/
-	/*矩阵数据标准化类*/
+
+	/*矩阵运算类*/
+	namespace matrix_operate
+	{
+		template<class T>
+		void exp(matrix<T>& matrix)
+		{
+			for (auto& i : matrix)
+			{
+				i = std::exp(i);
+			}
+		}
+		/*求和*/
+		template<class T>
+		T sum(matrix<T>& matrix)
+		{
+			T sum = 0;
+			for (auto& i : matrix)
+			{
+				sum += i;
+			}
+			return sum;
+		}
+		/*矩阵的f范数*/
+		template<class T>
+		long double norm_f(matrix<T>& matrix)
+		{
+			long double sum = 0;
+			for (auto& i : matrix)
+			{
+				sum += i * i;
+			}
+			return sqrt(sum);
+		}
+	}
+	/*矩阵数据标准化*/
 	namespace matrix_normalized {
 		/*设置元素值的范围，将大于上限upper_bound的元素设置为最大值，将小于下限lower_bound的元素设置为最小值*/
 		template<class T>
@@ -990,6 +1060,28 @@ namespace myml
 				}
 			}
 			return move(temp);
+		}
+		/*将数据的label转换为连续的整数*/
+		template<class T, class E>
+		map<T, E> serialize_label(matrix<T>& label_matrix, matrix<E>& serialized_label)
+		{
+			map<T, E> label_map;
+			for (auto &i : label_matrix)
+			{
+				if (label_map.count(i) == 0)
+					label_map.insert({ i,0 });
+			}
+			E map_i = 0;
+			for (auto &l : label_map)
+			{
+				l.second = map_i++;
+			}
+			serialized_label.resize(label_matrix.row_size(), 1);
+			for (size_t row_i = 0; row_i < label_matrix.row_size(); ++row_i)
+			{
+				E(serialized_label.row(row_i)) = label_map[label_matrix.row(row_i)];
+			}
+			return label_map;
 		}
 	};
 
