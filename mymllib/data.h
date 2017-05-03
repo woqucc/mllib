@@ -877,6 +877,7 @@ namespace myml
 		{
 			//分配新内存
 			_memory = new T[_row_size*_col_size]();
+#pragma omp parallel for
 			for (size_t row_i = 0; row_i < _row_size; row_i++)
 			{
 				T* origin_row = _data[row_i];
@@ -893,6 +894,7 @@ namespace myml
 	inline matrix<T>::matrix(const matrix<T>& m)
 	{
 		resize(m._row_size, m._col_size);
+#pragma omp parallel for
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
 		{
 			memcpy(_data[row_i], m._data[row_i], sizeof(T) / sizeof(char) * _col_size);
@@ -925,6 +927,7 @@ namespace myml
 	template<class T>
 	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const pseudo_matrix & rn)
 	{
+#pragma omp parallel for
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
 		{
 			memcpy(_data[row_i], rn._data[row_i], sizeof(T) / sizeof(char) * _col_size);
@@ -946,6 +949,7 @@ namespace myml
 	{
 		//分配index内存，不分配实际内存
 		_data = new T*[row_size]();
+#pragma omp parallel for
 		for (size_t row_i = 0; row_i < row_size; ++row_i)
 		{
 			_data[row_i] = m.raw_data()[row_i + row_begin] + col_begin;
@@ -1007,6 +1011,7 @@ namespace myml
 		template<class T>
 		void exp(matrix<T>& matrix)
 		{
+#pragma omp parallel for
 			for (auto& i : matrix)
 			{
 				i = std::exp(i);
@@ -1052,6 +1057,7 @@ namespace myml
 		matrix<DST> convert_matrix_type(const matrix<SRC>& m)
 		{
 			matrix<DST> temp(m.row_size(), m.col_size());
+#pragma omp parallel for
 			for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
 			{
 				for (size_t col_i = 0; col_i < m.col_size(); ++col_i)

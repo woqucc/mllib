@@ -86,6 +86,7 @@ namespace myml
 		/*误差矩阵大小与_theta大小相同*/
 		matrix<feature_type> sum_error(_theta.row_size(), _theta.col_size());
 		/*累加每个特征向量的误差*/
+#pragma omp parallel for
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
 			/*临时特征向量，增加特征向量的维数，计算常数项*/
