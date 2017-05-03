@@ -396,6 +396,7 @@ namespace myml
 		/*©иртЁк*/
 		assert(_col_size == t.row_size());
 		matrix<T> temp(_row_size, t.col_size());
+#pragma omp parallel for
 		for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
 		{
 			for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
