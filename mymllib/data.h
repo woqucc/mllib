@@ -268,14 +268,16 @@ namespace myml
 		matrix<T>(const matrix& m);
 		/*析构函数*/
 		virtual ~matrix<T>();
+
 		/*获取某一行数据，仅用于读取*/
-		pseudo_matrix<T> row(size_t row_index);
+		pseudo_matrix<T> row(size_t row_index) const;
 		/*获取某列数据，仅用于读取*/
-		pseudo_matrix<T> col(size_t col_index);
+		pseudo_matrix<T> col(size_t col_index) const;
 		/*获取某一行数据，仅用于读取*/
-		pseudo_matrix<T> rows(size_t begin, size_t end);
+		pseudo_matrix<T> rows(size_t begin, size_t end) const;
 		/*获取某列数据，仅用于读取*/
-		pseudo_matrix<T> cols(size_t begin, size_t end);
+		pseudo_matrix<T> cols(size_t begin, size_t end) const;
+
 		/*重新分配大小*/
 		void resize(size_t row_size, size_t col_size);
 		/*设置所有元素为指定值*/
@@ -320,7 +322,8 @@ namespace myml
 		//矩阵尚未实体化
 		else
 		{
-			resize(rn.row_size(), rn.col_size());
+			if(rn.row_size() > 0 && rn.col_size() > 0)
+				resize(rn.row_size(), rn.col_size());
 		}
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
 		{
@@ -396,7 +399,6 @@ namespace myml
 		/*可以乘*/
 		assert(_col_size == t.row_size());
 		matrix<T> temp(_row_size, t.col_size());
-#pragma omp parallel for
 		for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
 		{
 			for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
@@ -690,29 +692,30 @@ namespace myml
 		return _data;
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::row(size_t row_index)
+	inline pseudo_matrix<T> matrix<T>::row(size_t row_index) const
 	{
 		assert(row_index < _row_size);
 		return pseudo_matrix<T>(*this, row_index, 0, 1, _col_size);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::col(size_t col_index)
+	inline pseudo_matrix<T> matrix<T>::col(size_t col_index) const
 	{
 		assert(col_index < _col_size);
 		return pseudo_matrix<T>(*this, 0, col_index, _row_size, 1);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end)
+	inline pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end) const
 	{
 		assert(begin < _row_size && end < _row_size);
 		return pseudo_matrix<T>(*this, begin, 0, end - begin + 1, _col_size);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end)
+	inline pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end) const
 	{
 		assert(begin < _col_size && end < _col_size);
 		return pseudo_matrix<T>(*this, 0, begin, _row_size, end - begin + 1);
 	}
+
 	template<class T>
 	inline void matrix<T>::resize(size_t row_size, size_t col_size)
 	{
@@ -878,7 +881,6 @@ namespace myml
 		{
 			//分配新内存
 			_memory = new T[_row_size*_col_size]();
-#pragma omp parallel for
 			for (size_t row_i = 0; row_i < _row_size; row_i++)
 			{
 				T* origin_row = _data[row_i];
@@ -895,7 +897,6 @@ namespace myml
 	inline matrix<T>::matrix(const matrix<T>& m)
 	{
 		resize(m._row_size, m._col_size);
-#pragma omp parallel for
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
 		{
 			memcpy(_data[row_i], m._data[row_i], sizeof(T) / sizeof(char) * _col_size);
@@ -911,6 +912,12 @@ namespace myml
 	template<class T>
 	class pseudo_matrix :public matrix<T>
 	{
+		/*g++*/
+		using matrix<T>::_memory;
+		using matrix<T>::_data;
+		using matrix<T>::_row_size;
+		using matrix<T>::_col_size;
+		using matrix<T>::_cur_row_pos;
 	public:
 		pseudo_matrix& operator =(const pseudo_matrix& rn);
 		pseudo_matrix() = default;
@@ -928,7 +935,6 @@ namespace myml
 	template<class T>
 	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const pseudo_matrix & rn)
 	{
-#pragma omp parallel for
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
 		{
 			memcpy(_data[row_i], rn._data[row_i], sizeof(T) / sizeof(char) * _col_size);
@@ -950,7 +956,6 @@ namespace myml
 	{
 		//分配index内存，不分配实际内存
 		_data = new T*[row_size]();
-#pragma omp parallel for
 		for (size_t row_i = 0; row_i < row_size; ++row_i)
 		{
 			_data[row_i] = m.raw_data()[row_i + row_begin] + col_begin;
@@ -1012,7 +1017,6 @@ namespace myml
 		template<class T>
 		void exp(matrix<T>& matrix)
 		{
-#pragma omp parallel for
 			for (auto& i : matrix)
 			{
 				i = std::exp(i);
@@ -1040,6 +1044,16 @@ namespace myml
 			}
 			return sqrt(sum);
 		}
+		template<class T>
+		matrix<T> operator* (const matrix<T> a, const T& b)
+		{
+			matrix<T> temp = a;
+			for (auto& i : temp)
+			{
+				i *=b;
+			}
+			return move(temp);
+		}
 	}
 	/*矩阵数据标准化*/
 	namespace matrix_normalized {
@@ -1058,7 +1072,6 @@ namespace myml
 		matrix<DST> convert_matrix_type(const matrix<SRC>& m)
 		{
 			matrix<DST> temp(m.row_size(), m.col_size());
-#pragma omp parallel for
 			for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
 			{
 				for (size_t col_i = 0; col_i < m.col_size(); ++col_i)
