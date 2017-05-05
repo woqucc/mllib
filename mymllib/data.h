@@ -268,14 +268,16 @@ namespace myml
 		matrix<T>(const matrix& m);
 		/*析构函数*/
 		virtual ~matrix<T>();
+
 		/*获取某一行数据，仅用于读取*/
-		pseudo_matrix<T> row(size_t row_index);
+		pseudo_matrix<T> row(size_t row_index) const;
 		/*获取某列数据，仅用于读取*/
-		pseudo_matrix<T> col(size_t col_index);
+		pseudo_matrix<T> col(size_t col_index) const;
 		/*获取某一行数据，仅用于读取*/
-		pseudo_matrix<T> rows(size_t begin, size_t end);
+		pseudo_matrix<T> rows(size_t begin, size_t end) const;
 		/*获取某列数据，仅用于读取*/
-		pseudo_matrix<T> cols(size_t begin, size_t end);
+		pseudo_matrix<T> cols(size_t begin, size_t end) const;
+
 		/*重新分配大小*/
 		void resize(size_t row_size, size_t col_size);
 		/*设置所有元素为指定值*/
@@ -320,7 +322,8 @@ namespace myml
 		//矩阵尚未实体化
 		else
 		{
-			resize(rn.row_size(), rn.col_size());
+			if (rn.row_size() > 0 && rn.col_size() > 0)
+				resize(rn.row_size(), rn.col_size());
 		}
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
 		{
@@ -689,29 +692,30 @@ namespace myml
 		return _data;
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::row(size_t row_index)
+	inline pseudo_matrix<T> matrix<T>::row(size_t row_index) const
 	{
 		assert(row_index < _row_size);
 		return pseudo_matrix<T>(*this, row_index, 0, 1, _col_size);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::col(size_t col_index)
+	inline pseudo_matrix<T> matrix<T>::col(size_t col_index) const
 	{
 		assert(col_index < _col_size);
 		return pseudo_matrix<T>(*this, 0, col_index, _row_size, 1);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end)
+	inline pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end) const
 	{
 		assert(begin < _row_size && end < _row_size);
 		return pseudo_matrix<T>(*this, begin, 0, end - begin + 1, _col_size);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end)
+	inline pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end) const
 	{
 		assert(begin < _col_size && end < _col_size);
 		return pseudo_matrix<T>(*this, 0, begin, _row_size, end - begin + 1);
 	}
+
 	template<class T>
 	inline void matrix<T>::resize(size_t row_size, size_t col_size)
 	{
@@ -908,6 +912,12 @@ namespace myml
 	template<class T>
 	class pseudo_matrix :public matrix<T>
 	{
+		/*g++*/
+		using matrix<T>::_memory;
+		using matrix<T>::_data;
+		using matrix<T>::_row_size;
+		using matrix<T>::_col_size;
+		using matrix<T>::_cur_row_pos;
 	public:
 		pseudo_matrix& operator =(const pseudo_matrix& rn);
 		pseudo_matrix() = default;
@@ -1034,6 +1044,33 @@ namespace myml
 			}
 			return sqrt(sum);
 		}
+		template<class T>
+		matrix<T> operator* (const matrix<T>& a, const T& b)
+		{
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) * b;
+				}
+			}
+			return move(temp);
+		}
+		template<class T>
+		matrix<T> pow(const matrix<T>& a, const T& b)
+		{
+			//TODO:多了一次复制
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = std::pow(a.at(row_i, col_i), b);
+				}
+			}
+			return move(temp);
+		}
 	}
 	/*矩阵数据标准化*/
 	namespace matrix_normalized {
@@ -1079,7 +1116,7 @@ namespace myml
 			serialized_label.resize(label_matrix.row_size(), 1);
 			for (size_t row_i = 0; row_i < label_matrix.row_size(); ++row_i)
 			{
-				E(serialized_label.row(row_i)) = label_map[label_matrix.row(row_i)];
+				static_cast<E&>(serialized_label.row(row_i)) = label_map[label_matrix.row(row_i)];
 			}
 			return label_map;
 		}
