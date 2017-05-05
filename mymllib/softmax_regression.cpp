@@ -8,7 +8,12 @@ namespace myml
 		_theta.resize(label_count, feature_count + 1);
 		_theta.fill(0);
 		_pre_theta = _theta;
+		
 		_error_matrix = _theta;
+		
+		_grad_ewma = _theta;
+		_error_ewma = _theta;
+
 		_cur_error = rand();
 		_last_error = rand();
 	}
@@ -87,6 +92,8 @@ namespace myml
 	void softmax_regression::adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,param_type epsilon, param_type rho)
 	{
 		_error_matrix = error_matrix(feature_matrix, label_matrix);
+		_grad_ewma = _grad_ewma * rho + pow(_error_matrix, 2.0L) * (1 - rho);
+		//_error_matrix *= ()
 	}
 
 	param_type softmax_regression::accuracy(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)

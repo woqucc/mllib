@@ -322,7 +322,7 @@ namespace myml
 		//矩阵尚未实体化
 		else
 		{
-			if(rn.row_size() > 0 && rn.col_size() > 0)
+			if (rn.row_size() > 0 && rn.col_size() > 0)
 				resize(rn.row_size(), rn.col_size());
 		}
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
@@ -1045,12 +1045,29 @@ namespace myml
 			return sqrt(sum);
 		}
 		template<class T>
-		matrix<T> operator* (const matrix<T> a, const T& b)
+		matrix<T> operator* (const matrix<T>& a, const T& b)
 		{
-			matrix<T> temp = a;
-			for (auto& i : temp)
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
 			{
-				i *=b;
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) * b;
+				}
+			}
+			return move(temp);
+		}
+		template<class T>
+		matrix<T> pow(const matrix<T>& a, const T& b)
+		{
+			//TODO:多了一次复制
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = std::pow(a.at(row_i, col_i), b);
+				}
 			}
 			return move(temp);
 		}
@@ -1099,7 +1116,7 @@ namespace myml
 			serialized_label.resize(label_matrix.row_size(), 1);
 			for (size_t row_i = 0; row_i < label_matrix.row_size(); ++row_i)
 			{
-				E(serialized_label.row(row_i)) = label_map[label_matrix.row(row_i)];
+				static_cast<E&>(serialized_label.row(row_i)) = label_map[label_matrix.row(row_i)];
 			}
 			return label_map;
 		}
