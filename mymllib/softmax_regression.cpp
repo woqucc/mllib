@@ -1,4 +1,4 @@
-#include "softmax_regression.h"
+ï»¿#include "softmax_regression.h"
 #include<cmath>
 namespace myml
 {
@@ -36,7 +36,7 @@ namespace myml
 
 	void softmax_regression::sgd_momentum(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, param_type rho, param_type eit)
 	{
-		//²»ºÃÊ¹£¡£¡£¡£¡
+		//ä¸å¥½ä½¿ï¼ï¼ï¼ï¼
 		_last_error_matrix = _error_matrix;
 		_error_matrix = error_matrix(feature_matrix.row(0), label_matrix.row(0));
 		_error_matrix = _last_error_matrix * rho - _error_matrix * eit;
@@ -111,25 +111,25 @@ namespace myml
 
 	matrix<param_type> softmax_regression::error_matrix(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
-		/*Îó²î¾ØÕó´óĞ¡Óë_theta´óĞ¡ÏàÍ¬*/
+		/*è¯¯å·®çŸ©é˜µå¤§å°ä¸_thetaå¤§å°ç›¸åŒ*/
 		matrix<feature_type> sum_error(_theta.row_size(), _theta.col_size());
-		/*ÀÛ¼ÓÃ¿¸öÌØÕ÷ÏòÁ¿µÄÎó²î*/
+		/*ç´¯åŠ æ¯ä¸ªç‰¹å¾å‘é‡çš„è¯¯å·®*/
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
-			/*ÁÙÊ±ÌØÕ÷ÏòÁ¿£¬Ôö¼ÓÌØÕ÷ÏòÁ¿µÄÎ¬Êı£¬¼ÆËã³£ÊıÏî*/
+			/*ä¸´æ—¶ç‰¹å¾å‘é‡ï¼Œå¢åŠ ç‰¹å¾å‘é‡çš„ç»´æ•°ï¼Œè®¡ç®—å¸¸æ•°é¡¹*/
 			matrix<feature_type> row = matrix<feature_type>(1, feature_matrix.col_size() + 1);
-			/*ÁÙÊ±ÌØÕ÷ÏòÁ¿µÄ×îºóÒ»Î¬Óë³£ÊıÏîÏµÊıÏà³Ë£¬ÉèÖÃÎª1*/
+			/*ä¸´æ—¶ç‰¹å¾å‘é‡çš„æœ€åä¸€ç»´ä¸å¸¸æ•°é¡¹ç³»æ•°ç›¸ä¹˜ï¼Œè®¾ç½®ä¸º1*/
 			row.col(feature_matrix.col_size()).fill(1);
-			/*ÁÙÊ±ÌØÕ÷ÏòÁ¿¸³Öµ*/
+			/*ä¸´æ—¶ç‰¹å¾å‘é‡èµ‹å€¼*/
 			row.cols(0, feature_matrix.col_size() - 1) = feature_matrix.row(row_i);
-			/*×ªÖÃÁÙÊ±ÏòÁ¿*/
+			/*è½¬ç½®ä¸´æ—¶å‘é‡*/
 			row.transpose();
 
 			/*
-			ÌØÕ÷ÏòÁ¿µÄÔ¤²â½á¹ûpredict_result£¬µÄĞĞÊıÓëÀà±êÊıÏàÍ¬
-			µÚiĞĞ¼´¸ÃÌØÕ÷ÏòÁ¿ÎªµÚiÀàµÄ¸ÅÂÊ
+			ç‰¹å¾å‘é‡çš„é¢„æµ‹ç»“æœpredict_resultï¼Œçš„è¡Œæ•°ä¸ç±»æ ‡æ•°ç›¸åŒ
+			ç¬¬iè¡Œå³è¯¥ç‰¹å¾å‘é‡ä¸ºç¬¬iç±»çš„æ¦‚ç‡
 			*/
-			/*ÏµÊı¾ØÕó³ËÒÔĞĞµÄÏßĞÔ½á¹û*/
+			/*ç³»æ•°çŸ©é˜µä¹˜ä»¥è¡Œçš„çº¿æ€§ç»“æœ*/
 			matrix<feature_type> predict_result = (_theta * row);
 			for (auto &i : predict_result)
 			{
@@ -138,7 +138,7 @@ namespace myml
 					i = 709;
 				}
 			}
-			/*softmaxº¯Êı´¦Àí*/
+			/*softmaxå‡½æ•°å¤„ç†*/
 			exp(predict_result);
 			predict_result /= sum(predict_result);
 			
@@ -150,15 +150,15 @@ namespace myml
 				}
 			}
 			//predict_result.print();
-			/*×¼È·½á¹ûÎª£¬ÌØÕ÷ÏòÁ¿µÄÕæÕıÀà±êµÄÄÇÒ»ĞĞÓ¦¸ÃÎª1£¬ÆäËûĞĞÓ¦¸ÃÎª0
-			Ê¹ÓÃ×¼È·½á¹û¼õÈ¥ÕæÕı½á¹û
+			/*å‡†ç¡®ç»“æœä¸ºï¼Œç‰¹å¾å‘é‡çš„çœŸæ­£ç±»æ ‡çš„é‚£ä¸€è¡Œåº”è¯¥ä¸º1ï¼Œå…¶ä»–è¡Œåº”è¯¥ä¸º0
+			ä½¿ç”¨å‡†ç¡®ç»“æœå‡å»çœŸæ­£ç»“æœ
 			*/
 			for (size_t theta_i = 0; theta_i < predict_result.row_size(); ++theta_i)
 			{
-				//×¼È·½á¹û¼õÈ¥Ô¤²â½á¹ûÎªÎó²î
+				//å‡†ç¡®ç»“æœå‡å»é¢„æµ‹ç»“æœä¸ºè¯¯å·®
 				feature_type(predict_result.row(theta_i)) = (theta_i == label_matrix.row(row_i) ? 1 - predict_result.row(theta_i) : 0 - predict_result.row(theta_i));
 			}
-			/*Ô¤²â½á¹ûµÄÃ¿Ò»ĞĞÎó²î£¬³ËÒÔµ¹ÊıÖĞµÄÌØÕ÷ÏòÁ¿Ïî*/
+			/*é¢„æµ‹ç»“æœçš„æ¯ä¸€è¡Œè¯¯å·®ï¼Œä¹˜ä»¥å€’æ•°ä¸­çš„ç‰¹å¾å‘é‡é¡¹*/
 			sum_error += predict_result * row.t();
 		}
 		sum_error /= -param_type(feature_matrix.row_size());

@@ -1,7 +1,7 @@
-/*
+ï»¿/*
 * poll.h
 *
-*  Created on: 2015Äê9ÔÂ1ÈÕ
+*  Created on: 2015å¹´9æœˆ1æ—¥
 *      Author: woqucc
 */
 
@@ -13,7 +13,7 @@
 namespace myml
 {
 	/**
-	* ÄÚ´æ³ØÀà£¬ÓÃÓÚÒ»´ÎĞÔ·ÖÅäµÄ´óÁ¿ÄÚ´æµÄ¹ÜÀí¡£
+	* å†…å­˜æ± ç±»ï¼Œç”¨äºä¸€æ¬¡æ€§åˆ†é…çš„å¤§é‡å†…å­˜çš„ç®¡ç†ã€‚
 	* */
 
 	template<class T>
@@ -33,23 +33,23 @@ namespace myml
 		memory_struct* _delete;                 //the last recovered memory's pointer
 	public:
 		size_t size;	
-		/**< ÄÚ´æ³Ø´óĞ¡*/
+		/**< å†…å­˜æ± å¤§å°*/
 		/**
-		* ¹¹Ôìº¯Êı
-		* @param max_size ÄÚ´æ³Ø´óĞ¡
+		* æ„é€ å‡½æ•°
+		* @param max_size å†…å­˜æ± å¤§å°
 		* */
 		memory_pool(size_t max_size);
 		~memory_pool();
 		/**
-		* ´ÓÄÚ´æ³ØÖĞ·ÖÅäĞÂÄÚ´æ
-		* @return ·ÖÅäµÄĞÂÄÚ´æ
+		* ä»å†…å­˜æ± ä¸­åˆ†é…æ–°å†…å­˜
+		* @return åˆ†é…çš„æ–°å†…å­˜
 		* */
 		T* pool_new();
 		/**
-		* ½«ÎŞÓÃµÄÄÚ´æ¹é»¹¸øÄÚ´æ³Ø
-		*@param t ÒªÉ¾³ıµÄÄÚ´æ¶ÔÏóµØÖ·
-		*@return É¾³ı³É¹¦ true
-		*@return É¾³ıÊ§°Ü false
+		* å°†æ— ç”¨çš„å†…å­˜å½’è¿˜ç»™å†…å­˜æ± 
+		*@param t è¦åˆ é™¤çš„å†…å­˜å¯¹è±¡åœ°å€
+		*@return åˆ é™¤æˆåŠŸ true
+		*@return åˆ é™¤å¤±è´¥ false
 		* */
 		bool pool_delete(T* t);
 	};

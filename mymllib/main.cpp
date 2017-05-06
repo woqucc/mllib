@@ -1,4 +1,4 @@
-#include<iostream>
+﻿#include<iostream>
 #include<fstream>
 #include<memory>
 #include<unordered_map>
@@ -16,7 +16,7 @@ int main()
 	//		ifstream f(R"(binary_classification.txt)", ios::in);
 		//ifstream f(R"(multi_classification.txt)", ios::in);
 		//	ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
-	ifstream f(R"(D:\paper\featuresʵ��\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
+	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 	import_matrix_data(m, f);
 	matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
 	cerr << m.row_size() << '\t' << m.col_size() << endl;

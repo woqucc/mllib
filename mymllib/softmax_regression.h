@@ -1,10 +1,10 @@
-#ifndef SOFTMAX_REGRESSION
+ï»¿#ifndef SOFTMAX_REGRESSION
 #define SOFTMAX_REGRESSION
 #include"data.h"
 #include<map>
 namespace myml
 {
-	/*ÉèÖÃÊı¾İÀàĞÍ£¬²»ÏëÓÃtemplate*/
+	/*è®¾ç½®æ•°æ®ç±»å‹ï¼Œä¸æƒ³ç”¨template*/
 	using feature_type = long double;
 	using label_type = size_t;
 	using param_type = long double;
@@ -14,41 +14,41 @@ namespace myml
 	public:
 		softmax_regression(size_t feature_count, size_t label_count);
 		void import_data(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
-		/*Ëæ»úÌİ¶ÈÏÂ½µ£¬¿ÉÒÔÒ»´Î´«Èë¶à¸öÑù±¾*/
+		/*éšæœºæ¢¯åº¦ä¸‹é™ï¼Œå¯ä»¥ä¸€æ¬¡ä¼ å…¥å¤šä¸ªæ ·æœ¬*/
 		void sgd(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,const param_type & learning_rate = 1E-5);
 
-		/*Ëæ»úÌİ¶ÈÏÂ½µ£¬¿ÉÒÔÒ»´Î´«Èë¶à¸öÑù±¾*/
+		/*éšæœºæ¢¯åº¦ä¸‹é™ï¼Œå¯ä»¥ä¸€æ¬¡ä¼ å…¥å¤šä¸ªæ ·æœ¬*/
 		void sgd_momentum(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,param_type rho = 0.9 ,param_type eit = 0.3);
 
-		/*ÅúÁ¿Ìİ¶ÈÏÂ½µ£¬Èç¹û´«ÈëµÄÑù±¾µÄbatchÎªÈ«²¿Ñù±¾£¬ÔòÎªÕı³£µÄÌİ¶ÈÏÂ½µ*/
+		/*æ‰¹é‡æ¢¯åº¦ä¸‹é™ï¼Œå¦‚æœä¼ å…¥çš„æ ·æœ¬çš„batchä¸ºå…¨éƒ¨æ ·æœ¬ï¼Œåˆ™ä¸ºæ­£å¸¸çš„æ¢¯åº¦ä¸‹é™*/
 		void batch_sgd(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
 		/*
-		Bold Driver·½·¨¸üĞÂÑ§Ï°ËÙÂÊ
-		¼´Èôµ±Ç°error¼õĞ¡ÔòÔö´óÑ§Ï°ËÙÂÊ£¬ÈôerrorÔö´óÔò¼õĞ¡Ñ§Ï°ËÙÂÊ
-		½ö¶ÔÅúÏÂ½µ·½Ê½ÓĞĞ§
+		Bold Driveræ–¹æ³•æ›´æ–°å­¦ä¹ é€Ÿç‡
+		å³è‹¥å½“å‰errorå‡å°åˆ™å¢å¤§å­¦ä¹ é€Ÿç‡ï¼Œè‹¥errorå¢å¤§åˆ™å‡å°å­¦ä¹ é€Ÿç‡
+		ä»…å¯¹æ‰¹ä¸‹é™æ–¹å¼æœ‰æ•ˆ
 		*/
 		void update_learning_rate_bd(param_type increase = 1.05, param_type decrease = 0.5);
 		/*
-		Bold Driver·½·¨¸üĞÂÑ§Ï°ËÙÂÊ
-		¼´Èôµ±Ç°error¼õĞ¡ÔòÔö´óÑ§Ï°ËÙÂÊ£¬ÈôerrorÔö´óÔò¼õĞ¡Ñ§Ï°ËÙÂÊ
-		½ö¶ÔÅúÏÂ½µ·½Ê½ÓĞĞ§
+		Bold Driveræ–¹æ³•æ›´æ–°å­¦ä¹ é€Ÿç‡
+		å³è‹¥å½“å‰errorå‡å°åˆ™å¢å¤§å­¦ä¹ é€Ÿç‡ï¼Œè‹¥errorå¢å¤§åˆ™å‡å°å­¦ä¹ é€Ÿç‡
+		ä»…å¯¹æ‰¹ä¸‹é™æ–¹å¼æœ‰æ•ˆ
 		*/
 		void adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,param_type epsilon = 1E-6, param_type rho = 0.95);
 
 		
-		/*Êä³ö×¼È·ÂÊ*/
+		/*è¾“å‡ºå‡†ç¡®ç‡*/
 		param_type accuracy(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
 		/*
-			¼ÆËãÎó²î¾ØÕó£¨ÕıÈ·½á¹û-Ô¤²â½á¹û£©* ¶ÔÓ¦µÄÌØÕ÷ÏòÁ¿
-			@param in feature_matrix ÊäÈëÌØÕ÷¾ØÕó£¬¾ØÕóµÄÃ¿Ò»ĞĞÎªÒ»¸öÌØÕ÷ÏòÁ¿
-			@param in label_matrix ÓëÌØÕ÷¾ØÕóÃ¿Ò»ĞĞÏà¶ÔÓ¦µÄ¾ßÌåÀà±ê£¬ÓÃÀ´¼ÆËãÎó²î
-			@param out Êä³öÎó²î¾ØÕó£¬¾ØÕó´óĞ¡Óë_theta´óĞ¡ÏàÍ¬
+			è®¡ç®—è¯¯å·®çŸ©é˜µï¼ˆæ­£ç¡®ç»“æœ-é¢„æµ‹ç»“æœï¼‰* å¯¹åº”çš„ç‰¹å¾å‘é‡
+			@param in feature_matrix è¾“å…¥ç‰¹å¾çŸ©é˜µï¼ŒçŸ©é˜µçš„æ¯ä¸€è¡Œä¸ºä¸€ä¸ªç‰¹å¾å‘é‡
+			@param in label_matrix ä¸ç‰¹å¾çŸ©é˜µæ¯ä¸€è¡Œç›¸å¯¹åº”çš„å…·ä½“ç±»æ ‡ï¼Œç”¨æ¥è®¡ç®—è¯¯å·®
+			@param out è¾“å‡ºè¯¯å·®çŸ©é˜µï¼ŒçŸ©é˜µå¤§å°ä¸_thetaå¤§å°ç›¸åŒ
 		*/
 		matrix<param_type> error_matrix(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
 		/*
-			Ê¹ÓÃ_thetaÔ¤²âÌØÕ÷¾ØÕóµÄ½á¹û
-			@param in ÊäÈëÌØÕ÷¾ØÕó£¬¾ØÕóµÄÃ¿Ò»ĞĞÎªÒ»¸öÌØÕ÷ÏòÁ¿
-			@param out ÊäÈë¾ØÕóµÄÔ¤²â½á¹û£¬Êä³öµÄ¾ØÕóÃ¿Ò»ĞĞÎªÒ»¸öÔ¤²â½á¹û£¬Ö»ÓĞÒ»ÁĞ
+			ä½¿ç”¨_thetaé¢„æµ‹ç‰¹å¾çŸ©é˜µçš„ç»“æœ
+			@param in è¾“å…¥ç‰¹å¾çŸ©é˜µï¼ŒçŸ©é˜µçš„æ¯ä¸€è¡Œä¸ºä¸€ä¸ªç‰¹å¾å‘é‡
+			@param out è¾“å…¥çŸ©é˜µçš„é¢„æµ‹ç»“æœï¼Œè¾“å‡ºçš„çŸ©é˜µæ¯ä¸€è¡Œä¸ºä¸€ä¸ªé¢„æµ‹ç»“æœï¼Œåªæœ‰ä¸€åˆ—
 		*/
 		matrix<label_type> predict(const matrix<feature_type> &feature_matrix);
 
@@ -67,9 +67,9 @@ namespace myml
 		matrix<param_type> _grad_ewma;
 		matrix<param_type> _error_ewma;
 
-		/*½öÔÚÊ¹ÓÃ¶¯Á¿·¨½øĞĞÌİ¶ÈÏÂ½µÊ±Ê¹ÓÃ*/
-		matrix<param_type> _last_error_matrix;/*ÉÏÒ»´ÎÎó²î*/
-		matrix<param_type> _error_matrix;/*±¾´ÎÎó²î*/
+		/*ä»…åœ¨ä½¿ç”¨åŠ¨é‡æ³•è¿›è¡Œæ¢¯åº¦ä¸‹é™æ—¶ä½¿ç”¨*/
+		matrix<param_type> _last_error_matrix;/*ä¸Šä¸€æ¬¡è¯¯å·®*/
+		matrix<param_type> _error_matrix;/*æœ¬æ¬¡è¯¯å·®*/
 	};
 	inline void softmax_regression::update_learning_rate_bd(param_type increase, param_type decrease)
 	{

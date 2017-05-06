@@ -1,4 +1,4 @@
-#ifndef DATA_H
+ï»¿#ifndef DATA_H
 #define DATA_H
 #include<vector>
 #include<algorithm>
@@ -14,68 +14,68 @@ namespace myml
 {
 	using namespace std;
 
-	/*ÉùÃ÷×ÓÀà*/
+	/*å£°æ˜å­ç±»*/
 	template<class T>
 	class pseudo_matrix;
 	/*
-	@brief ¾ØÕóÀà£¬Ê¹ÓÃÊı×éÊµÏÖ
+	@brief çŸ©é˜µç±»ï¼Œä½¿ç”¨æ•°ç»„å®ç°
 	*/
 
 	template <class T>
 	class matrix
 	{
 	public:
-		//½«valarray×÷Îª¿ÉÒÔpush_backµÄÒ»ÖÖĞÎÊ½
+		//å°†valarrayä½œä¸ºå¯ä»¥push_backçš„ä¸€ç§å½¢å¼
 		using index_array = valarray<size_t>;
-		/*±éÀúÔªËØ,row_i,col_iÎªµü´ú×ø±ê*/
+		/*éå†å…ƒç´ ,row_i,col_iä¸ºè¿­ä»£åæ ‡*/
 #define each_ele(op) for (size_t row_i = 0; row_i < _row_size; row_i++) {for (size_t col_i = 0; col_i < _col_size; col_i++){op;}}
 		class iterator
 		{
 		private:
-			matrix<T>& _matrix;/*< ´æ´¢¾ØÕó*/
-			size_t _index;/*< ´æ´¢Ë÷Òı*/
+			matrix<T>& _matrix;/*< å­˜å‚¨çŸ©é˜µ*/
+			size_t _index;/*< å­˜å‚¨ç´¢å¼•*/
 		public:
 			iterator(matrix<T>& matrix, size_t index);
 			/*
-			@brief ·µ»Øµ±Ç°index
+			@brief è¿”å›å½“å‰index
 			*/
 			virtual size_t index() const;
 			/*
-			@brief µü´úÆ÷È¡Ö·²Ù×÷·û
-			@return T& ÔªËØÒıÓÃ
+			@brief è¿­ä»£å™¨å–å€æ“ä½œç¬¦
+			@return T& å…ƒç´ å¼•ç”¨
 			*/
 			virtual  T& operator * () const;
 			/*
-			@brief µü´úÆ÷±È½Ï²Ù×÷·û
-			@param i ÆäËûµü´úÆ÷
-			@return true ²»µÈ
-			@return false ÏàµÈ
+			@brief è¿­ä»£å™¨æ¯”è¾ƒæ“ä½œç¬¦
+			@param i å…¶ä»–è¿­ä»£å™¨
+			@return true ä¸ç­‰
+			@return false ç›¸ç­‰
 			*/
 			virtual bool operator != (iterator& i) const;
 			/*
-			@brief µü´úÆ÷×ÔÔö²Ù×÷·û
-			@return ×ÔÔöÇ°µÄµü´úÆ÷¸±±¾
+			@brief è¿­ä»£å™¨è‡ªå¢æ“ä½œç¬¦
+			@return è‡ªå¢å‰çš„è¿­ä»£å™¨å‰¯æœ¬
 			*/
 			virtual typename matrix<T>::iterator& operator ++();
 			/*
-			@brief µü´úÆ÷×Ô¼õ²Ù×÷·û
-			@return ×Ô¼õÇ°µÄµü´úÆ÷¸±±¾
+			@brief è¿­ä»£å™¨è‡ªå‡æ“ä½œç¬¦
+			@return è‡ªå‡å‰çš„è¿­ä»£å™¨å‰¯æœ¬
 			*/
 			virtual typename matrix<T>::iterator& operator --();
 			/*
-			@brief  ¼ÓºÅ²Ù×÷·û
-			@return ×Ô¼õÇ°µÄµü´úÆ÷¸±±¾
+			@brief  åŠ å·æ“ä½œç¬¦
+			@return è‡ªå‡å‰çš„è¿­ä»£å™¨å‰¯æœ¬
 			*/
 			virtual typename matrix<T>::iterator& operator +(size_t iv);
 			/*
-			@brief  ¼õºÅ²Ù×÷·û
-			@return ×Ô¼õÇ°µÄµü´úÆ÷¸±±¾
+			@brief  å‡å·æ“ä½œç¬¦
+			@return è‡ªå‡å‰çš„è¿­ä»£å™¨å‰¯æœ¬
 			*/
 			virtual size_t operator -(const iterator& i);
 		};
 		/*
-		@brief ÁĞµü´úÆ÷
-		°´ÁĞ·ÃÎÊÔªËØ
+		@brief åˆ—è¿­ä»£å™¨
+		æŒ‰åˆ—è®¿é—®å…ƒç´ 
 		*/
 		class column_iterator
 		{
@@ -93,200 +93,200 @@ namespace myml
 			virtual typename matrix<T>::column_iterator& operator +(size_t iv);
 			virtual size_t operator -(const column_iterator& i);
 		};
-		/*Ä¬ÈÏ¹¹Ôìº¯Êı£¬¹¹Ôì¿Õ¾ØÕó£¬ÎŞ·¨Ê¹ÓÃ*/
+		/*é»˜è®¤æ„é€ å‡½æ•°ï¼Œæ„é€ ç©ºçŸ©é˜µï¼Œæ— æ³•ä½¿ç”¨*/
 		matrix() = default;
 		/*
-		@brief ´òÓ¡¾ØÕóÖĞµÄËùÓĞÔªËØ
+		@brief æ‰“å°çŸ©é˜µä¸­çš„æ‰€æœ‰å…ƒç´ 
 		*/
 		virtual void print(char split = ',', ostream& out = cout);
 		/*
-		@brief °´ÕÕÄ³ÁĞÅÅĞò
-		@param column_num ÁĞÊı
+		@brief æŒ‰ç…§æŸåˆ—æ’åº
+		@param column_num åˆ—æ•°
 		*/
 		virtual void sort_by(size_t column_num);
 
 		/*
-		@brief »ñÈ¡ÔªËØ¸öÊı
+		@brief è·å–å…ƒç´ ä¸ªæ•°
 		*/
 		virtual size_t row_size() const;
 		/*
-		@brief »ñÈ¡ÔªËØÎ¬Êı
+		@brief è·å–å…ƒç´ ç»´æ•°
 		*/
 		virtual size_t col_size() const;
 		/*
-		@brief Ôö¼ÓĞĞ
-		@param row ÔªËØĞĞµÄÊ×µØÖ·Ö¸Õë
-		@param size ÔªËØÎ¬Êı
+		@brief å¢åŠ è¡Œ
+		@param row å…ƒç´ è¡Œçš„é¦–åœ°å€æŒ‡é’ˆ
+		@param size å…ƒç´ ç»´æ•°
 		*/
 		virtual void push_back(T *row, size_t size);
 		/*
-		@brief ¼ì²é¾ØÕóÖĞÃ¿ĞĞÊı¾İÁĞÊıÊÇ·ñÏàÍ¬,¼´Êı¾İÊÇ·ñºÏ·¨
-		@return true Ã¿ĞĞÊı¾İÁĞÊıÏàÍ¬£¬ºÏ·¨
-		@return false Ã¿ĞĞÊı¾İÁĞÊı²»Í¬£¬·Ç·¨;¾ØÕóÎª¿Õ
+		@brief æ£€æŸ¥çŸ©é˜µä¸­æ¯è¡Œæ•°æ®åˆ—æ•°æ˜¯å¦ç›¸åŒ,å³æ•°æ®æ˜¯å¦åˆæ³•
+		@return true æ¯è¡Œæ•°æ®åˆ—æ•°ç›¸åŒï¼Œåˆæ³•
+		@return false æ¯è¡Œæ•°æ®åˆ—æ•°ä¸åŒï¼Œéæ³•;çŸ©é˜µä¸ºç©º
 		*/
 		virtual bool rect_check() const;
 		/*
-		@brief ½»»»Á½ĞĞ
-		@param row1 ´ı½»»»µÄĞĞ1
-		@param row2 ´ı½»»»µÄĞĞ2
+		@brief äº¤æ¢ä¸¤è¡Œ
+		@param row1 å¾…äº¤æ¢çš„è¡Œ1
+		@param row2 å¾…äº¤æ¢çš„è¡Œ2
 		*/
 		virtual void swap_row(size_t row1, size_t row2);
 		/*
-		@brief »ñÈ¡Ä³Ò»ÔªËØ
-		@param row_num ĞĞÊı
-		@param col_num ÁĞÊı
+		@brief è·å–æŸä¸€å…ƒç´ 
+		@param row_num è¡Œæ•°
+		@param col_num åˆ—æ•°
 		*/
 		virtual T& at(size_t row_num, size_t col_num);
 		/*
-		@brief »ñÈ¡Ä³Ò»ÔªËØ
-		@param row_num ĞĞÊı
-		@param col_num ÁĞÊı
+		@brief è·å–æŸä¸€å…ƒç´ 
+		@param row_num è¡Œæ•°
+		@param col_num åˆ—æ•°
 		*/
 		virtual const T at(size_t row_num, size_t col_num) const;
 		/*
-		@brief ·µ»ØµÚÒ»¸ö¾ØÕóÔªËØµü´úÆ÷
+		@brief è¿”å›ç¬¬ä¸€ä¸ªçŸ©é˜µå…ƒç´ è¿­ä»£å™¨
 		*/
 		virtual iterator begin();
 		/*
-		@brief ·µ»Ø×îºóÒ»¸ö¾ØÕóÔªËØµü´úÆ÷
+		@brief è¿”å›æœ€åä¸€ä¸ªçŸ©é˜µå…ƒç´ è¿­ä»£å™¨
 		*/
 		virtual iterator end();
 		/*
-		@brief ·µ»ØÄ³Ò»ÁĞµÚÒ»¸öÔªËØµÄµü´úÆ÷
+		@brief è¿”å›æŸä¸€åˆ—ç¬¬ä¸€ä¸ªå…ƒç´ çš„è¿­ä»£å™¨
 		*/
 		virtual column_iterator cbegin(size_t column);
 		/*
-		@brief ·µ»ØÄ³Ò»ÁĞµÄ½áÎ²µü´úÆ÷£¨Ö¸Ïònull£©
+		@brief è¿”å›æŸä¸€åˆ—çš„ç»“å°¾è¿­ä»£å™¨ï¼ˆæŒ‡å‘nullï¼‰
 		*/
 		virtual column_iterator cend(size_t column);
 
 		/*
-		@brief ·µ»Ø×ÓÕó
-		@param row_begin	µÚÒ»¸öÔªËØºá×ø±ê£¬ÓÉ0¿ªÊ¼
-		@param column_begin	µÚÒ»¸öÔªËØ×İ×ø±ê£¬ÓÉ0¿ªÊ¼
-		@param row_end	×îºóÒ»¸öÔªËØºá×ø±ê£¬ÓÉ0¿ªÊ¼
-		@param column_end	×îºóÒ»¸öÔªËØ×İ×ø±ê£¬ÓÉ0¿ªÊ¼
-		@return Ö¸ÏòĞÂ×ÓÕóµÄÖ¸Õë£¨shared_ptr£©
+		@brief è¿”å›å­é˜µ
+		@param row_begin	ç¬¬ä¸€ä¸ªå…ƒç´ æ¨ªåæ ‡ï¼Œç”±0å¼€å§‹
+		@param column_begin	ç¬¬ä¸€ä¸ªå…ƒç´ çºµåæ ‡ï¼Œç”±0å¼€å§‹
+		@param row_end	æœ€åä¸€ä¸ªå…ƒç´ æ¨ªåæ ‡ï¼Œç”±0å¼€å§‹
+		@param column_end	æœ€åä¸€ä¸ªå…ƒç´ çºµåæ ‡ï¼Œç”±0å¼€å§‹
+		@return æŒ‡å‘æ–°å­é˜µçš„æŒ‡é’ˆï¼ˆshared_ptrï¼‰
 		*/
 		virtual pseudo_matrix<T> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end);
 		/*
-		@brief ¸³Öµ²Ù×÷·û
+		@brief èµ‹å€¼æ“ä½œç¬¦
 		*/
 		matrix& operator =(const matrix& rn);
 		/*
-		@brief ¼ÓºÅ²Ù×÷·û
+		@brief åŠ å·æ“ä½œç¬¦
 		*/
 		matrix& operator +=(const T t);
 		/*
-		@brief ¼õºÅ²Ù×÷·û
+		@brief å‡å·æ“ä½œç¬¦
 		*/
 		matrix& operator -=(const T t);
 		/*
-		@brief ³Ë·¨²Ù×÷·û
+		@brief ä¹˜æ³•æ“ä½œç¬¦
 		*/
 		matrix& operator *=(const T t);
 		/*
-		@brief ³ıºÅ²Ù×÷·û
+		@brief é™¤å·æ“ä½œç¬¦
 		*/
 		matrix& operator /=(const T t);
 		/*
-		@brief È¡Óà²Ù×÷·û
+		@brief å–ä½™æ“ä½œç¬¦
 		*/
 		matrix& operator %=(const T t);
 
 		/*
-		@brief ¾ØÕóÏà¼Ó
+		@brief çŸ©é˜µç›¸åŠ 
 		*/
 		matrix<T> operator +(const matrix<T>& t) const;
 
 		/*
-		@brief ¾ØÕóÏà¼õ
+		@brief çŸ©é˜µç›¸å‡
 		*/
 		matrix<T> operator -(const matrix<T>& t) const;
 
 		/*
-		@brief ¾ØÕóÏà³Ë
+		@brief çŸ©é˜µç›¸ä¹˜
 		*/
 		matrix<T> operator *(const matrix<T>& t) const;
 
 		/*
-		@brief ¾ØÕóÖĞÖ»ÓĞÒ»¸öÔªËØÊ±¿É½«ÆäÖ±½Ó×ª»»Îªµ¥¸öµÄTÀàĞÍ±äÁ¿
+		@brief çŸ©é˜µä¸­åªæœ‰ä¸€ä¸ªå…ƒç´ æ—¶å¯å°†å…¶ç›´æ¥è½¬æ¢ä¸ºå•ä¸ªçš„Tç±»å‹å˜é‡
 		*/
 		operator const T&() const;
 		/*
-		@brief ¾ØÕóÖĞÖ»ÓĞÒ»¸öÔªËØÊ±¿É½«ÆäÖ±½Ó×ª»»Îªµ¥¸öµÄTÀàĞÍ±äÁ¿
+		@brief çŸ©é˜µä¸­åªæœ‰ä¸€ä¸ªå…ƒç´ æ—¶å¯å°†å…¶ç›´æ¥è½¬æ¢ä¸ºå•ä¸ªçš„Tç±»å‹å˜é‡
 		*/
 		operator T&();
 		/*
-		@brief ¾ØÕóÏà¼Ó
+		@brief çŸ©é˜µç›¸åŠ 
 		*/
 		matrix<T> operator +=(const matrix<T>& t);
 
 		/*
-		@brief ¾ØÕóÏà¼õ
+		@brief çŸ©é˜µç›¸å‡
 		*/
 		matrix<T> operator -=(const matrix<T>& t);
 
 
 		/*
-		@brief Ñ¡È¡¾ØÕóÖĞµÄÖ¸¶¨ĞĞ
+		@brief é€‰å–çŸ©é˜µä¸­çš„æŒ‡å®šè¡Œ
 		*/
 		virtual pseudo_matrix<T> fetch_row(const index_array& row_indexs) const;
 
 		/*
-		@brief ÌáÈ¡Âú×ãÖ¸¶¨Ìõ¼şµÄĞĞ
+		@brief æå–æ»¡è¶³æŒ‡å®šæ¡ä»¶çš„è¡Œ
 		*/
 		virtual pseudo_matrix<T> fetch_row(function<bool(const T* val, size_t col_size)> condition) const;
 
 		/*
-		@brief ÌáÈ¡Ö¸¶¨ĞĞ³ÉÎªĞÂµÄ¾ØÕó
+		@brief æå–æŒ‡å®šè¡Œæˆä¸ºæ–°çš„çŸ©é˜µ
 		*/
 		//virtual matrix<T> fetch_column(const index_array& column_indexs) const;
 
 		/*
-		@brief É¾³ı±¾¾ØÕóÖĞÖ¸¶¨µÄĞĞ
+		@brief åˆ é™¤æœ¬çŸ©é˜µä¸­æŒ‡å®šçš„è¡Œ
 		*/
 		virtual void remove_row(const index_array& row_indexs);
 
 		/*
-		@brief ²»ÅÅĞò£¬½ö½ö»ñÈ¡ÆäË³Ğò
+		@brief ä¸æ’åºï¼Œä»…ä»…è·å–å…¶é¡ºåº
 		*/
 		virtual index_array get_order(size_t column_num);
 
-		/*³õÊ¼»¯ÁĞ±íĞÎÊ½³õÊ¼»¯*/
+		/*åˆå§‹åŒ–åˆ—è¡¨å½¢å¼åˆå§‹åŒ–*/
 		void push_back(valarray<T> && row);
 		void push_back(const valarray<T>& row);
-		/*·µ»ØĞĞÖ¸ÕëÊı×é*/
+		/*è¿”å›è¡ŒæŒ‡é’ˆæ•°ç»„*/
 		T** raw_data();
-		/*·µ»ØĞĞÖ¸ÕëÊı×é*/
+		/*è¿”å›è¡ŒæŒ‡é’ˆæ•°ç»„*/
 		T** raw_data() const;
-		/*ÕæÕı¹¹Ôìº¯Êı*/
+		/*çœŸæ­£æ„é€ å‡½æ•°*/
 		matrix<T>(size_t row_size, size_t col_size);
-		/*×ªÒÆ¹¹Ôìº¯Êı*/
+		/*è½¬ç§»æ„é€ å‡½æ•°*/
 		matrix<T>(matrix&& m);
-		/*¸´ÖÆ¹¹Ôìº¯Êı*/
+		/*å¤åˆ¶æ„é€ å‡½æ•°*/
 		matrix<T>(const matrix& m);
-		/*Îö¹¹º¯Êı*/
+		/*ææ„å‡½æ•°*/
 		virtual ~matrix<T>();
 
-		/*»ñÈ¡Ä³Ò»ĞĞÊı¾İ£¬½öÓÃÓÚ¶ÁÈ¡*/
+		/*è·å–æŸä¸€è¡Œæ•°æ®ï¼Œä»…ç”¨äºè¯»å–*/
 		pseudo_matrix<T> row(size_t row_index) const;
-		/*»ñÈ¡Ä³ÁĞÊı¾İ£¬½öÓÃÓÚ¶ÁÈ¡*/
+		/*è·å–æŸåˆ—æ•°æ®ï¼Œä»…ç”¨äºè¯»å–*/
 		pseudo_matrix<T> col(size_t col_index) const;
-		/*»ñÈ¡Ä³Ò»ĞĞÊı¾İ£¬½öÓÃÓÚ¶ÁÈ¡*/
+		/*è·å–æŸä¸€è¡Œæ•°æ®ï¼Œä»…ç”¨äºè¯»å–*/
 		pseudo_matrix<T> rows(size_t begin, size_t end) const;
-		/*»ñÈ¡Ä³ÁĞÊı¾İ£¬½öÓÃÓÚ¶ÁÈ¡*/
+		/*è·å–æŸåˆ—æ•°æ®ï¼Œä»…ç”¨äºè¯»å–*/
 		pseudo_matrix<T> cols(size_t begin, size_t end) const;
 
-		/*ÖØĞÂ·ÖÅä´óĞ¡*/
+		/*é‡æ–°åˆ†é…å¤§å°*/
 		void resize(size_t row_size, size_t col_size);
-		/*ÉèÖÃËùÓĞÔªËØÎªÖ¸¶¨Öµ*/
+		/*è®¾ç½®æ‰€æœ‰å…ƒç´ ä¸ºæŒ‡å®šå€¼*/
 		void fill(const T &t);
-		/*ÊÇ·ñÓĞÊı¾İ*/
+		/*æ˜¯å¦æœ‰æ•°æ®*/
 		bool has_data();
-		/*·­×ª±¾¾ØÕó*/
+		/*ç¿»è½¬æœ¬çŸ©é˜µ*/
 		void transpose();
-		/*Éú³ÉĞÂµÄ¾ØÕó*/
+		/*ç”Ÿæˆæ–°çš„çŸ©é˜µ*/
 		matrix<T> t();
 	protected:
 		T* _memory = nullptr;
@@ -314,12 +314,12 @@ namespace myml
 	template<class T>
 	inline matrix<T>& matrix<T>::operator = (const matrix & rn)
 	{
-		//ÒÑ¾­ÊÇÊµÌå¾ØÕóÁË£¬²»ÄÜËæÒâ¸³Öµ
+		//å·²ç»æ˜¯å®ä½“çŸ©é˜µäº†ï¼Œä¸èƒ½éšæ„èµ‹å€¼
 		if (_data != nullptr && _memory != nullptr)
 		{
 			assert(rn.row_size() == _row_size && rn.col_size() == _col_size);
 		}
-		//¾ØÕóÉĞÎ´ÊµÌå»¯
+		//çŸ©é˜µå°šæœªå®ä½“åŒ–
 		else
 		{
 			if (rn.row_size() > 0 && rn.col_size() > 0)
@@ -375,7 +375,7 @@ namespace myml
 				temp.at(row_i, col_i) += t.at(row_i, col_i);
 			}
 		}
-		/*ÔÚ´Ëµ÷ÓÃ×ªÒÆ¹¹Ôìº¯Êı£¬move²»move¶¼¿ÉÒÔ*/
+		/*åœ¨æ­¤è°ƒç”¨è½¬ç§»æ„é€ å‡½æ•°ï¼Œmoveä¸moveéƒ½å¯ä»¥*/
 		return move(temp);
 	}
 	template<class T>
@@ -390,20 +390,20 @@ namespace myml
 				temp.at(row_i, col_i) -= t.at(row_i, col_i);
 			}
 		}
-		/*ÔÚ´Ëµ÷ÓÃ×ªÒÆ¹¹Ôìº¯Êı£¬move²»move¶¼¿ÉÒÔ*/
+		/*åœ¨æ­¤è°ƒç”¨è½¬ç§»æ„é€ å‡½æ•°ï¼Œmoveä¸moveéƒ½å¯ä»¥*/
 		return move(temp);
 	}
 	template<class T>
 	inline matrix<T> matrix<T>::operator*(const matrix<T>& t) const
 	{
-		/*¿ÉÒÔ³Ë*/
+		/*å¯ä»¥ä¹˜*/
 		assert(_col_size == t.row_size());
 		matrix<T> temp(_row_size, t.col_size());
 		for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
 		{
 			for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
 			{
-				/* temp = ±¾¾ØÕóµÄµÚrow_iĞĞ * t¾ØÕóµÄµØcol_iÁĞ */
+				/* temp = æœ¬çŸ©é˜µçš„ç¬¬row_iè¡Œ * tçŸ©é˜µçš„åœ°col_iåˆ— */
 				temp.at(row_i, col_i) = 0;
 				for (size_t i = 0; i < _col_size; i++)
 				{
@@ -411,7 +411,7 @@ namespace myml
 				}
 			}
 		}
-		/*ÔÚ´Ëµ÷ÓÃ×ªÒÆ¹¹Ôìº¯Êı£¬move²»move¶¼¿ÉÒÔ*/
+		/*åœ¨æ­¤è°ƒç”¨è½¬ç§»æ„é€ å‡½æ•°ï¼Œmoveä¸moveéƒ½å¯ä»¥*/
 		return move(temp);
 	}
 	template<class T>
@@ -438,7 +438,7 @@ namespace myml
 		each_ele(_data[row_i][col_i] -= t.at(row_i, col_i));
 		return *this;
 	}
-	//TODO :ÓÅ»¯Âß¼­
+	//TODO :ä¼˜åŒ–é€»è¾‘
 	template<class T>
 	inline typename matrix<T>::index_array matrix<T>::get_order(size_t column_num)
 	{
@@ -448,7 +448,7 @@ namespace myml
 			ia[i] = i;
 		}
 		auto temp = col(column_num);
-		/*Ê¹ÓÃÕ»´úÌæµİ¹é£¬Ö´ĞĞ¿ìÅÅ*/
+		/*ä½¿ç”¨æ ˆä»£æ›¿é€’å½’ï¼Œæ‰§è¡Œå¿«æ’*/
 		stack<pair<size_t, size_t>> qs_stack;
 		assert(_col_size > 0 && _row_size > 0);
 		qs_stack.push({ 0,row_size() - 1 });
@@ -461,16 +461,16 @@ namespace myml
 			T key = temp.at(i, 0);
 			while (i < j)
 			{
-				//´ÓºóÏòÇ°ÕÒµ½Ğ¡ÓÚkeyµÄÔªËØj£¬½«j»º´æµ½i´¦
-				//Ê×´Î½»»»Ê±iÎªbegin
+				//ä»åå‘å‰æ‰¾åˆ°å°äºkeyçš„å…ƒç´ jï¼Œå°†jç¼“å­˜åˆ°iå¤„
+				//é¦–æ¬¡äº¤æ¢æ—¶iä¸ºbegin
 				while (i < j && temp.at(j, 0) >= key)
 				{
 					j--;
 				}
-				//½»»»
+				//äº¤æ¢
 				std::swap(ia[i], ia[j]);
 				temp.swap_row(i, j);
-				//´ÓÇ°ÏòºóÕÒµ½µÚÒ»¸ö´óÓÚkeyµÄÔªËØi£¬Óëj½»»»£¬½«»º´æµ½j³öµÄbeginÔªËØ½»»»ÖÁi´¦
+				//ä»å‰å‘åæ‰¾åˆ°ç¬¬ä¸€ä¸ªå¤§äºkeyçš„å…ƒç´ iï¼Œä¸jäº¤æ¢ï¼Œå°†ç¼“å­˜åˆ°jå‡ºçš„beginå…ƒç´ äº¤æ¢è‡³iå¤„
 				while (i < j && temp.at(i, 0) <= key)
 				{
 					i++;
@@ -615,7 +615,7 @@ namespace myml
 	template<class T>
 	inline void matrix<T>::sort_by(size_t column_num)
 	{
-		/*Ê¹ÓÃÕ»´úÌæµİ¹é£¬Ö´ĞĞ¿ìÅÅ*/
+		/*ä½¿ç”¨æ ˆä»£æ›¿é€’å½’ï¼Œæ‰§è¡Œå¿«æ’*/
 		stack<pair<size_t, size_t>> qs_stack;
 		qs_stack.push({ 0,row_size() - 1 });
 		while (!qs_stack.empty())
@@ -627,15 +627,15 @@ namespace myml
 			T key = at(i, column_num);
 			while (i < j)
 			{
-				//´ÓºóÏòÇ°ÕÒµ½Ğ¡ÓÚkeyµÄÔªËØj£¬½«j»º´æµ½i´¦
-				//Ê×´Î½»»»Ê±iÎªbegin
+				//ä»åå‘å‰æ‰¾åˆ°å°äºkeyçš„å…ƒç´ jï¼Œå°†jç¼“å­˜åˆ°iå¤„
+				//é¦–æ¬¡äº¤æ¢æ—¶iä¸ºbegin
 				while (i < j && at(j, column_num) >= key)
 				{
 					j--;
 				}
-				//½»»»
+				//äº¤æ¢
 				swap_row(i, j);
-				//´ÓÇ°ÏòºóÕÒµ½µÚÒ»¸ö´óÓÚkeyµÄÔªËØi£¬Óëj½»»»£¬½«»º´æµ½j³öµÄbeginÔªËØ½»»»ÖÁi´¦
+				//ä»å‰å‘åæ‰¾åˆ°ç¬¬ä¸€ä¸ªå¤§äºkeyçš„å…ƒç´ iï¼Œä¸jäº¤æ¢ï¼Œå°†ç¼“å­˜åˆ°jå‡ºçš„beginå…ƒç´ äº¤æ¢è‡³iå¤„
 				while (i < j && at(i, column_num) <= key)
 				{
 					i++;
@@ -787,7 +787,7 @@ namespace myml
 	template<class T>
 	pseudo_matrix<T> matrix<T>::sub_matrix(size_t row_begin, size_t col_begin, size_t row_end, size_t col_end)
 	{
-		/*·¶Î§ÕıÈ·*/
+		/*èŒƒå›´æ­£ç¡®*/
 		assert(row_begin <= row_end && col_begin <= col_end);
 		assert(row_end - row_begin < _row_size && col_end - col_begin < _col_size);
 		assert(row_end < _row_size && col_end < _col_size);
@@ -876,17 +876,17 @@ namespace myml
 		_col_size = m._col_size;
 		_row_size = m._row_size;
 		_cur_row_pos = m._cur_row_pos;
-		//´ÓÎ±¾ØÕóÖĞ¿½±´
+		//ä»ä¼ªçŸ©é˜µä¸­æ‹·è´
 		if (_memory == nullptr)
 		{
-			//·ÖÅäĞÂÄÚ´æ
+			//åˆ†é…æ–°å†…å­˜
 			_memory = new T[_row_size*_col_size]();
 			for (size_t row_i = 0; row_i < _row_size; row_i++)
 			{
 				T* origin_row = _data[row_i];
-				//ÖØĞÂ¸øindex¾ØÕó¸³Öµ
+				//é‡æ–°ç»™indexçŸ©é˜µèµ‹å€¼
 				_data[row_i] = _memory + row_i * _col_size;
-				//¿½±´Êı¾İ
+				//æ‹·è´æ•°æ®
 				memcpy(_data[row_i], origin_row, sizeof(T) / sizeof(char) * _col_size);
 			}
 		}
@@ -908,7 +908,7 @@ namespace myml
 		delete[] _data;
 		delete[] _memory;
 	}
-	/*Î±¾ØÕó£¬½ö¹©ÁÙÊ±¶ÁÈ¡Ê¹ÓÃ*/
+	/*ä¼ªçŸ©é˜µï¼Œä»…ä¾›ä¸´æ—¶è¯»å–ä½¿ç”¨*/
 	template<class T>
 	class pseudo_matrix :public matrix<T>
 	{
@@ -924,7 +924,7 @@ namespace myml
 		pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size);
 		pseudo_matrix(const matrix<T>& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size);
 		~pseudo_matrix();
-		/*ÏòÎ´ÕæÊµ·ÖÅäÄÚ´æµÄ¾ØÕóÖĞÌí¼ÓÊı¾İ£¬¾ßÌåĞĞÎª²»ÖªµÀÊÇÉ¶*/
+		/*å‘æœªçœŸå®åˆ†é…å†…å­˜çš„çŸ©é˜µä¸­æ·»åŠ æ•°æ®ï¼Œå…·ä½“è¡Œä¸ºä¸çŸ¥é“æ˜¯å•¥*/
 		void push_back(valarray<T> && row) { assert(false); }
 		void push_back(const valarray<T>& row) { assert(false); }
 		void push_back(T *row, size_t size) { assert(false); }
@@ -940,21 +940,21 @@ namespace myml
 			memcpy(_data[row_i], rn._data[row_i], sizeof(T) / sizeof(char) * _col_size);
 		}
 		return *this;
-		// TODO: ÔÚ´Ë´¦²åÈë return Óï¾ä
+		// TODO: åœ¨æ­¤å¤„æ’å…¥ return è¯­å¥
 	}
 	template<class T>
 	inline pseudo_matrix<T>::pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size)
 	{
 		_row_size = row_size;
 		_col_size = col_size;
-		//·ÖÅäindexÄÚ´æ£¬²»·ÖÅäÊµ¼ÊÄÚ´æ
+		//åˆ†é…indexå†…å­˜ï¼Œä¸åˆ†é…å®é™…å†…å­˜
 		_data = new T*[_row_size]();
 		memcpy(_data, m.raw_data(), sizeof(T*) / sizeof(char)*_row_size);
 	}
 	template<class T>
 	inline pseudo_matrix<T>::pseudo_matrix(const matrix<T>& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size)
 	{
-		//·ÖÅäindexÄÚ´æ£¬²»·ÖÅäÊµ¼ÊÄÚ´æ
+		//åˆ†é…indexå†…å­˜ï¼Œä¸åˆ†é…å®é™…å†…å­˜
 		_data = new T*[row_size]();
 		for (size_t row_i = 0; row_i < row_size; ++row_i)
 		{
@@ -966,10 +966,10 @@ namespace myml
 	template<class T>
 	inline pseudo_matrix<T>::~pseudo_matrix()
 	{
-		/*²»ÊÍ·ÅÕæÕı¾ØÕóµÄÄÚ´æ*/
+		/*ä¸é‡Šæ”¾çœŸæ­£çŸ©é˜µçš„å†…å­˜*/
 		_memory = nullptr;
 	}
-	/*µ¼ÈëÊı¾İ²¿·ÖµÄÈ«¾Öº¯Êı*/
+	/*å¯¼å…¥æ•°æ®éƒ¨åˆ†çš„å…¨å±€å‡½æ•°*/
 	template<class T>
 	bool import_matrix_data(matrix<T>& matrix, ifstream& in, char split = ',', int line_width = 2048)
 	{
@@ -977,7 +977,7 @@ namespace myml
 			cerr << "Can not open file!" << endl;
 			return false;
 		}
-		/*»ñÈ¡ÁĞÊı*/
+		/*è·å–åˆ—æ•°*/
 		char *line = new char[line_width]();
 		in.getline(line, line_width);
 		size_t col_size = count(line, line + strlen(line), split) + 1;
@@ -994,7 +994,7 @@ namespace myml
 		if (strlen(line) == 0)
 			row_size--;
 		matrix.resize(row_size, col_size);
-		/*½«ÎÄ¼şÖ¸ÕëÖØÖÃµ½ÎÄ¼şÊ×²¿*/
+		/*å°†æ–‡ä»¶æŒ‡é’ˆé‡ç½®åˆ°æ–‡ä»¶é¦–éƒ¨*/
 		in.clear();
 		in.seekg(ios::beg);
 		for (size_t row_index = 0; row_index < row_size; ++row_index)
@@ -1011,7 +1011,7 @@ namespace myml
 		return true;
 	};
 
-	/*¾ØÕóÔËËãÀà*/
+	/*çŸ©é˜µè¿ç®—ç±»*/
 	namespace matrix_operate
 	{
 		template<class T>
@@ -1022,7 +1022,7 @@ namespace myml
 				i = std::exp(i);
 			}
 		}
-		/*ÇóºÍ*/
+		/*æ±‚å’Œ*/
 		template<class T>
 		T sum(matrix<T>& matrix)
 		{
@@ -1033,7 +1033,7 @@ namespace myml
 			}
 			return sum;
 		}
-		/*¾ØÕóµÄf·¶Êı*/
+		/*çŸ©é˜µçš„fèŒƒæ•°*/
 		template<class T>
 		long double norm_f(matrix<T>& matrix)
 		{
@@ -1060,7 +1060,7 @@ namespace myml
 		template<class T>
 		matrix<T> pow(const matrix<T>& a, const T& b)
 		{
-			//TODO:¶àÁËÒ»´Î¸´ÖÆ
+			//TODO:å¤šäº†ä¸€æ¬¡å¤åˆ¶
 			matrix<T> temp(a.row_size(), a.col_size());
 			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
 			{
@@ -1072,9 +1072,9 @@ namespace myml
 			return move(temp);
 		}
 	}
-	/*¾ØÕóÊı¾İ±ê×¼»¯*/
+	/*çŸ©é˜µæ•°æ®æ ‡å‡†åŒ–*/
 	namespace matrix_normalized {
-		/*ÉèÖÃÔªËØÖµµÄ·¶Î§£¬½«´óÓÚÉÏÏŞupper_boundµÄÔªËØÉèÖÃÎª×î´óÖµ£¬½«Ğ¡ÓÚÏÂÏŞlower_boundµÄÔªËØÉèÖÃÎª×îĞ¡Öµ*/
+		/*è®¾ç½®å…ƒç´ å€¼çš„èŒƒå›´ï¼Œå°†å¤§äºä¸Šé™upper_boundçš„å…ƒç´ è®¾ç½®ä¸ºæœ€å¤§å€¼ï¼Œå°†å°äºä¸‹é™lower_boundçš„å…ƒç´ è®¾ç½®ä¸ºæœ€å°å€¼*/
 		template<class T>
 		void set_range(matrix<T>& matrix, size_t column_num, T lower_bound, T upper_bound) {
 			for (auto i = matrix.cbegin(column_num); i != matrix.cend(column_num); ++i)
@@ -1098,7 +1098,7 @@ namespace myml
 			}
 			return move(temp);
 		}
-		/*½«Êı¾İµÄlabel×ª»»ÎªÁ¬ĞøµÄÕûÊı*/
+		/*å°†æ•°æ®çš„labelè½¬æ¢ä¸ºè¿ç»­çš„æ•´æ•°*/
 		template<class T, class E>
 		map<T, E> serialize_label(matrix<T>& label_matrix, matrix<E>& serialized_label)
 		{

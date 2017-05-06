@@ -1,4 +1,4 @@
-#ifndef C45_H
+ï»¿#ifndef C45_H
 #define C45_H
 #include"range.h"
 #include"data.h"
@@ -16,8 +16,8 @@ namespace myml
 
 		c45_tree_node(matrix_p data);
 		/*
-		@breif ¼ÆËãÀëÉ¢ÊôĞÔµÄgain
-			¼ÆËãĞÅÏ¢Ê¹ÓÃÊôĞÔan£¨µÚan¸öÊôĞÔ£©£¬¶ÔÑù±¾½øĞĞ·ÖÀàµÄĞÅÏ¢ÔöÒæ
+		@breif è®¡ç®—ç¦»æ•£å±æ€§çš„gain
+			è®¡ç®—ä¿¡æ¯ä½¿ç”¨å±æ€§anï¼ˆç¬¬anä¸ªå±æ€§ï¼‰ï¼Œå¯¹æ ·æœ¬è¿›è¡Œåˆ†ç±»çš„ä¿¡æ¯å¢ç›Š
 		*/
 		void calc_discrete_gain();
 		size_t split_by_gain_ratio();
@@ -31,14 +31,14 @@ namespace myml
 
 		vector<c45_tree_node> _children;
 		/*
-		@breif ¼ÆËãĞÅÏ¢ÔöìØ
-		@param cr <ÀàÃû,¸ÃÀà¸öÊı>
-		@return ìØ
+		@breif è®¡ç®—ä¿¡æ¯å¢ç†µ
+		@param cr <ç±»å,è¯¥ç±»ä¸ªæ•°>
+		@return ç†µ
 		*/
 		long double _calc_ent(const count_result& cr);
-		long double _ent = 0;/*< ±¾½ÚµãìØÖµ*/
-		long double _gain = 0;/*<±¾½Úµã×î´óĞÅÏ¢ÔöÒæ*/
-		long double _gain_ratio = 0;/*<±¾½Úµã×î´óĞÅÏ¢ÔöÒæÂÊ*/
+		long double _ent = 0;/*< æœ¬èŠ‚ç‚¹ç†µå€¼*/
+		long double _gain = 0;/*<æœ¬èŠ‚ç‚¹æœ€å¤§ä¿¡æ¯å¢ç›Š*/
+		long double _gain_ratio = 0;/*<æœ¬èŠ‚ç‚¹æœ€å¤§ä¿¡æ¯å¢ç›Šç‡*/
 		bool _finish_node = false;
 		long double _label = .0L;
 		size_t _gain_ratio_attr = 0;
@@ -46,24 +46,24 @@ namespace myml
 
 		matrix_p _data;
 		count_result _labels_count;
-		//»ñÈ¡Ã¿ÀàÊôĞÔµÄ¸öÊı
+		//è·å–æ¯ç±»å±æ€§çš„ä¸ªæ•°
 		count_result _get_column_classes_count(size_t column_num, matrix_p data);
-		//»ñÈ¡Ä³Ò»ÀàµÄÖµÎª
+		//è·å–æŸä¸€ç±»çš„å€¼ä¸º
 		count_result _get_specified_value_labels_count(long double value, matrix_p data, size_t column_num);
-		//¼ÆËãcount_result ÖĞvalueµÄºÍ
+		//è®¡ç®—count_result ä¸­valueçš„å’Œ
 		long double _count_value_sum(const count_result& cr);
-		//¸ù¾İÊı¾İÖĞ½Ï¶àÏîÅĞ¶ÏÀà±ê
+		//æ ¹æ®æ•°æ®ä¸­è¾ƒå¤šé¡¹åˆ¤æ–­ç±»æ ‡
 		void _set_finish_node();
 		/*
-		@brief »ñÈ¡Êı¾İ°´ÕÕÖ¸¶¨ÀëÉ¢ÊôĞÔ·Ö¸ô»ñÈ¡µÄĞÅÏ¢ÔöÒæ
-		@param data Êı¾İ
-		@param column_num ÊôĞÔÁĞÊı
+		@brief è·å–æ•°æ®æŒ‰ç…§æŒ‡å®šç¦»æ•£å±æ€§åˆ†éš”è·å–çš„ä¿¡æ¯å¢ç›Š
+		@param data æ•°æ®
+		@param column_num å±æ€§åˆ—æ•°
 		*/
 		long double _calc_gain(matrix_p data, size_t column_num,const count_result& cr);
 		
 		/*
-			@brief ¸ù¾İcount_result<Àà±ğ,ÀàÊı>£¬¼ÆËãintrinsic value(·ÖÁÑĞÅÏ¢)
-			@param count_result ÀàÃû£¬ÀàÊıÁ¿
+			@brief æ ¹æ®count_result<ç±»åˆ«,ç±»æ•°>ï¼Œè®¡ç®—intrinsic value(åˆ†è£‚ä¿¡æ¯)
+			@param count_result ç±»åï¼Œç±»æ•°é‡
 		*/
 		long double _calc_intrinsic_value(const count_result& cr);
 	};
