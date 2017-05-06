@@ -91,8 +91,25 @@ namespace myml
 
 	void softmax_regression::adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,param_type epsilon, param_type rho)
 	{
-		_error_matrix = error_matrix(feature_matrix, label_matrix);
-		_grad_ewma = _grad_ewma * rho + pow(_error_matrix, 2.0L) * (1 - rho);
+		matrix<param_type> grad = error_matrix(feature_matrix, label_matrix);
+		_cur_error = norm_f(grad);
+		_grad_ewma = _grad_ewma * rho + dot(grad, grad) * (1 - rho);
+
+
+		_last_error_matrix = _error_matrix;
+
+		_error_matrix = sqrt(_error_ewma + epsilon) / sqrt(_grad_ewma + epsilon);
+		//_error_matrix.fill(0.001);
+
+		_error_matrix  = dot(_error_matrix, grad);
+		
+		_pre_theta = _theta;
+
+
+		_theta -= _error_matrix;
+		_error_ewma = _error_ewma * rho + dot(_error_matrix, _error_matrix) * (1 - rho);
+		
+		//_grad_ewma *= rho;
 		//_error_matrix *= ()
 	}
 
@@ -135,7 +152,18 @@ namespace myml
 			{
 				if (i > 709.783)
 				{
-					i = 709;
+					/*_pre_theta.print();
+					_error_matrix.print();
+					_error_ewma.print();
+					_grad_ewma.print();*/
+					auto 卧槽啊 = i / 700;
+					//predict_result.print();
+					for (auto &t : predict_result)
+					{
+						t /= 卧槽啊;
+					}
+					//predict_result.print();
+					break;
 				}
 			}
 			/*softmax函数处理*/

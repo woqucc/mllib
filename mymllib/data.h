@@ -1010,7 +1010,15 @@ namespace myml
 		in.close();
 		return true;
 	};
-
+	template<class T>
+	bool import_matrix_data(matrix<T>& matrix, initializer_list<initializer_list<T>> data)
+	{
+		matrix.resize(data.size(), *(data.begin()).size());
+		for (auto & row : data)
+		{
+			matrix.push_back(row);
+		}
+	}
 	/*矩阵运算类*/
 	namespace matrix_operate
 	{
@@ -1042,7 +1050,7 @@ namespace myml
 			{
 				sum += i * i;
 			}
-			return sqrt(sum);
+			return std::sqrt(sum);
 		}
 		template<class T>
 		matrix<T> operator* (const matrix<T>& a, const T& b)
@@ -1057,16 +1065,77 @@ namespace myml
 			}
 			return move(temp);
 		}
+
+		template<class T>
+		matrix<T> operator+ (const matrix<T>& a, const T& b)
+		{
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) + b;
+				}
+			}
+			return move(temp);
+		}
+		/*
+		两个矩阵点乘：对应位置的元素相乘
+		*/
+		template<class T>
+		matrix<T> dot(const matrix<T>& a, const matrix<T>& b)
+		{
+			assert(a.row_size() == b.row_size() && a.col_size() == b.col_size());
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) * b.at(row_i, col_i);
+				}
+			}
+			return move(temp);
+		}
+		/*
+		矩阵相除：相同大小的矩阵对应位置相除
+		*/
+		template<class T>
+		matrix<T> operator/ (const matrix<T>& a, const matrix<T>& b)
+		{
+			assert(a.row_size() == b.row_size() && a.col_size() == b.col_size());
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) / b.at(row_i, col_i);
+				}
+			}
+			return move(temp);
+		}
+
 		template<class T>
 		matrix<T> pow(const matrix<T>& a, const T& b)
 		{
-			//TODO:多了一次复制
 			matrix<T> temp(a.row_size(), a.col_size());
 			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
 			{
 				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
 				{
 					temp.at(row_i, col_i) = std::pow(a.at(row_i, col_i), b);
+				}
+			}
+			return move(temp);
+		}
+		template<class T>
+		matrix<T> sqrt(const matrix<T>& a)
+		{
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = std::sqrt(a.at(row_i, col_i));
 				}
 			}
 			return move(temp);

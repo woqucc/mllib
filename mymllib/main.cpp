@@ -10,15 +10,16 @@
 #include<vector>
 using namespace std;
 using namespace myml;
+using namespace myml::matrix_operate;
 int main()
 {
 	matrix<long double> m;
-	//		ifstream f(R"(binary_classification.txt)", ios::in);
-		//ifstream f(R"(multi_classification.txt)", ios::in);
-		//	ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
+	//ifstream f(R"(binary_classification.txt)", ios::in);
+	//ifstream f(R"(multi_classification.txt)", ios::in);
+	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 	import_matrix_data(m, f);
-	matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
+	//matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
 	cerr << m.row_size() << '\t' << m.col_size() << endl;
 	//matrix<long double> m1 = m;
 	//m.transpose();
@@ -32,20 +33,26 @@ int main()
 	matrix<size_t> label;
 	auto label_map = matrix_normalized::serialize_label<long double, size_t>(m.col(m.col_size() - 1), label);
 	softmax_regression sr(m.col_size() - 1, label_map.size());
-	int n = 10000;
+	int n = 1000000;
 	int p = 0;
 	int out_count = 0;
-	while (sr.error() > 1E-3L)
+
+	while (n--)
 	{
 		p = rand() % m.row_size();
 
 		//sr.sgd(m.cols(0, m.col_size() - 2).row(p), label.row(p));
 		//sr.sgd_momentum(m.cols(0, m.col_size() - 2).row(p), label.row(p));
-		sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
-		sr.update_learning_rate_bd();
-
+		//sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
+		//sr.update_learning_rate_bd();
+		sr.adadelta(m.cols(0, m.col_size() - 2), label);
+		//sr.adadelta(m.cols(0, m.col_size() - 2), label);
 		if (out_count++ % 100 == 0)
+		{
 			cerr << "error:" << sr.error() << "\tacc:" << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
+			//cerr << "theta" << endl;
+			//sr.print();
+		}
 		//cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	}
 	cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
