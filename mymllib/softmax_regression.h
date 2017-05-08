@@ -13,7 +13,8 @@ namespace myml
 	{
 	public:
 		softmax_regression(size_t feature_count, size_t label_count);
-		void import_data(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
+
+		void load(const matrix<param_type>& theta);
 		/*随机梯度下降，可以一次传入多个样本*/
 		void sgd(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,const param_type & learning_rate = 1E-5);
 
@@ -52,11 +53,12 @@ namespace myml
 		*/
 		matrix<label_type> predict(const matrix<feature_type> &feature_matrix);
 
-		inline param_type error();
+		inline param_type error(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
 		void print()
 		{
 			_theta.print();
 		}
+		void set_theta(const matrix<feature_type> &feature_matrix);
 	private:
 		matrix<param_type> _theta;
 		matrix<param_type> _pre_theta;
@@ -83,9 +85,11 @@ namespace myml
 			_theta = _pre_theta;
 		}
 	}
-	inline param_type myml::softmax_regression::error()
+	inline param_type myml::softmax_regression::error(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix)
 	{
+
 		return _cur_error;
 	}
+
 }
 #endif // !SOFTMAX_REGRESSION

@@ -299,7 +299,7 @@ namespace myml
 	template<class T>
 	inline void matrix<T>::print(char split, ostream& out)
 	{
-		out.precision(10);
+		out.precision(4);
 		out << fixed;
 		for (size_t row = 0; row < row_size(); row++)
 		{
@@ -1013,22 +1013,28 @@ namespace myml
 	template<class T>
 	bool import_matrix_data(matrix<T>& matrix, initializer_list<initializer_list<T>> data)
 	{
-		matrix.resize(data.size(), *(data.begin()).size());
+		matrix.resize(data.size(), data.begin()->size());
 		for (auto & row : data)
 		{
 			matrix.push_back(row);
 		}
+		return true;
 	}
 	/*矩阵运算类*/
 	namespace matrix_operate
 	{
 		template<class T>
-		void exp(matrix<T>& matrix)
+		matrix<T> exp(const matrix<T>& a)
 		{
-			for (auto& i : matrix)
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
 			{
-				i = std::exp(i);
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = std::exp(a.at(row_i, col_i));
+				}
 			}
+			return move(temp);
 		}
 		/*求和*/
 		template<class T>
@@ -1075,6 +1081,20 @@ namespace myml
 				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
 				{
 					temp.at(row_i, col_i) = a.at(row_i, col_i) + b;
+				}
+			}
+			return move(temp);
+		}
+
+		template<class T>
+		matrix<T> operator- (const matrix<T>& a, const T& b)
+		{
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) - b;
 				}
 			}
 			return move(temp);
@@ -1139,6 +1159,32 @@ namespace myml
 				}
 			}
 			return move(temp);
+		}
+		template<class T>
+		matrix<T> log(const matrix<T>& a)
+		{
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = std::log(a.at(row_i, col_i));
+				}
+			}
+			return move(temp);
+		}
+		template<class T>
+		T max(const matrix<T>& a)
+		{
+			T max = -LDBL_MAX;
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					max = max > a.at(row_i, col_i) ? max : a.at(row_i, col_i);
+				}
+			}
+			return max;
 		}
 	}
 	/*矩阵数据标准化*/
