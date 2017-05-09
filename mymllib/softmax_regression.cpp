@@ -82,12 +82,16 @@ namespace myml
 			*/
 			/*系数矩阵乘以行的线性结果*/
 			matrix<feature_type> predict_result = (_theta * row);
-			//predict_result.print();
+			/*
+			* trick: 在线性相乘得到的结果predict_result中，首先获取其中最大的值，随后将，这样不会造成overflow
+			*/
 			param_type regular = max(predict_result);
-			predict_result = predict_result - (regular + sum(exp(predict_result - regular)));
+			predict_result -= regular;
+
+			/*正则化，使概率和在0-1之间*/
+			predict_result = exp(predict_result);
 			predict_result /= sum(predict_result);
-			//predict_result.print();
-			//cerr << endl;
+
 			param_type max = -LDBL_MAX;
 			label_type max_i = 0;
 			for (size_t row_i = 0; row_i < predict_result.row_size(); ++row_i)
@@ -115,7 +119,7 @@ namespace myml
 
 		_last_error_matrix = _error_matrix;
 
-		_error_matrix = sqrt(_error_ewma + epsilon) / sqrt(_grad_ewma + epsilon);
+		_error_matrix = sqrt((_error_ewma + epsilon) / (_grad_ewma + epsilon));
 		//_error_matrix.fill(0.001);
 
 		_error_matrix  = dot(_error_matrix, grad);
@@ -123,7 +127,7 @@ namespace myml
 		_pre_theta = _theta;
 
 
-		_theta += _error_matrix;
+		_theta -= _error_matrix;
 		_error_ewma = _error_ewma * rho + dot(_error_matrix, _error_matrix) * (1 - rho);
 		
 		//_grad_ewma *= rho;
@@ -165,9 +169,14 @@ namespace myml
 			*/
 			/*系数矩阵乘以行的线性结果*/
 			matrix<feature_type> predict_result = (_theta * row);
-			//predict_result.print();
+			/*
+			* trick: 在线性相乘得到的结果predict_result中，首先获取其中最大的值，随后将，这样不会造成overflow
+			*/
 			param_type regular= max(predict_result);
-			predict_result = predict_result - (regular + sum(exp(predict_result  - regular)));
+			predict_result -= regular;
+
+			/*正则化，使概率和在0-1之间*/
+			predict_result = exp(predict_result);
 			predict_result /= sum(predict_result);
 
 			//predict_result.print();

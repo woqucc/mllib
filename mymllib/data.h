@@ -29,6 +29,7 @@ namespace myml
 		using index_array = valarray<size_t>;
 		/*遍历元素,row_i,col_i为迭代坐标*/
 #define each_ele(op) for (size_t row_i = 0; row_i < _row_size; row_i++) {for (size_t col_i = 0; col_i < _col_size; col_i++){op;}}
+#define ele _data[row_i][col_i]
 		class iterator
 		{
 		private:
@@ -195,19 +196,9 @@ namespace myml
 		matrix& operator %=(const T t);
 
 		/*
-		@brief 矩阵相加
+		@brief 本矩阵每个元素都exp
 		*/
-		matrix<T> operator +(const matrix<T>& t) const;
-
-		/*
-		@brief 矩阵相减
-		*/
-		matrix<T> operator -(const matrix<T>& t) const;
-
-		/*
-		@brief 矩阵相乘
-		*/
-		matrix<T> operator *(const matrix<T>& t) const;
+		matrix& exp();
 
 		/*
 		@brief 矩阵中只有一个元素时可将其直接转换为单个的T类型变量
@@ -227,7 +218,7 @@ namespace myml
 		*/
 		matrix<T> operator -=(const matrix<T>& t);
 
-
+		
 		/*
 		@brief 选取矩阵中的指定行
 		*/
@@ -288,6 +279,8 @@ namespace myml
 		void transpose();
 		/*生成新的矩阵*/
 		matrix<T> t();
+		/*最大元素的位置*/
+		pair<size_t, size_t> max_position() const;
 	protected:
 		T* _memory = nullptr;
 		T** _data = nullptr;
@@ -335,85 +328,41 @@ namespace myml
 	template<class T>
 	inline matrix<T> & matrix<T>::operator+=(const T t)
 	{
-		each_ele(_data[row_i][col_i] += t);
+		each_ele(ele += t);
 		return *this;
 	}
 	template<class T>
 	inline matrix<T> & matrix<T>::operator-=(const T t)
 	{
-		each_ele(_data[row_i][col_i] -= t);
+		each_ele(ele -= t);
 		return *this;
 	}
 	template<class T>
 	inline matrix<T> & matrix<T>::operator*=(const T t)
 	{
-		each_ele(_data[row_i][col_i] *= t);
+		each_ele(ele *= t);
 		return *this;
 	}
 	template<class T>
 	inline matrix<T> & matrix<T>::operator/=(const T t)
 	{
 		assert(t != 0);
-		each_ele(_data[row_i][col_i] /= t);
+		each_ele(ele /= t);
 		return *this;
 	}
 	template<class T>
 	inline matrix<T> & matrix<T>::operator%=(const T t)
 	{
-		each_ele(_data[row_i][col_i] %= t);
+		each_ele(ele %= t);
 		return *this;
 	}
 	template<class T>
-	inline matrix<T> matrix<T>::operator+(const matrix<T>& t) const
+	inline matrix<T> & matrix<T>::exp()
 	{
-		assert(_col_size == t.col_size() && _row_size == t.row_size());
-		matrix<T> temp = *this;
-		for (size_t row_i = 0; row_i < _row_size; row_i++)
-		{
-			for (size_t col_i = 0; col_i < _col_size; col_i++)
-			{
-				temp.at(row_i, col_i) += t.at(row_i, col_i);
-			}
-		}
-		/*在此调用转移构造函数，move不move都可以*/
-		return move(temp);
+		each_ele(ele = std::exp(ele));
+		return *this;
 	}
-	template<class T>
-	inline matrix<T> matrix<T>::operator-(const matrix<T>& t) const
-	{
-		assert(_col_size == t.col_size() && _row_size == t.row_size());
-		matrix<T> temp = *this;
-		for (size_t row_i = 0; row_i < _row_size; row_i++)
-		{
-			for (size_t col_i = 0; col_i < _col_size; col_i++)
-			{
-				temp.at(row_i, col_i) -= t.at(row_i, col_i);
-			}
-		}
-		/*在此调用转移构造函数，move不move都可以*/
-		return move(temp);
-	}
-	template<class T>
-	inline matrix<T> matrix<T>::operator*(const matrix<T>& t) const
-	{
-		/*可以乘*/
-		assert(_col_size == t.row_size());
-		matrix<T> temp(_row_size, t.col_size());
-		for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
-		{
-			for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
-			{
-				/* temp = 本矩阵的第row_i行 * t矩阵的地col_i列 */
-				temp.at(row_i, col_i) = 0;
-				for (size_t i = 0; i < _col_size; i++)
-				{
-					temp.at(row_i, col_i) += this->_data[row_i][i] * t.at(i, col_i);
-				}
-			}
-		}
-		/*在此调用转移构造函数，move不move都可以*/
-		return move(temp);
-	}
+
 	template<class T>
 	inline matrix<T>::operator const T&() const
 	{
@@ -779,6 +728,22 @@ namespace myml
 		return temp;
 	}
 	template<class T>
+	inline pair<size_t, size_t> matrix<T>::max_position() const
+	{
+		T max = _data[0][0];
+		size_t max_row;
+		size_t max_col;
+		each_ele(
+			if (max < ele)
+			{
+				max_row = row_i;
+				max_col = col_i;
+				max = ele;
+			}
+		);
+		return pair<size_t, size_t>();
+	}
+	template<class T>
 	inline bool matrix<T>::rect_check() const
 	{
 		return true;
@@ -1071,7 +1036,19 @@ namespace myml
 			}
 			return move(temp);
 		}
-
+		template<class T>
+		matrix<T> operator/ (const matrix<T>& a, const T& b)
+		{
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) / b;
+				}
+			}
+			return move(temp);
+		}
 		template<class T>
 		matrix<T> operator+ (const matrix<T>& a, const T& b)
 		{
@@ -1095,6 +1072,54 @@ namespace myml
 				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
 				{
 					temp.at(row_i, col_i) = a.at(row_i, col_i) - b;
+				}
+			}
+			return move(temp);
+		}
+		template<class T>
+		inline matrix<T> operator+(const matrix<T>& a, const matrix<T>& b)
+		{
+			assert(a.col_size() == b.col_size() && a.row_size() == b.row_size());
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i <  temp.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) + b.at(row_i, col_i);
+				}
+			}
+			return move(temp);
+		}
+		template<class T>
+		inline matrix<T> operator-(const matrix<T>& a, const matrix<T>& b)
+		{
+			assert(a.col_size() == b.col_size() && a.row_size() == b.row_size());
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = a.at(row_i, col_i) - b.at(row_i, col_i);
+				}
+			}
+			return move(temp);
+		}
+		template<class T>
+		inline matrix<T> operator*(const matrix<T>& a, const matrix<T>& b) 
+		{
+			/*可以乘*/
+			assert(a.col_size() == b.row_size());
+			matrix<T> temp(a.row_size(), b.col_size());
+			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
+				{
+					/* temp = 本矩阵的第row_i行 * t矩阵的地col_i列 */
+					temp.at(row_i, col_i) = 0;
+					for (size_t i = 0; i < a.col_size(); i++)
+					{
+						temp.at(row_i, col_i) += a.at(row_i,i) * b.at(i, col_i);
+					}
 				}
 			}
 			return move(temp);
