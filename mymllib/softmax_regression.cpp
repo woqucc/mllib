@@ -40,8 +40,8 @@ namespace myml
 	{
 		//不好使！！！！
 		_last_error_matrix = _error_matrix;
-		_error_matrix = error_matrix(feature_matrix.row(0), label_matrix.row(0));
-		_error_matrix = _last_error_matrix * rho - _error_matrix * eit;
+		_error_matrix = error_matrix(feature_matrix.row(0), label_matrix.row(0)) * _learning_rate;
+		_error_matrix = _last_error_matrix * rho - _error_matrix * (1-rho);
 		//_error_matrix.print();
 
 		_pre_theta = _theta;
@@ -55,14 +55,14 @@ namespace myml
 		_error_matrix = error_matrix(feature_matrix, label_matrix);
 
 		_last_error = _cur_error;
-		_cur_error = norm_f(_error_matrix);
+		_cur_error = error(feature_matrix, label_matrix);
 
 		_pre_theta = _theta;
 		_theta -= ((_error_matrix) *= _learning_rate);
 
 	}
 
-	matrix<feature_type> softmax_regression::predict(const matrix<feature_type>& feature_matrix)
+	matrix<feature_type> softmax_regression::predict(const matrix<feature_type>& feature_matrix) const
 	{
 		matrix<feature_type> feature(feature_matrix.row_size(), feature_matrix.col_size() + 1);
 		/*最后一列填1*/
@@ -154,11 +154,13 @@ namespace myml
 	param_type softmax_regression::error(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix)
 	{
 		_last_error = _cur_error;
-		_cur_error = 1;
+		_cur_error = 0;
+		
 		matrix<feature_type> predict_matrix = predict(feature_matrix);
 		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
 		{
-			_cur_error *= predict_matrix.at(row_i, label_matrix.at(row_i,0));
+			size_t label = label_matrix.at(row_i, 0);
+			_cur_error += predict_matrix.at(row_i, label);
 		}
 		return _cur_error;
 	}

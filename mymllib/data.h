@@ -218,7 +218,7 @@ namespace myml
 		*/
 		matrix<T> operator -=(const matrix<T>& t);
 
-		
+
 		/*
 		@brief 选取矩阵中的指定行
 		*/
@@ -275,14 +275,17 @@ namespace myml
 		void fill(const T &t);
 		/*是否有数据*/
 		bool has_data();
-		/*翻转本矩阵*/
+		/*转置本矩阵*/
 		void transpose();
-		/*生成新的矩阵*/
-		matrix<T> t();
+		/*生成新的转置过的矩阵*/
+		matrix<T> t() const;
 		/*最大元素的位置*/
 		pair<size_t, size_t> max_position() const;
 		/*最大元素*/
 		T max() const;
+		/*获取某一元素个数*/
+		size_t count(const T& t);
+
 	protected:
 		T* _memory = nullptr;
 		T** _data = nullptr;
@@ -718,7 +721,7 @@ namespace myml
 		_memory = t_memory;
 	}
 	template<class T>
-	inline matrix<T> matrix<T>::t()
+	inline matrix<T> matrix<T>::t() const
 	{
 		matrix<T> temp(_col_size, _row_size);
 		for (size_t row_i = 0; row_i < _col_size; ++row_i)
@@ -757,6 +760,16 @@ namespace myml
 			}
 		);
 		return max;
+	}
+	template<class T>
+	inline size_t matrix<T>::count(const T & t)
+	{
+		size_t c = 0;
+		each_ele(
+			if (ele == t)
+				++c;
+		);
+		return c;
 	}
 	template<class T>
 	inline bool matrix<T>::rect_check() const
@@ -1106,7 +1119,7 @@ namespace myml
 			matrix<T> temp(a.row_size(), a.col_size());
 			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
 			{
-				for (size_t col_i = 0; col_i <  temp.col_size(); col_i++)
+				for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
 				{
 					temp.at(row_i, col_i) = a.at(row_i, col_i) + b.at(row_i, col_i);
 				}
@@ -1128,7 +1141,7 @@ namespace myml
 			return move(temp);
 		}
 		template<class T>
-		inline matrix<T> operator*(const matrix<T>& a, const matrix<T>& b) 
+		inline matrix<T> operator*(const matrix<T>& a, const matrix<T>& b)
 		{
 			/*可以乘*/
 			assert(a.col_size() == b.row_size());
@@ -1141,7 +1154,7 @@ namespace myml
 					temp.at(row_i, col_i) = 0;
 					for (size_t i = 0; i < a.col_size(); i++)
 					{
-						temp.at(row_i, col_i) += a.at(row_i,i) * b.at(i, col_i);
+						temp.at(row_i, col_i) += a.at(row_i, i) * b.at(i, col_i);
 					}
 				}
 			}
@@ -1248,6 +1261,7 @@ namespace myml
 					*i = upper_bound;
 			}
 		}
+		/*转换矩阵中数据的类型*/
 		template<class SRC, class DST>
 		matrix<DST> convert_matrix_type(const matrix<SRC>& m)
 		{

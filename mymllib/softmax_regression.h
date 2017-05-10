@@ -51,7 +51,7 @@ namespace myml
 			@param in 输入特征矩阵，矩阵的每一行为一个特征向量
 			@param out 输入矩阵的预测结果，输出的矩阵每一行为一个预测结果，只有一列
 		*/
-		matrix<feature_type> predict(const matrix<feature_type> &feature_matrix);
+		matrix<feature_type> predict(const matrix<feature_type> &feature_matrix) const;
 
 		param_type error(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
 		void print()
@@ -64,7 +64,7 @@ namespace myml
 		matrix<param_type> _pre_theta;
 		param_type _cur_error = 0;
 		param_type _last_error = 0;
-		param_type _learning_rate = 1E-2L;
+		param_type _learning_rate = 1E-3L;
 
 		matrix<param_type> _grad_ewma;
 		matrix<param_type> _error_ewma;
@@ -85,7 +85,12 @@ namespace myml
 			_theta = _pre_theta;
 		}
 	}
-
+	template <class T>
+	matrix<size_t> confusion_matrix(const softmax_regression& sr, const matrix<T> &feature_matrix)
+	{
+		matrix<T> p = sr.predict(feature_matrix);
+		
+	}
 
 }
 #endif // !SOFTMAX_REGRESSION

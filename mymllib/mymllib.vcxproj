@@ -134,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="binary_classification.txt" />
+    <Text Include="multiclass_theta.txt" />
     <Text Include="multi_classification.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

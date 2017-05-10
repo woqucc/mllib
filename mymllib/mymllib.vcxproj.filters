@@ -66,5 +66,6 @@
   <ItemGroup>
     <Text Include="binary_classification.txt" />
     <Text Include="multi_classification.txt" />
+    <Text Include="multiclass_theta.txt" />
   </ItemGroup>
 </Project>
