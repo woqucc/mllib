@@ -173,7 +173,7 @@ namespace myml
 		/*
 		@brief 赋值操作符
 		*/
-		matrix& operator =(const matrix& rn);
+		matrix& operator =(const matrix & rn);
 		/*
 		@brief 加号操作符
 		*/
@@ -281,6 +281,8 @@ namespace myml
 		matrix<T> t();
 		/*最大元素的位置*/
 		pair<size_t, size_t> max_position() const;
+		/*最大元素*/
+		T max() const;
 	protected:
 		T* _memory = nullptr;
 		T** _data = nullptr;
@@ -305,7 +307,7 @@ namespace myml
 	}
 
 	template<class T>
-	inline matrix<T>& matrix<T>::operator = (const matrix & rn)
+	inline matrix<T>& matrix<T>::operator = (const matrix<T> & rn)
 	{
 		//已经是实体矩阵了，不能随意赋值
 		if (_data != nullptr && _memory != nullptr)
@@ -378,6 +380,7 @@ namespace myml
 	template<class T>
 	inline matrix<T> matrix<T>::operator+=(const matrix<T>& t)
 	{
+		assert(_row_size == t.row_size() && _col_size == t.col_size());
 		each_ele(_data[row_i][col_i] += t.at(row_i, col_i));
 		return *this;
 	}
@@ -731,8 +734,8 @@ namespace myml
 	inline pair<size_t, size_t> matrix<T>::max_position() const
 	{
 		T max = _data[0][0];
-		size_t max_row;
-		size_t max_col;
+		size_t max_row = 0;
+		size_t max_col = 0;
 		each_ele(
 			if (max < ele)
 			{
@@ -741,7 +744,19 @@ namespace myml
 				max = ele;
 			}
 		);
-		return pair<size_t, size_t>();
+		return { max_row ,max_col };
+	}
+	template<class T>
+	inline T matrix<T>::max() const
+	{
+		T max = _data[0][0];
+		each_ele(
+			if (max < ele)
+			{
+				max = ele;
+			}
+		);
+		return max;
 	}
 	template<class T>
 	inline bool matrix<T>::rect_check() const
@@ -885,6 +900,7 @@ namespace myml
 		using matrix<T>::_cur_row_pos;
 	public:
 		pseudo_matrix& operator =(const pseudo_matrix& rn);
+		pseudo_matrix& operator =(const matrix& rn);
 		pseudo_matrix() = default;
 		pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size);
 		pseudo_matrix(const matrix<T>& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size);
@@ -895,7 +911,6 @@ namespace myml
 		void push_back(T *row, size_t size) { assert(false); }
 
 	private:
-		//T **_data;
 	};
 	template<class T>
 	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const pseudo_matrix & rn)
@@ -905,7 +920,15 @@ namespace myml
 			memcpy(_data[row_i], rn._data[row_i], sizeof(T) / sizeof(char) * _col_size);
 		}
 		return *this;
-		// TODO: 在此处插入 return 语句
+	}
+	template<class T>
+	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const matrix & rn)
+	{
+		for (size_t row_i = 0; row_i < _row_size; row_i++)
+		{
+			memcpy(_data[row_i], rn.raw_data()[row_i], sizeof(T) / sizeof(char) * _col_size);
+		}
+		return *this;
 	}
 	template<class T>
 	inline pseudo_matrix<T>::pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size)

@@ -62,49 +62,26 @@ namespace myml
 
 	}
 
-	matrix<label_type> softmax_regression::predict(const matrix<feature_type>& feature_matrix)
+	matrix<feature_type> softmax_regression::predict(const matrix<feature_type>& feature_matrix)
 	{
-		matrix<label_type> result(feature_matrix.row_size(), 1);
+		matrix<feature_type> feature(feature_matrix.row_size(), feature_matrix.col_size() + 1);
+		/*最后一列填1*/
+		feature.cols(0, feature_matrix.col_size() - 1) = feature_matrix;
+		feature.col(feature_matrix.col_size()).fill(1);
+		matrix<feature_type> predict_result = feature*_theta.t();
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
-			/*临时特征向量，增加特征向量的维数，计算常数项*/
-			matrix<feature_type> row = matrix<feature_type>(1, feature_matrix.col_size() + 1);
-			/*临时特征向量的最后一维与常数项系数相乘，设置为1*/
-			row.col(feature_matrix.col_size()).fill(1);
-			/*临时特征向量赋值*/
-			row.cols(0, feature_matrix.col_size() - 1) = feature_matrix.row(row_i);
-			/*转置临时向量*/
-			row.transpose();
-
-			/*
-			特征向量的预测结果predict_result，的行数与类标数相同
-			第i行即该特征向量为第i类的概率
-			*/
-			/*系数矩阵乘以行的线性结果*/
-			matrix<feature_type> predict_result = (_theta * row);
 			/*
 			* trick: 在线性相乘得到的结果predict_result中，首先获取其中最大的值，随后将，这样不会造成overflow
 			*/
-			param_type regular = max(predict_result);
-			predict_result -= regular;
-
+			predict_result.row(row_i) -= predict_result.row(row_i).max();
+			predict_result.row(row_i) = exp(predict_result.row(row_i));
 			/*正则化，使概率和在0-1之间*/
-			predict_result = exp(predict_result);
-			predict_result /= sum(predict_result);
-
-			param_type max = -LDBL_MAX;
-			label_type max_i = 0;
-			for (size_t row_i = 0; row_i < predict_result.row_size(); ++row_i)
-			{
-				if (predict_result.row(row_i) > max)
-				{
-					max = predict_result.row(row_i);
-					max_i = row_i;
-				}
-			}
-			label_type(result.row(row_i)) = max_i;
+			predict_result.row(row_i) /= sum(predict_result.row(row_i));
 		}
-		return result;
+	
+		//label_type(result.row(row_i)) = predict_result.max_position().first;
+		return predict_result;
 	}
 
 
@@ -120,7 +97,6 @@ namespace myml
 		_last_error_matrix = _error_matrix;
 
 		_error_matrix = sqrt((_error_ewma + epsilon) / (_grad_ewma + epsilon));
-		//_error_matrix.fill(0.001);
 
 		_error_matrix  = dot(_error_matrix, grad);
 		
@@ -130,18 +106,17 @@ namespace myml
 		_theta -= _error_matrix;
 		_error_ewma = _error_ewma * rho + dot(_error_matrix, _error_matrix) * (1 - rho);
 		
-		//_grad_ewma *= rho;
-		//_error_matrix *= ()
+
 	}
 
 	param_type softmax_regression::accuracy(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
-		matrix<label_type> pr = predict(feature_matrix);
+		matrix<param_type> pr = predict(feature_matrix);
 		size_t total = pr.row_size();
 		size_t correct = 0;
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
-			if (pr.row(row_i) == label_matrix.row(row_i))
+			if (pr.row(row_i).max_position().second == label_matrix.row(row_i))
 				correct++;
 		}
 		return (correct + .0) / total;
@@ -151,51 +126,40 @@ namespace myml
 	{
 		/*误差矩阵大小与_theta大小相同*/
 		matrix<feature_type> sum_error(_theta.row_size(), _theta.col_size());
+		matrix<feature_type> predict_matrix = predict(feature_matrix);
 		/*累加每个特征向量的误差*/
-		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
+		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
 		{
-			/*临时特征向量，增加特征向量的维数，计算常数项*/
-			matrix<feature_type> row = matrix<feature_type>(1, feature_matrix.col_size() + 1);
-			/*临时特征向量的最后一维与常数项系数相乘，设置为1*/
-			row.col(feature_matrix.col_size()).fill(1);
-			/*临时特征向量赋值*/
-			row.cols(0, feature_matrix.col_size() - 1) = feature_matrix.row(row_i);
-			/*转置临时向量*/
-			row.transpose();
-
-			/*
-			特征向量的预测结果predict_result，的行数与类标数相同
-			第i行即该特征向量为第i类的概率
-			*/
-			/*系数矩阵乘以行的线性结果*/
-			matrix<feature_type> predict_result = (_theta * row);
-			/*
-			* trick: 在线性相乘得到的结果predict_result中，首先获取其中最大的值，随后将，这样不会造成overflow
-			*/
-			param_type regular= max(predict_result);
-			predict_result -= regular;
-
-			/*正则化，使概率和在0-1之间*/
-			predict_result = exp(predict_result);
-			predict_result /= sum(predict_result);
-
-			//predict_result.print();
-			/*准确结果为，特征向量的真正类标的那一行应该为1，其他行应该为0
-			使用准确结果减去真正结果
-			*/
-			for (size_t theta_i = 0; theta_i < predict_result.row_size(); ++theta_i)
+			for (size_t theta_i = 0; theta_i < predict_matrix.col_size(); ++theta_i)
 			{
-				//准确结果减去预测结果为误差
-				feature_type(predict_result.row(theta_i)) = (theta_i == label_matrix.row(row_i) ? 1 - predict_result.row(theta_i) : 0 - predict_result.row(theta_i));
+				predict_matrix.at(row_i, theta_i) =  predict_matrix.at(row_i, theta_i) - (theta_i == label_matrix.row(row_i) ? 1 : 0);
 			}
-			/*预测结果的每一行误差，乘以倒数中的特征向量项*/
-			sum_error += predict_result * row.t();
+			
 		}
-		sum_error /= -param_type(feature_matrix.row_size());
+		predict_matrix.transpose();
+		/*预测结果的每一列误差，乘以对应的特征向量项，*/
+		for (size_t col_i = 0; col_i < predict_matrix.col_size(); ++col_i)
+		{
+			sum_error.cols(0, _theta.col_size() - 2) += predict_matrix.col(col_i) * feature_matrix.row(col_i);
+			/*补1*/
+			sum_error.col(_theta.col_size() - 1) = predict_matrix.col(col_i);
+		}	
+		sum_error /= param_type(feature_matrix.row_size());
 		return sum_error;
 	}
 	void softmax_regression::set_theta(const matrix<feature_type>& feature_matrix)
 	{
 		_theta = feature_matrix;
+	}
+	param_type softmax_regression::error(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix)
+	{
+		_last_error = _cur_error;
+		_cur_error = 1;
+		matrix<feature_type> predict_matrix = predict(feature_matrix);
+		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
+		{
+			_cur_error *= predict_matrix.at(row_i, label_matrix.at(row_i,0));
+		}
+		return _cur_error;
 	}
 }
