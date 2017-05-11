@@ -19,11 +19,17 @@ int main()
 	//ifstream f(R"(binary_classification.txt)", ios::in);
 	//ifstream f(R"(multi_classification.txt)", ios::in);
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
+	
+	
 	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 	import_matrix_data(m, f, ',');
-/*	matrix<long double> t;
+	
+	/*matrix<long double> t;
 	ifstream tf("multiclass_theta.txt");
-	import_matrix_data(t, tf, ' ');*/
+	import_matrix_data(t, tf, ' ');
+	softmax_regression sr(10,4);
+	sr.set_theta(t.t());
+	sr.predict({ {0.001,0.004,1.7579,0.000,0.0004,0.0352,0.0004,0.0200,0.1217,10000.0000} }).print();*/
 //	t.print();
 	/*import_matrix_data<long double>(t, {
 	{-1565.84783857894,-1399.69502209318,-2935.82459826157,-1455.37181730943,-1383.35204023056,0},
@@ -63,63 +69,25 @@ int main()
 	cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	cerr << sr.error(m.cols(0, m.col_size() - 2), label) << endl;
 	*/
-
+/*
     matrix<size_t> label;
 	matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
 	auto label_map = matrix_normalized::serialize_label<long double, size_t>(m.col(m.col_size() - 1), label);
-	matrix<long double> m0(m.col(m.col_size() - 1).count(0), m.col_size())
-		, m1(m.col(m.col_size() - 1).count(1), m.col_size())
-		, m2(m.col(m.col_size() - 1).count(2), m.col_size())
-		, m3(m.col(m.col_size() - 1).count(3), m.col_size());
-	size_t mi[4] = { 0 };
+	vector<size_t> us[4];
 	for (size_t row_i = 0; row_i < m.row_size(); row_i++)
 	{
-		switch (label.at(row_i,0))
-		{
-		case 0:
-			m0.row(mi[0]++) = m.row(row_i);
-			break;
-		case 1:
-			m1.row(mi[1]++) = m.row(row_i);
-			break;
-		case 2:
-			m2.row(mi[2]++) = m.row(row_i);
-			break;
-		case 3:
-			m3.row(mi[3]++) = m.row(row_i);
-			break;
-		default:
-			break;
-		}
+		us[label.at(row_i, 0)].push_back(row_i);
 	}
-	m2.print();
 	softmax_regression sr(m.col_size() - 1, label_map.size());
-	int n = 600000;
+	int n = 50000;
 	int r = 0;
 	int out_count = 0;
 	srand(time(nullptr));
 	long double e = 0;
-	while (n--)
+	while (sr.accuracy(m.cols(0, m.col_size() - 2), label) < 0.85 || n-- > 0)
 	{
-		
-		switch (rand() % 4)
-		{
-		case 0:
-			r = rand() % m0.row_size();
-
-			break;
-		case 1:
-			
-			break;
-		case 2:
-		
-			break;
-		case 3:
-			
-			break;
-		default:
-			break;
-		}
+		size_t tr = rand() % 4;
+		r = us[tr][rand()% us[tr].size()];
 		//sr.adadelta(m.cols(0, m.col_size() - 2), label);
 		sr.adadelta(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//e = sr.error(m.cols(0, m.col_size() - 2), label);
@@ -129,14 +97,14 @@ int main()
 		//sr.update_learning_rate_bd();
 
 
-		/*if (out_count++ % 150000 == 0)
-		{
-			e = sr.error(m.cols(0, m.col_size() - 2), label);
-			cerr << "error:" << e << "\tacc:" << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
-			//cerr << "theta" << endl;
-			//sr.print();
+		//if (out_count++ % 150000 == 0)
+		//{
+		//	e = sr.error(m.cols(0, m.col_size() - 2), label);
+		//	cerr << "error:" << e << "\tacc:" << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
+		//	//cerr << "theta" << endl;
+		//	//sr.print();
 
-		}*/
+		//}
 		//cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	}
 	cerr << "error" << sr.error(m.cols(0, m.col_size() - 2), label) << endl;
@@ -149,7 +117,7 @@ int main()
 		cm.at(p.row(row_i).max_position().second, label.at(row_i, 0))++;
 	}
 	cm.print('\t');
-
+	*/
 	//sr.predict(m.cols(0, m.col_size() - 2)).print();
 //	sr.print();
 	//sr.import_data(m.cols(0, m.col_size() - 2), m.col( m.col_size() - 1));

@@ -9,6 +9,10 @@
 #include<functional>
 #include<cassert>
 #include<map>
+/*g++*/
+#include<cfloat>
+#include<fstream>
+#include<cstring>
 
 namespace myml
 {
@@ -152,6 +156,7 @@ namespace myml
 		@brief 返回最后一个矩阵元素迭代器
 		*/
 		virtual iterator end();
+
 		/*
 		@brief 返回某一列第一个元素的迭代器
 		*/
@@ -245,8 +250,7 @@ namespace myml
 		virtual index_array get_order(size_t column_num);
 
 		/*初始化列表形式初始化*/
-		void push_back(valarray<T> && row);
-		void push_back(const valarray<T>& row);
+		void push_back(const initializer_list<T>& row);
 		/*返回行指针数组*/
 		T** raw_data();
 		/*返回行指针数组*/
@@ -255,6 +259,8 @@ namespace myml
 		matrix<T>(size_t row_size, size_t col_size);
 		/*转移构造函数*/
 		matrix<T>(matrix&& m);
+		/*初始化列表*/
+		matrix<T>(const initializer_list<initializer_list<T>>&);
 		/*复制构造函数*/
 		matrix<T>(const matrix& m);
 		/*析构函数*/
@@ -617,22 +623,13 @@ namespace myml
 		++_cur_row_pos;
 	}
 	template<class T>
-	inline void matrix<T>::push_back(valarray<T>&& row)
+	inline void matrix<T>::push_back(const initializer_list<T>& row)
 	{
 		assert(_row_size > _cur_row_pos);
+		assert(_col_size == row.size());
 		for (size_t i = 0; i < row.size(); ++i)
 		{
-			_data[_cur_row_pos][i] = row[i];
-		}
-		++_cur_row_pos;
-	}
-	template<class T>
-	inline void matrix<T>::push_back(const valarray<T>& row)
-	{
-		assert(_row_size > _cur_row_pos);
-		for (size_t i = 0; i < row.size(); ++i)
-		{
-			_data[_cur_row_pos][i] = row[i];
+			_data[_cur_row_pos][i] = *(row.begin()+i);
 		}
 		++_cur_row_pos;
 	}
@@ -887,6 +884,15 @@ namespace myml
 		m._memory = nullptr;
 	}
 	template<class T>
+	inline matrix<T>::matrix(const initializer_list<initializer_list<T>> &data)
+	{
+		resize(data.size(), data.begin()->size());
+		for (auto & row : data)
+		{
+			push_back(row);
+		}
+	}
+	template<class T>
 	inline matrix<T>::matrix(const matrix<T>& m)
 	{
 		resize(m._row_size, m._col_size);
@@ -913,14 +919,13 @@ namespace myml
 		using matrix<T>::_cur_row_pos;
 	public:
 		pseudo_matrix& operator =(const pseudo_matrix& rn);
-		pseudo_matrix& operator =(const matrix& rn);
+		pseudo_matrix& operator =(const matrix<T>& rn);
 		pseudo_matrix() = default;
 		pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size);
 		pseudo_matrix(const matrix<T>& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size);
 		~pseudo_matrix();
 		/*向未真实分配内存的矩阵中添加数据，具体行为不知道是啥*/
-		void push_back(valarray<T> && row) { assert(false); }
-		void push_back(const valarray<T>& row) { assert(false); }
+		void push_back(const initializer_list<T>& row) { assert(false); };
 		void push_back(T *row, size_t size) { assert(false); }
 
 	private:
@@ -935,7 +940,7 @@ namespace myml
 		return *this;
 	}
 	template<class T>
-	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const matrix & rn)
+	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const matrix<T> & rn)
 	{
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
 		{
@@ -1039,12 +1044,15 @@ namespace myml
 		}
 		/*求和*/
 		template<class T>
-		T sum(matrix<T>& matrix)
+		T sum(const matrix<T>& matrix)
 		{
 			T sum = 0;
-			for (auto& i : matrix)
+			for (size_t row_i = 0; row_i < matrix.row_size(); ++row_i)
 			{
-				sum += i;
+				for (size_t col_i = 0; col_i < matrix.col_size(); ++col_i)
+				{
+					sum += matrix.at(row_i, col_i);
+				}
 			}
 			return sum;
 		}
