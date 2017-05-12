@@ -69,19 +69,15 @@ namespace myml
 		feature.cols(0, feature_matrix.col_size() - 1) = feature_matrix;
 		feature.col(feature_matrix.col_size()).fill(1);
 		matrix<feature_type> predict_result = feature*_theta.t();
-		predict_result.print();
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
 			/*
 			* trick: 在线性相乘得到的结果predict_result中，首先获取其中最大的值，随后将，这样不会造成overflow
 			*/
 			predict_result.row(row_i) -= predict_result.row(row_i).max();
-			predict_result.print();
 			predict_result.row(row_i) = exp(predict_result.row(row_i));
-			predict_result.print();
 			/*正则化，使概率和在0-1之间*/
 			predict_result.row(row_i) /= sum(predict_result.row(row_i));
-			predict_result.print();
 		}
 	
 		//label_type(result.row(row_i)) = predict_result.max_position().first;

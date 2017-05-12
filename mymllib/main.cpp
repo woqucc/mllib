@@ -69,7 +69,7 @@ int main()
 	cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	cerr << sr.error(m.cols(0, m.col_size() - 2), label) << endl;
 	*/
-/*
+
     matrix<size_t> label;
 	matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
 	auto label_map = matrix_normalized::serialize_label<long double, size_t>(m.col(m.col_size() - 1), label);
@@ -84,8 +84,10 @@ int main()
 	int out_count = 0;
 	srand(time(nullptr));
 	long double e = 0;
-	while (sr.accuracy(m.cols(0, m.col_size() - 2), label) < 0.85 || n-- > 0)
+	long double acc = 0;
+	while (acc < 0.85 || n-- > 0)
 	{
+		
 		size_t tr = rand() % 4;
 		r = us[tr][rand()% us[tr].size()];
 		//sr.adadelta(m.cols(0, m.col_size() - 2), label);
@@ -95,16 +97,18 @@ int main()
 		//sr.sgd_momentum(m.cols(0, m.col_size() - 2).row(p), label.row(p));
 		//sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
 		//sr.update_learning_rate_bd();
+		acc = sr.accuracy(m.cols(0, m.col_size() - 2), label);
+		if (out_count++ % 100 == 0)
+		{
+			
+			e = sr.error(m.cols(0, m.col_size() - 2), label);
+			cerr << "error:" << e << "\tacc:" << acc << endl;
+			cerr << "theta:" << endl;
+			sr.print();
+			//cerr << "theta" << endl;
+			//sr.print();
 
-
-		//if (out_count++ % 150000 == 0)
-		//{
-		//	e = sr.error(m.cols(0, m.col_size() - 2), label);
-		//	cerr << "error:" << e << "\tacc:" << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
-		//	//cerr << "theta" << endl;
-		//	//sr.print();
-
-		//}
+		}
 		//cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	}
 	cerr << "error" << sr.error(m.cols(0, m.col_size() - 2), label) << endl;
@@ -117,7 +121,6 @@ int main()
 		cm.at(p.row(row_i).max_position().second, label.at(row_i, 0))++;
 	}
 	cm.print('\t');
-	*/
 	//sr.predict(m.cols(0, m.col_size() - 2)).print();
 //	sr.print();
 	//sr.import_data(m.cols(0, m.col_size() - 2), m.col( m.col_size() - 1));
