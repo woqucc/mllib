@@ -103,7 +103,7 @@ namespace myml
 		/*
 		@brief 打印矩阵中的所有元素
 		*/
-		virtual void print(char split = ',', ostream& out = cout);
+		virtual void print(char split = ',', ostream& out = cout) const;
 		/*
 		@brief 按照某列排序
 		@param column_num 列数
@@ -301,7 +301,7 @@ namespace myml
 	};
 
 	template<class T>
-	inline void matrix<T>::print(char split, ostream& out)
+	inline void matrix<T>::print(char split, ostream& out) const 
 	{
 		out.precision(4);
 		out << fixed;
@@ -977,7 +977,7 @@ namespace myml
 	}
 	/*导入数据部分的全局函数*/
 	template<class T>
-	bool import_matrix_data(matrix<T>& matrix, ifstream& in, char split = ',', int line_width = 2048)
+	bool import_matrix_data(matrix<T>& matrix,ifstream& in, char split = ',', int line_width = 2048)
 	{
 		if (in.bad() || in.fail()) {
 			cerr << "Can not open file!" << endl;

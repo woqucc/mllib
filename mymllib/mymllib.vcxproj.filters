@@ -62,6 +62,9 @@
     <ClInclude Include="softmax_regression.h">
       <Filter>头文件\classifier</Filter>
     </ClInclude>
+    <ClInclude Include="classifier.h">
+      <Filter>头文件\classifier</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="binary_classification.txt" />

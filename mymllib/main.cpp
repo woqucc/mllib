@@ -17,19 +17,19 @@ int main()
 {
 	matrix<long double> m;
 	//ifstream f(R"(binary_classification.txt)", ios::in);
-	//ifstream f(R"(multi_classification.txt)", ios::in);
+	ifstream f(R"(multi_classification.txt)", ios::in);
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 	
 	
-	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
-	import_matrix_data(m, f, ',');
+	//ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
+	import_matrix_data(m, f, ' ');
 	
 	/*matrix<long double> t;
 	ifstream tf("multiclass_theta.txt");
 	import_matrix_data(t, tf, ' ');
 	softmax_regression sr(10,4);
 	sr.set_theta(t.t());
-	sr.predict({ {0.001,0.004,1.7579,0.000,0.0004,0.0352,0.0004,0.0200,0.1217,10000.0000} }).print();*/
+	sr.probabilities({ {0.001,0.004,1.7579,0.000,0.0004,0.0352,0.0004,0.0200,0.1217,10000.0000} }).print();*/
 //	t.print();
 	/*import_matrix_data<long double>(t, {
 	{-1565.84783857894,-1399.69502209318,-2935.82459826157,-1455.37181730943,-1383.35204023056,0},
@@ -71,25 +71,27 @@ int main()
 	*/
 
     matrix<size_t> label;
-	matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
+	//matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
 	auto label_map = matrix_normalized::serialize_label<long double, size_t>(m.col(m.col_size() - 1), label);
-	vector<size_t> us[4];
+	vector<size_t> us[6];
 	for (size_t row_i = 0; row_i < m.row_size(); row_i++)
 	{
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
 	softmax_regression sr(m.col_size() - 1, label_map.size());
 	int n = 50000;
-	int r = 0;
+	size_t r = 0;
 	int out_count = 0;
 	srand(time(nullptr));
 	long double e = 0;
 	long double acc = 0;
-	while (acc < 0.85 || n-- > 0)
+	while (acc < 0.95 || n-- > 0)
 	{
 		
-		size_t tr = rand() % 4;
-		r = us[tr][rand()% us[tr].size()];
+		/*size_t tr = rand() % 4;
+		r = us[tr][rand()% us[tr].size()];*/
+		r = rand() % m.row_size();
+		
 		//sr.adadelta(m.cols(0, m.col_size() - 2), label);
 		sr.adadelta(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//e = sr.error(m.cols(0, m.col_size() - 2), label);
@@ -98,46 +100,34 @@ int main()
 		//sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
 		//sr.update_learning_rate_bd();
 		acc = sr.accuracy(m.cols(0, m.col_size() - 2), label);
-		if (out_count++ % 100 == 0)
+		if (out_count++ % 10000 == 0)
 		{
 			
-			e = sr.error(m.cols(0, m.col_size() - 2), label);
+			e = sr.objective_function(m.cols(0, m.col_size() - 2), label);
 			cerr << "error:" << e << "\tacc:" << acc << endl;
 			cerr << "theta:" << endl;
 			sr.print();
-			//cerr << "theta" << endl;
-			//sr.print();
+			cerr << "c ma:" << endl;
+			matrix<long double> p = sr.probabilities(m.cols(0, m.col_size() - 2));
+			matrix<long double> cm(label_map.size(), label_map.size());
+			for (size_t row_i = 0; row_i < p.row_size(); row_i++)
+			{
+				cm.at(p.row(row_i).max_position().second, label.at(row_i, 0))++;
+			}
+			//sr.predict(m.cols(0, m.col_size() - 2)).print();
 
 		}
 		//cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	}
-	cerr << "error" << sr.error(m.cols(0, m.col_size() - 2), label) << endl;
+	cerr << "of" << sr.objective_function(m.cols(0, m.col_size() - 2), label) << endl;
 	cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	sr.print();
-	matrix<long double> p = sr.predict(m.cols(0, m.col_size() - 2));
+	matrix<long double> p = sr.probabilities(m.cols(0, m.col_size() - 2));
 	matrix<long double> cm(label_map.size(), label_map.size());
 	for (size_t row_i = 0; row_i < p.row_size(); row_i++)
 	{
 		cm.at(p.row(row_i).max_position().second, label.at(row_i, 0))++;
 	}
 	cm.print('\t');
-	//sr.predict(m.cols(0, m.col_size() - 2)).print();
-//	sr.print();
-	//sr.import_data(m.cols(0, m.col_size() - 2), m.col( m.col_size() - 1));
-
-	//auto c = m.row(4);
-	//c.print();
-	//auto p = m.fetch_column({1,2});
-	//p->print();
-	//cerr << m.row_size() << "," << m.col_size() << endl;
-	//tree<string> tr;
-	//auto root = tr.insert(tr.begin(),"ccc");
-	//tr.append_child(root, "hello");
-	//tr.append_child(root, "hello1");
-	//tr.append_child(root, "hello2");
-	//for (auto i = tr.begin_leaf(); i != tr.end_leaf(); i++)
-	//{
-	//	cerr << *i << endl;
-	//}
 	return 0;
 }
