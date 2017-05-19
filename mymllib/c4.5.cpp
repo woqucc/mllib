@@ -237,13 +237,10 @@ namespace myml
 		_label = most_label;
 	}
 
-	c45_decision_tree::c45_decision_tree(matrix_p data) : _root(data)
+
+	void c45::train(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
 
 	}
 
-	void c45_decision_tree::train()
-	{
-		cerr << _root.split_by_gain_ratio();
-	}
 }

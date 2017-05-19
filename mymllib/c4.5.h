@@ -2,6 +2,8 @@
 #define C45_H
 #include"range.h"
 #include"data.h"
+#include"tree.hh"
+#include"classifier.h"
 #include<unordered_map>
 #include<memory>
 namespace myml
@@ -9,6 +11,9 @@ namespace myml
 	using namespace std;
 	using count_result = unordered_map<long double, int>;
 	using matrix_p = shared_ptr<matrix<long double>>;
+	using feature_type = long double;
+	using label_type = size_t;
+	using param_type = long double;
 	class c45_tree_node
 	{
 
@@ -67,12 +72,21 @@ namespace myml
 		*/
 		long double _calc_intrinsic_value(const count_result& cr);
 	};
-	class c45
+	class c45 : public classifier<feature_type, label_type, param_type>
 	{
 	public:
-		c45(matrix_p data);
-		void train();
+		/*实现分类器标准接口*/
+		const matrix<param_type> probabilities(const matrix<feature_type> & feature_matrix) const override;
+		void train(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) override;
+		bool load(istream &in) override;
+		bool save(ostream &out) override;
+		param_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) override;
+		param_type accuracy(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
+		const matrix<label_type> predict(const matrix<feature_type> & feature_matrix) const override;
+		void print(ostream & out = cout) override;
 	protected:
+		tree<c45_tree_node> tr;
+
 		c45_tree_node _root;
 	};
 }
