@@ -26,27 +26,23 @@ namespace myml
 
 	void softmax_regression::sgd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, const param_type & learning_rate)
 	{
-		_error_matrix = gradient(feature_matrix.row(0), label_matrix.row(0));
-
-		_last_error = _cur_error;
-		_cur_error = norm_f(_error_matrix);
-
-		_pre_theta = _theta;
-		_theta -= (_error_matrix *= learning_rate);
+		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
+		{
+			_error_matrix = gradient(feature_matrix.row(row_i), label_matrix.row(row_i))  * _learning_rate;
+			_theta -= (_error_matrix);
+		}
 	}
 
 	void softmax_regression::sgd_momentum(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, param_type rho, param_type eit)
 	{
-		//不好使！！！！
-		_last_error_matrix = _error_matrix;
-		_error_matrix = gradient(feature_matrix.row(0), label_matrix.row(0)) * _learning_rate;
-		_error_matrix = _last_error_matrix * rho - _error_matrix * (1-rho);
-		//_error_matrix.print();
-
-		_pre_theta = _theta;
-		_theta += (_error_matrix);
-		_last_error = _cur_error;
-		_cur_error = norm_f(_error_matrix);
+		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
+		{
+			_last_error_matrix = _error_matrix;
+			_error_matrix = gradient(feature_matrix.row(row_i), label_matrix.row(row_i)) * _learning_rate;
+			_error_matrix = _last_error_matrix * rho - _error_matrix * (1 - rho);
+			_pre_theta = _theta;
+			_theta -= _error_matrix;
+		}	
 	}
 
 	void softmax_regression::batch_sgd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
@@ -55,7 +51,7 @@ namespace myml
 
 		_pre_theta = _theta;
 		_theta -= _error_matrix;
-
+		
 	}
 
 	const matrix<param_type> softmax_regression::probabilities(const matrix<feature_type>& feature_matrix) const
@@ -85,14 +81,14 @@ namespace myml
 		adadelta(feature_matrix, label_matrix);
 	}
 
-	bool softmax_regression::load(ifstream & in)
+	bool softmax_regression::load(istream & in)
 	{
 		return import_matrix_data<param_type>(_theta, in);
 	}
 
-	bool softmax_regression::save(ofstream & out)
+	bool softmax_regression::save(ostream & out)
 	{
-		_theta.print(',', out);
+		_theta.print(out);
 		return true;
 	}
 
@@ -101,22 +97,22 @@ namespace myml
 
 	void softmax_regression::adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,param_type epsilon, param_type rho)
 	{
-		matrix<param_type> grad = gradient(feature_matrix, label_matrix);
-		_cur_error = norm_f(grad);
+		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
+		{
+			matrix<param_type> grad = gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
 
-		_grad_ewma = _grad_ewma * rho + dot(grad, grad) * (1 - rho);
+			_grad_ewma = _grad_ewma * rho + dot(grad, grad) * (1 - rho);
 
-		_last_error_matrix = _error_matrix;
+			_last_error_matrix = _error_matrix;
 
-		_error_matrix = sqrt((_error_ewma + epsilon) / (_grad_ewma + epsilon));
-		_error_matrix  = dot(_error_matrix, grad);
-		
-		_pre_theta = _theta;
+			_error_matrix = sqrt((_error_ewma + epsilon) / (_grad_ewma + epsilon));
+			_error_matrix = dot(_error_matrix, grad);
 
-		_theta -= _error_matrix;
-		_error_ewma = _error_ewma * rho + dot(_error_matrix, _error_matrix) * (1 - rho);
-		
+			_pre_theta = _theta;
 
+			_theta -= _error_matrix;
+			_error_ewma = _error_ewma * rho + dot(_error_matrix, _error_matrix) * (1 - rho);
+		}
 	}
 
 	param_type softmax_regression::accuracy(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
@@ -146,6 +142,11 @@ namespace myml
 			predict_result.at(i, 0) = prob_matrix.row(i).max_position().second;
 		}
 		return predict_result;
+	}
+
+	void softmax_regression::print(ostream & out)
+	{
+		_theta.print(out);
 	}
 
 	matrix<param_type> softmax_regression::gradient(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)

@@ -21,8 +21,8 @@ int main()
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 	
 	
-	//ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
-	import_matrix_data(m, f, ' ');
+//	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
+	import_matrix_data(m, f,' ');
 	
 	/*matrix<long double> t;
 	ifstream tf("multiclass_theta.txt");
@@ -96,15 +96,17 @@ int main()
 		sr.adadelta(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//e = sr.error(m.cols(0, m.col_size() - 2), label);
 		//sr.sgd(m.cols(0, m.col_size() - 2).row(p), label.row(p));
+		//sr.sgd(m.cols(0, m.col_size() - 2), label);
 		//sr.sgd_momentum(m.cols(0, m.col_size() - 2).row(p), label.row(p));
+		//sr.sgd_momentum(m.cols(0, m.col_size() - 2), label);
 		//sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
 		//sr.update_learning_rate_bd();
-		acc = sr.accuracy(m.cols(0, m.col_size() - 2), label);
-		if (out_count++ % 10000 == 0)
+		//
+		if (out_count++ % 20000 == 0)
 		{
-			
+			acc = sr.accuracy(m.cols(0, m.col_size() - 2), label);
 			e = sr.objective_function(m.cols(0, m.col_size() - 2), label);
-			cerr << "error:" << e << "\tacc:" << acc << endl;
+			cerr << "objective function:" << e << "\tacc:" << acc << endl;
 			cerr << "theta:" << endl;
 			sr.print();
 			cerr << "c ma:" << endl;
@@ -114,6 +116,7 @@ int main()
 			{
 				cm.at(p.row(row_i).max_position().second, label.at(row_i, 0))++;
 			}
+			cm.print();
 			//sr.predict(m.cols(0, m.col_size() - 2)).print();
 
 		}
@@ -128,6 +131,6 @@ int main()
 	{
 		cm.at(p.row(row_i).max_position().second, label.at(row_i, 0))++;
 	}
-	cm.print('\t');
+	cm.print(cout , '\t');
 	return 0;
 }

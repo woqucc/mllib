@@ -1,7 +1,7 @@
 ﻿#ifndef CLASSIFIER_H
 #define CLASSIFIER_H
 #include"data.h"
-#include<fstream>
+#include<iostream>
 namespace myml
 {
 	using namespace std;
@@ -15,7 +15,7 @@ namespace myml
 		@param in feature_matrix特征矩阵，其中每一行为一个样本
 		@param out 输出每个样本对应类别的概率
 		*/
-		virtual const matrix<param_type> probabilities(const matrix<feature_type> & feature_matrix) const = 0 ;
+		virtual const matrix<param_type> probabilities(const matrix<feature_type> & feature_matrix) const = 0;
 		/*
 		@brief 预测
 		@param in feature_matrix特征矩阵，其中每一行为一个样本
@@ -32,12 +32,12 @@ namespace myml
 		@brief 保存模型
 		@param in 文件
 		*/
-		virtual bool load(ifstream &in) = 0;
+		virtual bool load(istream &in) = 0;
 		/*
 		@brief 读取模型
 		@param in 文件
 		*/
-		virtual bool save(ofstream &out) = 0;
+		virtual bool save(ostream &out) = 0;
 		/*
 		@brief 模型的目标函数
 		@param in feature_matrix 特征矩阵
@@ -49,7 +49,23 @@ namespace myml
 		/*
 		@brief 获取输入样本的准确率
 		*/
-	    virtual param_type accuracy(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const = 0 ;
+		virtual param_type accuracy(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const = 0;
+
+		/*
+		@brief 输出分类器信息
+		*/
+		virtual void print(ostream & out) = 0;
 	};
+
+
+	template<class feature_type, class label_type, class param_type>
+	matrix<size_t> confusion_matrix(const classifier<feature_type, label_type, param_type>& sr, const matrix<feature_type> &feature_matrix)
+	{
+		matrix<label_type> p = sr.predict(feature_matrix);
+
+	}
+
+
+
 }
 #endif // !CLASSIFIER_H

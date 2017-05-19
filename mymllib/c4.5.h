@@ -67,10 +67,10 @@ namespace myml
 		*/
 		long double _calc_intrinsic_value(const count_result& cr);
 	};
-	class c45_tree
+	class c45
 	{
 	public:
-		c45_tree(matrix_p data);
+		c45(matrix_p data);
 		void train();
 	protected:
 		c45_tree_node _root;

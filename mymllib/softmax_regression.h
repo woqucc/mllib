@@ -3,6 +3,7 @@
 #include"data.h"
 #include"classifier.h"
 #include<map>
+#include<iostream>
 namespace myml
 {
 	/*设置数据类型，不想用template*/
@@ -18,34 +19,28 @@ namespace myml
 		/*实现分类器标准接口*/
 		const matrix<param_type> probabilities(const matrix<feature_type> & feature_matrix) const override;
 		void train(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) override;
-		bool load(ifstream &in) override;
-		bool save(ofstream &out) override;
+		bool load(istream &in) override;
+		bool save(ostream &out) override;
 		param_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) override;
 		param_type accuracy(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
 		const matrix<label_type> predict(const matrix<feature_type> & feature_matrix) const override;
+		void print(ostream & out = cout) override;
 		
 		
-		
-		/*实现特有接口*/
+		/*实现特有方法*/
 		void load(const matrix<param_type>& theta);
 
 
 		/*随机梯度下降，可以一次传入多个样本*/
 		void sgd(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,const param_type & learning_rate = 1E-5);
-
 		/*随机梯度下降，动量法调节学习速率，可以一次传入多个样本*/
 		void sgd_momentum(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,param_type rho = 0.9 ,param_type eit = 0.3);
+		/*随机梯度下降，adadelta方法调节学习速率*/
+		void adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix, param_type epsilon = 1E-6, param_type rho = 0.95);
 
 		/*批量梯度下降，如果传入的样本的batch为全部样本，则为正常的梯度下降*/
 		void batch_sgd(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
-		/*
-		Bold Driver方法更新学习速率
-		即若当前error减小则增大学习速率，若error增大则减小学习速率
-		仅对批下降方式有效
-		*/
-		void update_learning_rate_bd(param_type increase = 1.05, param_type decrease = 0.5);
-		/*adadelta方法调节学习速率*/
-		void adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,param_type epsilon = 1E-6, param_type rho = 0.95);
+
 
 		/*
 			计算误差矩阵（正确结果-预测结果）* 对应的特征向量
@@ -55,10 +50,6 @@ namespace myml
 		*/
 		matrix<param_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
 
-		void print()
-		{
-			_theta.print();
-		}
 	private:
 		matrix<param_type> _theta;
 		matrix<param_type> _pre_theta;
@@ -73,24 +64,8 @@ namespace myml
 		matrix<param_type> _last_error_matrix;/*上一次误差*/
 		matrix<param_type> _error_matrix;/*本次误差*/
 	};
-	inline void softmax_regression::update_learning_rate_bd(param_type increase, param_type decrease)
-	{
-		if (_last_error - _cur_error > 10E-10L)
-		{
-			_learning_rate *= increase;
-		}
-		else if (_last_error < _cur_error)
-		{
-			_learning_rate *= decrease;
-			_theta = _pre_theta;
-		}
-	}
-	template <class T>
-	matrix<size_t> confusion_matrix(const softmax_regression& sr, const matrix<T> &feature_matrix)
-	{
-		matrix<T> p = sr.probabilities(feature_matrix);
-		
-	}
+
+
 
 }
 #endif // !SOFTMAX_REGRESSION

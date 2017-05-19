@@ -1,4 +1,4 @@
-#include "c4.5.h"
+ï»¿#include "c4.5.h"
 #include<cmath>
 #include<valarray>
 namespace myml
@@ -21,9 +21,9 @@ namespace myml
 	}
 	void c45_tree_node::calc_discrete_gain()
 	{
-		//Àà±êÎ»ÖÃ
+		//ç±»æ ‡ä½ç½®
 		size_t label_pos = _data->col_size() - 1;
-		//»ñÈ¡Àà±êµÄ<Àà±ğ£¬¸ÃÀà¸öÊı>
+		//è·å–ç±»æ ‡çš„<ç±»åˆ«ï¼Œè¯¥ç±»ä¸ªæ•°>
 		_labels_count = _get_column_classes_count(label_pos, _data);
 		if (_labels_count.size() == 1)
 		{
@@ -31,21 +31,21 @@ namespace myml
 			return;
 		}
 		_ent = _calc_ent(_labels_count);
-		//Ê¹ÓÃÄÄÒ»¸öÊôĞÔ½øĞĞ·Ö¸ô
+		//ä½¿ç”¨å“ªä¸€ä¸ªå±æ€§è¿›è¡Œåˆ†éš”
 		long double max_gain_ratio = -LDBL_MAX;
 		long double max_gain = -LDBL_MAX;
 		for (size_t attr_num = 0; attr_num < label_pos; attr_num++)
 		{
-			/*»ñÈ¡¸ÃÊôĞÔµÄ<ÖÖÀà,¸ÃÀàÔªËØ¸öÊı>*/
+			/*è·å–è¯¥å±æ€§çš„<ç§ç±»,è¯¥ç±»å…ƒç´ ä¸ªæ•°>*/
 			auto attr_count_result = _get_column_classes_count(attr_num, _data);
-			//Ö»ÓĞÒ»Àà£¬²»ÓÃËãÁË£¬»»ÏÂÒ»¸ö
+			//åªæœ‰ä¸€ç±»ï¼Œä¸ç”¨ç®—äº†ï¼Œæ¢ä¸‹ä¸€ä¸ª
 			if (attr_count_result.size() < 2)
 			{
 				continue;
 			}
-			//¸ù¾İÊ¹ÓÃ¸ÃÊôĞÔ·Ö¸ôºóµÄÃ¿Ò»ÀàÖĞÕæÊµÀà±êµÄ<ÖÖÀà,¸ÃÀàÔªËØ¸öÊı>
+			//æ ¹æ®ä½¿ç”¨è¯¥å±æ€§åˆ†éš”åçš„æ¯ä¸€ç±»ä¸­çœŸå®ç±»æ ‡çš„<ç§ç±»,è¯¥ç±»å…ƒç´ ä¸ªæ•°>
 			_gain = _ent - _calc_gain(_data, attr_num, attr_count_result);
-			//¼ÆËãiv
+			//è®¡ç®—iv
 			_gain_ratio = _gain / _calc_intrinsic_value(attr_count_result);
 			if (max_gain_ratio < _gain_ratio)
 			{
@@ -57,32 +57,32 @@ namespace myml
 				max_gain = _gain;
 				_gain_attr = attr_num;
 			}
-			cerr << "Êı¾İ´óĞ¡:" << _data->row_size() << endl;
-			cerr << "ĞÅÏ¢ÔöÒæ£º" << _gain << '\t';
-			cerr << "µ±Ç°½ÚµãìØ£º" << _ent << endl;
-			cerr << "ĞÅÏ¢ÔöÒæÂÊ£º" << _gain_ratio << endl;
+			cerr << "æ•°æ®å¤§å°:" << _data->row_size() << endl;
+			cerr << "ä¿¡æ¯å¢ç›Šï¼š" << _gain << '\t';
+			cerr << "å½“å‰èŠ‚ç‚¹ç†µï¼š" << _ent << endl;
+			cerr << "ä¿¡æ¯å¢ç›Šç‡ï¼š" << _gain_ratio << endl;
 		}
-		//Èç¹ûÎ´ÕÒµ½¿É½øĞĞ·Ö¸ôµÄÊôĞÔ£¨ÊôĞÔÖ»ÓĞÒ»ÖÖ£©,½«¸Ã½ÚµãÉèÖÃÎªÖÕ½á½Úµã
+		//å¦‚æœæœªæ‰¾åˆ°å¯è¿›è¡Œåˆ†éš”çš„å±æ€§ï¼ˆå±æ€§åªæœ‰ä¸€ç§ï¼‰,å°†è¯¥èŠ‚ç‚¹è®¾ç½®ä¸ºç»ˆç»“èŠ‚ç‚¹
 		if (max_gain_ratio == -LDBL_MAX && max_gain == -LDBL_MAX)
 		{
 			_set_finish_node();
 		}
-		//±£´æ×î´óĞÅÏ¢ÔöÒæºÍ×î´óĞÅÏ¢ÔöÒæÂÊ
+		//ä¿å­˜æœ€å¤§ä¿¡æ¯å¢ç›Šå’Œæœ€å¤§ä¿¡æ¯å¢ç›Šç‡
 		_gain = max_gain;
 		_gain_ratio = max_gain_ratio;
 	}
 
 	size_t c45_tree_node::split_by_gain_ratio()
 	{
-		//Èç¹û²»ÊÇÖÕ½á½Úµã
+		//å¦‚æœä¸æ˜¯ç»ˆç»“èŠ‚ç‚¹
 		if (_finish_node)
 			return 1;
-		//»ñÈ¡ĞÅÏ¢ÔöÒæÂÊ×î´óµÄÊôĞÔ
+		//è·å–ä¿¡æ¯å¢ç›Šç‡æœ€å¤§çš„å±æ€§
 		auto selected_attr_counts = _get_column_classes_count(_gain_ratio_attr, _data);
-		//¶¨ÒåÓë×Ó½Úµã¸öÊıÏà¶ÔÓ¦µÄÇø¼ä
+		//å®šä¹‰ä¸å­èŠ‚ç‚¹ä¸ªæ•°ç›¸å¯¹åº”çš„åŒºé—´
 		_children_range.resize(selected_attr_counts.size());
-		cerr << "×î´óĞÅÏ¢ÔöÒæÂÊµÄÊôĞÔ£º" << _gain_ratio_attr << "\t" << _gain_ratio << endl;
-		//Ê¹ÓÃĞÅÏ¢ÔöÒæÂÊ×î´óµÄÊôĞÔ½øĞĞ·Ö¸î
+		cerr << "æœ€å¤§ä¿¡æ¯å¢ç›Šç‡çš„å±æ€§ï¼š" << _gain_ratio_attr << "\t" << _gain_ratio << endl;
+		//ä½¿ç”¨ä¿¡æ¯å¢ç›Šç‡æœ€å¤§çš„å±æ€§è¿›è¡Œåˆ†å‰²
 		//cerr << "print"; 
 		for (const auto& attr : selected_attr_counts)
 		{
@@ -120,7 +120,7 @@ namespace myml
 		out << "depth:" << depth;
 		out << "\tgain_ratio" << _gain_ratio << endl;
 		out << "data:" << endl;
-		_data->print(',', out);
+		_data->print(out);
 		for (auto& c : _children)
 		{
 			c.print(out);
@@ -147,7 +147,7 @@ namespace myml
 
 	long double c45_tree_node::_calc_gain(matrix_p data, size_t column_num, const count_result& cr)
 	{
-		//»ñÈ¡Àà±êÎ»ÖÃ
+		//è·å–ç±»æ ‡ä½ç½®
 		size_t lable_pos = data->col_size() - 1;
 		auto index_map = unordered_map<long double, count_result>(cr.size());
 		for (const auto& i : cr)
@@ -237,12 +237,12 @@ namespace myml
 		_label = most_label;
 	}
 
-	c45_tree::c45_tree(matrix_p data) : _root(data)
+	c45_decision_tree::c45_decision_tree(matrix_p data) : _root(data)
 	{
 
 	}
 
-	void c45_tree::train()
+	void c45_decision_tree::train()
 	{
 		cerr << _root.split_by_gain_ratio();
 	}
