@@ -23,7 +23,10 @@ int main()
 	
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 	import_matrix_data(m, f,' ');
-	
+	for (auto i : m.col(9))
+	{
+		cerr << i << endl;
+	}
 	/*matrix<long double> t;
 	ifstream tf("multiclass_theta.txt");
 	import_matrix_data(t, tf, ' ');
@@ -69,7 +72,7 @@ int main()
 	cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	cerr << sr.error(m.cols(0, m.col_size() - 2), label) << endl;
 	*/
-
+	vector<int> vtest;
     matrix<size_t> label;
 	//matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
 	auto label_map = matrix_normalized::serialize_label<long double, size_t>(m.col(m.col_size() - 1), label);

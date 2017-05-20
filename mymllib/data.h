@@ -14,6 +14,7 @@
 #include<fstream>
 #include<cstring>
 
+
 namespace myml
 {
 	using namespace std;
@@ -34,11 +35,14 @@ namespace myml
 		/*遍历元素,row_i,col_i为迭代坐标*/
 #define each_ele(op) for (size_t row_i = 0; row_i < _row_size; row_i++) {for (size_t col_i = 0; col_i < _col_size; col_i++){op;}}
 #define ele _data[row_i][col_i]
-		class iterator
+		class iterator : public std::iterator<std::random_access_iterator_tag,T,ptrdiff_t,T*,T&>
 		{
 		private:
+			T** _data;
 			matrix<T>& _matrix;/*< 存储矩阵*/
 			size_t _index;/*< 存储索引*/
+			size_t _column_size;
+			size_t _row_size;
 		public:
 			iterator(matrix<T>& matrix, size_t index);
 			/*
@@ -1260,8 +1264,8 @@ namespace myml
 	namespace matrix_normalized {
 		/*设置元素值的范围，将大于上限upper_bound的元素设置为最大值，将小于下限lower_bound的元素设置为最小值*/
 		template<class T>
-		void set_range(matrix<T>& matrix, size_t column_num, T lower_bound, T upper_bound) {
-			for (auto i = matrix.cbegin(column_num); i != matrix.cend(column_num); ++i)
+		void set_range(matrix<T>& m, size_t column_num, T lower_bound, T upper_bound) {
+			for (matrix<T>::column_iterator i = m.cbegin(column_num); i != m.cend(column_num); ++i)
 			{
 				if (*i < lower_bound)
 					*i = lower_bound;
