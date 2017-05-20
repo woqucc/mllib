@@ -14,6 +14,7 @@
 #include<fstream>
 #include<cstring>
 
+
 namespace myml
 {
 	using namespace std;
@@ -34,13 +35,15 @@ namespace myml
 		/*遍历元素,row_i,col_i为迭代坐标*/
 #define each_ele(op) for (size_t row_i = 0; row_i < _row_size; row_i++) {for (size_t col_i = 0; col_i < _col_size; col_i++){op;}}
 #define ele _data[row_i][col_i]
-		class iterator
+		class iterator : public std::iterator<std::random_access_iterator_tag, T, ptrdiff_t, T*, T&>
 		{
 		private:
-			matrix<T>& _matrix;/*< 存储矩阵*/
+			T** _data;
 			size_t _index;/*< 存储索引*/
+			size_t _row_size;
+			size_t _col_size;
 		public:
-			iterator(matrix<T>& matrix, size_t index);
+			iterator(T** data, size_t row_size, size_t column_size, size_t _index);
 			/*
 			@brief 返回当前index
 			*/
@@ -85,11 +88,11 @@ namespace myml
 		class column_iterator
 		{
 		private:
-			matrix<T>& _matrix;
+			T** _data;
 			size_t _index;
 			size_t _column;
 		public:
-			column_iterator(matrix<T>& matrix, size_t index, size_t column);
+			column_iterator(T** data, size_t index, size_t column);
 			virtual size_t index() const;
 			virtual T& operator * () const;
 			virtual bool operator != (column_iterator& i);
@@ -103,7 +106,7 @@ namespace myml
 		/*
 		@brief 打印矩阵中的所有元素
 		*/
-		virtual void print(ostream& out = cout,char split = ',' ) const;
+		virtual void print(ostream& out = cout, char split = ',') const;
 		/*
 		@brief 按照某列排序
 		@param column_num 列数
@@ -151,20 +154,20 @@ namespace myml
 		/*
 		@brief 返回第一个矩阵元素迭代器
 		*/
-		virtual iterator begin();
+		virtual iterator begin() const;
 		/*
 		@brief 返回最后一个矩阵元素迭代器
 		*/
-		virtual iterator end();
+		virtual iterator end() const;
 
 		/*
 		@brief 返回某一列第一个元素的迭代器
 		*/
-		virtual column_iterator cbegin(size_t column);
+		virtual column_iterator col_begin(size_t column) const;
 		/*
 		@brief 返回某一列的结尾迭代器（指向null）
 		*/
-		virtual column_iterator cend(size_t column);
+		virtual column_iterator col_end(size_t column) const;
 
 		/*
 		@brief 返回子阵
@@ -301,7 +304,7 @@ namespace myml
 	};
 
 	template<class T>
-	inline void matrix<T>::print(ostream& out,char split) const
+	inline void matrix<T>::print(ostream& out, char split) const
 	{
 		out.precision(4);
 		out << fixed;
@@ -447,8 +450,13 @@ namespace myml
 		return move(ia);
 	}
 
+
+
 	template<class T>
-	inline matrix<T>::iterator::iterator(matrix<T>& matrix, size_t index) :_matrix(matrix), _index(index) {}
+	inline matrix<T>::iterator::iterator(T ** data, size_t row_size, size_t column_size, size_t index) :
+		_data(data), _row_size(row_size), _col_size(column_size), _index(index)
+	{
+	}
 
 	template<class T>
 	inline size_t matrix<T>::iterator::index() const
@@ -492,17 +500,17 @@ namespace myml
 	template<class T>
 	inline T & matrix<T>::iterator::operator*() const
 	{
-		return _matrix.at(_index / _matrix.col_size(), _index % _matrix.col_size());
+		return _data[_index / _col_size][_index % _col_size];
 	}
 
 	template<class T>
-	matrix<T>::column_iterator::column_iterator(matrix<T>& matrix, size_t index, size_t column) :_matrix(matrix), _index(index), _column(column)
+	matrix<T>::column_iterator::column_iterator(T**data, size_t index, size_t column) :_data(data), _index(index), _column(column)
 	{
 	}
 	template<class T>
 	inline T & matrix<T>::column_iterator::operator*() const
 	{
-		return _matrix.at(_index, _column);
+		return _data[_index][_column];
 	}
 
 	template<class T>
@@ -549,27 +557,27 @@ namespace myml
 		return _data[row_num][col_num];
 	}
 	template<class T>
-	typename matrix<T>::iterator matrix<T>::begin()
+	typename matrix<T>::iterator matrix<T>::begin() const
 	{
-		return iterator(*this, 0);
+		return matrix<T>::iterator(_data, _row_size, _col_size, 0);
 	}
 
 	template<class T>
-	typename matrix<T>::iterator matrix<T>::end()
+	typename matrix<T>::iterator matrix<T>::end() const
 	{
-		return iterator(*this, row_size()*col_size());
+		return matrix<T>::iterator(_data, _row_size, _col_size, row_size()*col_size());
 	}
 
 	template<class T>
-	typename matrix<T>::column_iterator matrix<T>::cbegin(size_t column)
+	typename matrix<T>::column_iterator matrix<T>::col_begin(size_t column) const
 	{
-		return column_iterator(*this, 0, column);
+		return column_iterator(_data, 0, column);
 	}
 
 	template<class T>
-	typename matrix<T>::column_iterator matrix<T>::cend(size_t column)
+	typename matrix<T>::column_iterator matrix<T>::col_end(size_t column) const
 	{
-		return column_iterator(*this, row_size(), column);
+		return column_iterator(_data, _row_size, column);
 	}
 
 
@@ -629,7 +637,7 @@ namespace myml
 		assert(_col_size == row.size());
 		for (size_t i = 0; i < row.size(); ++i)
 		{
-			_data[_cur_row_pos][i] = *(row.begin()+i);
+			_data[_cur_row_pos][i] = *(row.begin() + i);
 		}
 		++_cur_row_pos;
 	}
@@ -977,7 +985,7 @@ namespace myml
 	}
 	/*导入数据部分的全局函数*/
 	template<class T>
-	bool import_matrix_data(matrix<T>& matrix,istream& in, char split = ',', int line_width = 2048)
+	bool import_matrix_data(matrix<T>& matrix, istream& in, char split = ',', int line_width = 2048)
 	{
 		if (in.bad() || in.fail()) {
 			cerr << "Can not open file!" << endl;
@@ -1260,8 +1268,8 @@ namespace myml
 	namespace matrix_normalized {
 		/*设置元素值的范围，将大于上限upper_bound的元素设置为最大值，将小于下限lower_bound的元素设置为最小值*/
 		template<class T>
-		void set_range(matrix<T>& matrix, size_t column_num, T lower_bound, T upper_bound) {
-			for (auto i = matrix.cbegin(column_num); i != matrix.cend(column_num); ++i)
+		void set_range(matrix<T>& m, size_t column_num, T lower_bound, T upper_bound) {
+			for (matrix<T>::column_iterator i = m.col_begin(column_num); i != m.col_end(column_num); ++i)
 			{
 				if (*i < lower_bound)
 					*i = lower_bound;
