@@ -130,7 +130,7 @@ namespace myml
 	inline count_result c45_tree_node::_get_column_classes_count(size_t column_num, matrix_p data)
 	{
 		count_result&& cr = count_result();
-		for (auto i = data->cbegin(column_num); i != data->cend(column_num); ++i)
+		for (auto i = data->col_begin(column_num); i != data->col_end(column_num); ++i)
 		{
 			auto lable_pair = cr.find(*i);
 			if (lable_pair == cr.end())
@@ -194,7 +194,7 @@ namespace myml
 	{
 		auto label_pos = data->col_size() - 1;
 		count_result&& cr = count_result();
-		for (auto i = data->cbegin(column_num); i != data->cend(column_num); ++i)
+		for (auto i = data->col_begin(column_num); i != data->col_end(column_num); ++i)
 		{
 			if (*i != value)
 				continue;
