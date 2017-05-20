@@ -18,16 +18,16 @@ int main(int argc ,char* argv[])
 {
 	matrix<long double> m;
 	//ifstream f(R"(binary_classification.txt)", ios::in);
-	//ifstream f(R"(multi_classification.txt)", ios::in);
+	ifstream f(R"(multi_classification.txt)", ios::in);
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 	
-	ifstream f(argv[1],ios::in);
+	//ifstream f(argv[1],ios::in);
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
-//	import_matrix_data(m, f,' ');
+	import_matrix_data(m, f,' ');
 
 	
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
-	import_matrix_data(m, f);
+//	import_matrix_data(m, f);
 	
 	/*matrix<long double> t;
 	ifstream tf("multiclass_theta.txt");

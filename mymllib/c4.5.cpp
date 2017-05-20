@@ -196,7 +196,7 @@ namespace myml
 	{
 		auto label_pos = data->col_size() - 1;
 		count_result&& cr = count_result();
-		for (auto i = data->cbegin(column_num); i != data->cend(column_num); ++i)
+		for (auto i = data->col_begin(column_num); i != data->col_end(column_num); ++i)
 		{
 			if (*i != value)
 				continue;

@@ -39,11 +39,11 @@
     <ClCompile Include="memory_pool.h">
       <Filter>头文件</Filter>
     </ClCompile>
-    <ClCompile Include="c4.5.cpp">
-      <Filter>源文件\tree</Filter>
-    </ClCompile>
     <ClCompile Include="softmax_regression.cpp">
       <Filter>源文件\classifier</Filter>
+    </ClCompile>
+    <ClCompile Include="c4.5.cpp">
+      <Filter>源文件\tree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
