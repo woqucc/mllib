@@ -74,6 +74,7 @@ namespace myml
 
 	size_t c45_tree_node::split_by_gain_ratio()
 	{
+		/*		
 		//如果不是终结节点
 		if (_finish_node)
 			return 1;
@@ -102,7 +103,8 @@ namespace myml
 			total_node += c.split_by_gain_ratio();
 		}
 		//this->print(cout);
-		return total_node;
+		return total_node;*/
+		return 0;
 	}
 
 	void c45_tree_node::append_child(c45_tree_node && tn)
@@ -131,6 +133,7 @@ namespace myml
 	{
 		count_result&& cr = count_result();
 		for (auto i = data->col_begin(column_num); i != data->col_end(column_num); ++i)
+
 		{
 			auto lable_pair = cr.find(*i);
 			if (lable_pair == cr.end())
@@ -236,5 +239,4 @@ namespace myml
 		_finish_node = true;
 		_label = most_label;
 	}
-
 }

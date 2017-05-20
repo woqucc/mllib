@@ -1,6 +1,7 @@
 ﻿#ifndef RANGE_H
 #define RANGE_H
 #include<iostream>
+#include<algorithm>
 #include<cmath>
 
 /*
@@ -55,8 +56,8 @@ namespace myml
 	template<class T>
 	range<T>::range(T lower_bound, T upper_bound)
 	{
-		_upper_bound_eq = max<T>(upper_bound, lower_bound);
-		_lower_bound = min<T>(upper_bound, lower_bound);
+		_upper_bound_eq = std::max<T>(upper_bound, lower_bound);
+		_lower_bound = std::min<T>(upper_bound, lower_bound);
 	}
 
 	template<class T>

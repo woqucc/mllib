@@ -95,7 +95,7 @@ namespace myml
 			column_iterator(T** data, size_t index, size_t column);
 			virtual size_t index() const;
 			virtual T& operator * () const;
-			virtual bool operator != (column_iterator& i);
+			virtual bool operator != (const column_iterator& i) const;
 			virtual typename matrix<T>::column_iterator& operator ++();
 			virtual typename matrix<T>::column_iterator& operator --();
 			virtual typename matrix<T>::column_iterator& operator +(size_t iv);
@@ -514,7 +514,7 @@ namespace myml
 	}
 
 	template<class T>
-	inline bool matrix<T>::column_iterator::operator!=(column_iterator & i)
+	inline bool matrix<T>::column_iterator::operator!=(const column_iterator & i) const
 	{
 		return _index != i._index || _column != i._column;
 	}
@@ -1269,7 +1269,7 @@ namespace myml
 		/*设置元素值的范围，将大于上限upper_bound的元素设置为最大值，将小于下限lower_bound的元素设置为最小值*/
 		template<class T>
 		void set_range(matrix<T>& m, size_t column_num, T lower_bound, T upper_bound) {
-			for (matrix<T>::column_iterator i = m.col_begin(column_num); i != m.col_end(column_num); ++i)
+			for (auto i = m.col_begin(column_num); i != m.col_end(column_num); ++i)
 			{
 				if (*i < lower_bound)
 					*i = lower_bound;
@@ -1293,7 +1293,7 @@ namespace myml
 		}
 		/*将数据的label转换为连续的整数*/
 		template<class T, class E>
-		map<T, E> serialize_label(matrix<T>& label_matrix, matrix<E>& serialized_label)
+		map<T, E> serialize_label(const matrix<T>& label_matrix, matrix<E>& serialized_label)
 		{
 			map<T, E> label_map;
 			for (auto &i : label_matrix)

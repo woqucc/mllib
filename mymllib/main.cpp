@@ -14,18 +14,21 @@
 using namespace std;
 using namespace myml;
 using namespace myml::matrix_operate;
-
-int main()
+int main(int argc ,char* argv[])
 {
 	matrix<long double> m;
 	//ifstream f(R"(binary_classification.txt)", ios::in);
-	ifstream f(R"(multi_classification.txt)", ios::in);
+	//ifstream f(R"(multi_classification.txt)", ios::in);
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 	
-
+	ifstream f(argv[1],ios::in);
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
-	import_matrix_data(m, f,' ');
+//	import_matrix_data(m, f,' ');
 
+	
+//	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
+	import_matrix_data(m, f);
+	
 	/*matrix<long double> t;
 	ifstream tf("multiclass_theta.txt");
 	import_matrix_data(t, tf, ' ');
@@ -71,10 +74,13 @@ int main()
 	cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	cerr << sr.error(m.cols(0, m.col_size() - 2), label) << endl;
 	*/
-	vector<int> vtest;
-    matrix<size_t> label;
-	//matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
-	auto label_map = matrix_normalized::serialize_label<long double, size_t>(m.col(m.col_size() - 1), label);
+	
+
+
+    	matrix<size_t> label;
+	matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
+	matrix<long double> temp = m.col(m.col_size() - 1);
+	auto label_map = matrix_normalized::serialize_label<long double, size_t>(temp, label);
 	vector<size_t> us[6];
 	for (size_t row_i = 0; row_i < m.row_size(); row_i++)
 	{
@@ -87,7 +93,7 @@ int main()
 	srand(time(nullptr));
 	long double e = 0;
 	long double acc = 0;
-	while (acc < 0.95 || n-- > 0)
+	while (acc < 0.97 || n-- > 0)
 	{
 		
 		/*size_t tr = rand() % 4;
@@ -108,10 +114,10 @@ int main()
 		{
 			acc = sr.accuracy(m.cols(0, m.col_size() - 2), label);
 			e = sr.objective_function(m.cols(0, m.col_size() - 2), label);
-			cerr << "objective function:" << e << "\tacc:" << acc << endl;
-			cerr << "theta:" << endl;
+			cout << "objective function:" << e << "\tacc:" << acc << endl;
+			cout << "theta:" << endl;
 			sr.print();
-			cerr << "c ma:" << endl;
+			cout << "c ma:" << endl;
 			matrix<long double> p = sr.probabilities(m.cols(0, m.col_size() - 2));
 			matrix<long double> cm(label_map.size(), label_map.size());
 			for (size_t row_i = 0; row_i < p.row_size(); row_i++)
@@ -124,8 +130,8 @@ int main()
 		}
 		//cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	}
-	cerr << "of" << sr.objective_function(m.cols(0, m.col_size() - 2), label) << endl;
-	cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
+	cout << "of" << sr.objective_function(m.cols(0, m.col_size() - 2), label) << endl;
+	cout << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	sr.print();
 	matrix<long double> p = sr.probabilities(m.cols(0, m.col_size() - 2));
 	matrix<long double> cm(label_map.size(), label_map.size());
