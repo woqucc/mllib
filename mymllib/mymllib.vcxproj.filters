@@ -28,6 +28,9 @@
     <Filter Include="头文件\classifier">
       <UniqueIdentifier>{613d95ce-f05b-4cba-b1f2-bdea3cfea3b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\optimizer">
+      <UniqueIdentifier>{a1bd99c0-750c-4871-9d44-9ebcd16cc4e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -64,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="classifier.h">
       <Filter>头文件\classifier</Filter>
+    </ClInclude>
+    <ClInclude Include="optimizer.h">
+      <Filter>头文件\optimizer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 namespace myml
 {
 	using namespace matrix_operate;
-	softmax_regression::softmax_regression(size_t feature_count, size_t label_count)
+	softmax_regression::softmax_regression(size_t feature_count, size_t label_count):classifier(feature_count, label_count)
 	{
 		_theta.resize(label_count, feature_count + 1);
 		_theta.fill(0);
@@ -18,22 +18,18 @@ namespace myml
 		_last_error = rand();
 	}
 
-	void softmax_regression::load(const matrix<param_type>& theta)
+	void softmax_regression::load(const matrix<calc_param_type>& theta)
 	{
 		_theta = theta;
 	}
 
 
-	void softmax_regression::sgd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, const param_type & learning_rate)
+	void softmax_regression::sgd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, const calc_param_type & learning_rate)
 	{
-		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
-		{
-			_error_matrix = gradient(feature_matrix.row(row_i), label_matrix.row(row_i))  * _learning_rate;
-			_theta -= (_error_matrix);
-		}
+		opt.sgd(_theta, *this, feature_matrix, label_matrix);
 	}
 
-	void softmax_regression::sgd_momentum(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, param_type rho, param_type eit)
+	void softmax_regression::sgd_momentum(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, calc_param_type rho, calc_param_type eit)
 	{
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
@@ -48,19 +44,19 @@ namespace myml
 	void softmax_regression::batch_sgd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
 		_error_matrix = gradient(feature_matrix, label_matrix) * _learning_rate;
-
+		
 		_pre_theta = _theta;
 		_theta -= _error_matrix;
 		
 	}
 
-	const matrix<param_type> softmax_regression::probabilities(const matrix<feature_type>& feature_matrix) const
+	const matrix<calc_param_type> softmax_regression::probabilities(const matrix<feature_type>& feature_matrix) const
 	{
-		matrix<feature_type> feature(feature_matrix.row_size(), feature_matrix.col_size() + 1);
+		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
 		/*最后一列填1*/
-		feature.cols(0, feature_matrix.col_size() - 1) = feature_matrix;
-		feature.col(feature_matrix.col_size()).fill(1);
-		matrix<param_type> predict_result = feature*_theta.t();
+		feature.cols(0, feature_size - 1) = feature_matrix;
+		feature.col(feature_size).fill(1);
+		matrix<calc_param_type> predict_result = feature*_theta.t();
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
 			/*
@@ -83,7 +79,7 @@ namespace myml
 
 	bool softmax_regression::load(istream & in)
 	{
-		return import_matrix_data<param_type>(_theta, in);
+		return import_matrix_data<calc_param_type>(_theta, in);
 	}
 
 	bool softmax_regression::save(ostream & out)
@@ -95,11 +91,11 @@ namespace myml
 
 
 
-	void softmax_regression::adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,param_type epsilon, param_type rho)
+	void softmax_regression::adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix,calc_param_type epsilon, calc_param_type rho)
 	{
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
-			matrix<param_type> grad = gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
+			matrix<calc_param_type> grad = gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
 
 			_grad_ewma = _grad_ewma * rho + dot(grad, grad) * (1 - rho);
 
@@ -115,9 +111,9 @@ namespace myml
 		}
 	}
 
-	param_type softmax_regression::accuracy(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	calc_param_type softmax_regression::accuracy(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
 	{
-		matrix<param_type> pr = probabilities(feature_matrix);
+		matrix<calc_param_type> pr = probabilities(feature_matrix);
 		size_t total = pr.row_size();
 		size_t correct = 0;
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
@@ -130,11 +126,11 @@ namespace myml
 
 	const matrix<label_type> softmax_regression::predict(const matrix<feature_type>& feature_matrix) const
 	{
-		matrix<feature_type> feature(feature_matrix.row_size(), feature_matrix.col_size() + 1);
+		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
 		/*最后一列填1*/
-		feature.cols(0, feature_matrix.col_size() - 1) = feature_matrix;
-		feature.col(feature_matrix.col_size()).fill(1);
-		matrix<param_type> prob_matrix = feature*_theta.t();
+		feature.cols(0, feature_size - 1) = feature_matrix;
+		feature.col(feature_size).fill(1);
+		matrix<calc_param_type> prob_matrix = feature*_theta.t();
 
 		matrix<label_type> predict_result(feature_matrix.row_size(), 1);
 		for (size_t i = 0; i < feature_matrix.row_size(); ++i)
@@ -144,17 +140,17 @@ namespace myml
 		return predict_result;
 	}
 
-	void softmax_regression::print(ostream & out)
+	void softmax_regression::print(ostream & out) const
 	{
 		_theta.print(out);
 	}
 
-	matrix<param_type> softmax_regression::gradient(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
+	matrix<calc_param_type> softmax_regression::gradient(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
 	{
 		/*误差矩阵大小与_theta大小相同*/
 		matrix<feature_type> sum_error(_theta.row_size(), _theta.col_size());
 		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
-		/*累加每个特征向量的误差*/
+		/*累加每个特征向量的误差，预测减去准确，梯度下降算法*/
 		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
 		{
 			for (size_t theta_i = 0; theta_i < predict_matrix.col_size(); ++theta_i)
@@ -171,19 +167,18 @@ namespace myml
 			/*补1*/
 			sum_error.col(_theta.col_size() - 1) = predict_matrix.col(col_i);
 		}	
-		sum_error /= param_type(feature_matrix.row_size());
+		sum_error /= calc_param_type(feature_matrix.row_size());
 		return sum_error;
 	}
-	param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix)
+	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{
-		_last_error = _cur_error;
-		_cur_error = 0;
+		calc_param_type cur_error = 0;
 		
 		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
 		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
 		{
 			size_t label = label_matrix.at(row_i, 0);
-			_cur_error += predict_matrix.at(row_i, label);
+			cur_error += predict_matrix.at(row_i, label);
 		}
 		return _cur_error;
 	}

@@ -129,6 +129,7 @@
     <ClInclude Include="c4.5.h" />
     <ClInclude Include="classifier.h" />
     <ClInclude Include="data.h" />
+    <ClInclude Include="optimizer.h" />
     <ClInclude Include="range.h" />
     <ClInclude Include="softmax_regression.h" />
     <ClInclude Include="tree.hh" />

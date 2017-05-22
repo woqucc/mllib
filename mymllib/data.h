@@ -44,6 +44,7 @@ namespace myml
 			size_t _col_size;
 		public:
 			iterator(T** data, size_t row_size, size_t column_size, size_t _index);
+			iterator(const iterator& i);
 			/*
 			@brief 返回当前index
 			*/
@@ -74,12 +75,12 @@ namespace myml
 			@brief  加号操作符
 			@return 自减前的迭代器副本
 			*/
-			virtual typename matrix<T>::iterator& operator +(size_t iv);
+			virtual typename matrix<T>::iterator operator +(size_t iv) const;
 			/*
 			@brief  减号操作符
 			@return 自减前的迭代器副本
 			*/
-			virtual size_t operator -(const iterator& i);
+			virtual size_t operator -(const iterator& i) const;
 		};
 		/*
 		@brief 列迭代器
@@ -93,13 +94,14 @@ namespace myml
 			size_t _column;
 		public:
 			column_iterator(T** data, size_t index, size_t column);
+			column_iterator(const column_iterator& i);
 			virtual size_t index() const;
 			virtual T& operator * () const;
 			virtual bool operator != (const column_iterator& i) const;
 			virtual typename matrix<T>::column_iterator& operator ++();
 			virtual typename matrix<T>::column_iterator& operator --();
-			virtual typename matrix<T>::column_iterator& operator +(size_t iv);
-			virtual size_t operator -(const column_iterator& i);
+			virtual typename matrix<T>::column_iterator operator +(size_t iv) const;
+			virtual size_t operator -(const column_iterator& i) const;
 		};
 		/*默认构造函数，构造空矩阵，无法使用*/
 		matrix() = default;
@@ -177,7 +179,7 @@ namespace myml
 		@param column_end	最后一个元素纵坐标，由0开始
 		@return 指向新子阵的指针（shared_ptr）
 		*/
-		virtual pseudo_matrix<T> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end);
+		virtual pseudo_matrix<T> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end) const;
 		/*
 		@brief 赋值操作符
 		*/
@@ -250,7 +252,7 @@ namespace myml
 		/*
 		@brief 不排序，仅仅获取其顺序
 		*/
-		virtual index_array get_order(size_t column_num);
+		virtual index_array get_order(size_t column_num) const;
 
 		/*初始化列表形式初始化*/
 		void push_back(const initializer_list<T>& row);
@@ -293,7 +295,7 @@ namespace myml
 		/*最大元素*/
 		T max() const;
 		/*获取某一元素个数*/
-		size_t count(const T& t);
+		size_t count(const T& t) const;
 
 	protected:
 		T* _memory = nullptr;
@@ -404,7 +406,7 @@ namespace myml
 	}
 	//TODO :优化逻辑
 	template<class T>
-	inline typename matrix<T>::index_array matrix<T>::get_order(size_t column_num)
+	inline typename matrix<T>::index_array matrix<T>::get_order(size_t column_num) const
 	{
 		index_array&& ia = index_array(row_size());
 		for (size_t i = 0; i < ia.size(); i++)
@@ -459,6 +461,15 @@ namespace myml
 	}
 
 	template<class T>
+	inline matrix<T>::iterator::iterator(const iterator & i)
+	{
+		_data = i._data;
+		_index = i._index;
+		_row_size = i._row_size;
+		_col_size = i._col_size;
+	}
+
+	template<class T>
 	inline size_t matrix<T>::iterator::index() const
 	{
 		return _index;
@@ -485,14 +496,13 @@ namespace myml
 	}
 
 	template<class T>
-	inline typename matrix<T>::iterator & matrix<T>::iterator::operator+(size_t iv)
+	inline typename matrix<T>::iterator matrix<T>::iterator::operator+(size_t iv) const
 	{
-		_index += iv;
-		return *this;
+		return matrix<T>::iterator(_data, _row_size, _col_size, _index + iv);
 	}
 
 	template<class T>
-	inline size_t matrix<T>::iterator::operator-(const iterator & i)
+	inline size_t matrix<T>::iterator::operator-(const iterator & i) const
 	{
 		return _index - i._index;
 	}
@@ -506,6 +516,13 @@ namespace myml
 	template<class T>
 	matrix<T>::column_iterator::column_iterator(T**data, size_t index, size_t column) :_data(data), _index(index), _column(column)
 	{
+	}
+	template<class T>
+	inline matrix<T>::column_iterator::column_iterator(const column_iterator& i)
+	{
+		_data = i._data;
+		_index = i._index;
+		_column = i._column;
 	}
 	template<class T>
 	inline T & matrix<T>::column_iterator::operator*() const
@@ -534,14 +551,13 @@ namespace myml
 	}
 
 	template<class T>
-	inline typename matrix<T>::column_iterator & matrix<T>::column_iterator::operator+(size_t iv)
+	inline typename matrix<T>::column_iterator matrix<T>::column_iterator::operator+(size_t iv) const
 	{
-		_index += iv;
-		return *this;
+		return matrix<T>::column_iterator(_data, _index + iv, _column);
 	}
 
 	template<class T>
-	inline size_t matrix<T>::column_iterator::operator-(const column_iterator & i)
+	inline size_t matrix<T>::column_iterator::operator-(const column_iterator & i) const
 	{
 		return _index - i._index;
 	}
@@ -767,7 +783,7 @@ namespace myml
 		return max;
 	}
 	template<class T>
-	inline size_t matrix<T>::count(const T & t)
+	inline size_t matrix<T>::count(const T & t) const
 	{
 		size_t c = 0;
 		each_ele(
@@ -783,7 +799,7 @@ namespace myml
 	}
 
 	template<class T>
-	pseudo_matrix<T> matrix<T>::sub_matrix(size_t row_begin, size_t col_begin, size_t row_end, size_t col_end)
+	pseudo_matrix<T> matrix<T>::sub_matrix(size_t row_begin, size_t col_begin, size_t row_end, size_t col_end) const
 	{
 		/*范围正确*/
 		assert(row_begin <= row_end && col_begin <= col_end);
@@ -1054,19 +1070,16 @@ namespace myml
 		template<class T>
 		T sum(const matrix<T>& matrix)
 		{
-			T sum = 0;
-			for (size_t row_i = 0; row_i < matrix.row_size(); ++row_i)
+			long double sum = 0;
+			for (auto& i : matrix)
 			{
-				for (size_t col_i = 0; col_i < matrix.col_size(); ++col_i)
-				{
-					sum += matrix.at(row_i, col_i);
-				}
+				sum += i;
 			}
 			return sum;
 		}
 		/*矩阵的f范数*/
 		template<class T>
-		long double norm_f(matrix<T>& matrix)
+		long double norm_f(const matrix<T>& matrix)
 		{
 			long double sum = 0;
 			for (auto& i : matrix)
@@ -1278,15 +1291,15 @@ namespace myml
 			}
 		}
 		/*转换矩阵中数据的类型*/
-		template<class SRC, class DST>
-		matrix<DST> convert_matrix_type(const matrix<SRC>& m)
+		template<class src, class dst>
+		matrix<dst> convert_matrix_type(const matrix<src>& m)
 		{
-			matrix<DST> temp(m.row_size(), m.col_size());
+			matrix<dst> temp(m.row_size(), m.col_size());
 			for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
 			{
 				for (size_t col_i = 0; col_i < m.col_size(); ++col_i)
 				{
-					temp.at(row_i, col_i) = DST(m.at(row_i, col_i));
+					temp.at(row_i, col_i) = dst(m.at(row_i, col_i));
 				}
 			}
 			return move(temp);
