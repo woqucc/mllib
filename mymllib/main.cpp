@@ -17,8 +17,11 @@ using namespace myml::matrix_operate;
 int main(int argc, char* argv[])
 {
 	matrix<long double> m;
-	ifstream f(R"(binary_classification.txt)", ios::in);
+	matrix<long double> test({ {1,2,3,4,5} });
+
+	//ifstream f(R"(binary_classification.txt)", ios::in);
 	//ifstream f(R"(multi_classification.txt)", ios::in);
+	ifstream f(R"(multi_classification2.txt)", ios::in);
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 
 	//ifstream f(argv[1],ios::in);
@@ -63,8 +66,8 @@ int main(int argc, char* argv[])
 
 		*/
 		/*	matrix<size_t> label;
-			matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
-			auto label_map = matrix_normalized::serialize_label<long double, size_t>(m.col(m.col_size() - 1), label);
+			matrix_normalization::set_range<long double>(m, m.col_size() - 1, 0, 3);
+			auto label_map = matrix_normalization::serialize_label<long double, size_t>(m.col(m.col_size() - 1), label);
 			softmax_regression sr(m.col_size() - 1, label_map.size());
 			sr.set_theta(t.t());
 			//label += size_t(1);
@@ -76,9 +79,9 @@ int main(int argc, char* argv[])
 
 
 	matrix<size_t> label;
-	matrix_normalized::set_range<long double>(m, m.col_size() - 1, 0, 3);
+	//matrix_normalization::set_range<long double>(m, m.col_size() - 1, 0, 3);
 	matrix<long double> temp = m.col(m.col_size() - 1);
-	auto label_map = matrix_normalized::serialize_label<long double, size_t>(temp, label);
+	auto label_map = matrix_normalization::serialize_label<long double, size_t>(temp, label);
 	vector<size_t> us[6];
 	for (size_t row_i = 0; row_i < m.row_size(); row_i++)
 	{
@@ -99,11 +102,11 @@ int main(int argc, char* argv[])
 		r = rand() % m.row_size();
 
 		//sr.adadelta(m.cols(0, m.col_size() - 2), label);
-		//sr.adadelta(m.cols(0, m.col_size() - 2).row(r), label.row(r));
+		sr.adadelta(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//e = sr.error(m.cols(0, m.col_size() - 2), label);
-		sr.sgd(m.cols(0, m.col_size() - 2).row(r), label.row(r));
+		//sr.sgd(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//sr.sgd(m.cols(0, m.col_size() - 2), label);
-		//sr.sgd_momentum(m.cols(0, m.col_size() - 2).row(p), label.row(p));
+		//sr.sgd_momentum(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//sr.sgd_momentum(m.cols(0, m.col_size() - 2), label);
 		//sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
 		//sr.update_learning_rate_bd();
@@ -126,12 +129,6 @@ int main(int argc, char* argv[])
 	cout << "of" << sr.objective_function(m.cols(0, m.col_size() - 2), label) << endl;
 	cout << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	sr.print();
-	matrix<long double> p = sr.probabilities(m.cols(0, m.col_size() - 2));
-	matrix<long double> cm(label_map.size(), label_map.size());
-	for (size_t row_i = 0; row_i < p.row_size(); row_i++)
-	{
-		cm.at(p.row(row_i).max_position().second, label.at(row_i, 0))++;
-	}
-	cm.print(cout, '\t');
+	confusion_matrix(sr, m.cols(0, m.col_size() - 2), label);
 	return 0;
 }

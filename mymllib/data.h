@@ -308,7 +308,7 @@ namespace myml
 	template<class T>
 	inline void matrix<T>::print(ostream& out, char split) const
 	{
-		out.precision(4);
+		out.precision(6);
 		out << fixed;
 		for (size_t row = 0; row < row_size(); row++)
 		{
@@ -1050,7 +1050,7 @@ namespace myml
 		}
 		return true;
 	}
-	/*矩阵运算类*/
+	/*矩阵运算*/
 	namespace matrix_operate
 	{
 		template<class T>
@@ -1088,6 +1088,7 @@ namespace myml
 			}
 			return std::sqrt(sum);
 		}
+		/*矩阵乘以元素：矩阵中每一个元素乘以一个元素*/
 		template<class T>
 		matrix<T> operator* (const matrix<T>& a, const T& b)
 		{
@@ -1276,9 +1277,43 @@ namespace myml
 			}
 			return max;
 		}
+		template<class T>
+		T average(const matrix<T>& a)
+		{
+			T sum = 0;
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					sum += a.at(row_i, col_i);
+				}
+			}
+			return sum / (a.row_size() * a.col_size());
+		}
+		template<class T>
+		T variance(const matrix<T>& a)
+		{
+			//DX =  E(X^2) - (EX)^2
+			T aver = 0;
+			T aver_square = 0;
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					aver_square += a.at(row_i, col_i) * a.at(row_i, col_i);
+					aver += a.at(row_i, col_i);
+				}
+			}
+			//(EX)^2
+			aver /= a.row_size() * a.col_size();
+			aver *= aver;
+			//E(X^2)
+			aver_square /= a.row_size() * a.col_size();
+			return aver_square - aver;
+		}
 	}
 	/*矩阵数据标准化*/
-	namespace matrix_normalized {
+	namespace matrix_normalization {
 		/*设置元素值的范围，将大于上限upper_bound的元素设置为最大值，将小于下限lower_bound的元素设置为最小值*/
 		template<class T>
 		void set_range(matrix<T>& m, size_t column_num, T lower_bound, T upper_bound) {
@@ -1325,6 +1360,20 @@ namespace myml
 				static_cast<E&>(serialized_label.row(row_i)) = label_map[label_matrix.row(row_i)];
 			}
 			return label_map;
+		}
+		template<class T>
+		void zero_mean_normalization(matrix<T>& m)
+		{
+			for (size_t col_i = 0; col_i < m.col_size(); ++col_i)
+			{
+				T aver = 0;
+				T variance = 0;
+				for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
+				{
+					aver += m.at(row_i, col_i);
+					
+				}
+			}
 		}
 	};
 

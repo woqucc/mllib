@@ -31,6 +31,9 @@
     <Filter Include="头文件\optimizer">
       <UniqueIdentifier>{a1bd99c0-750c-4871-9d44-9ebcd16cc4e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{c5f27b3b-64d2-4c92-9cff-7b816adcb5d9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -73,8 +76,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="binary_classification.txt" />
-    <Text Include="multi_classification.txt" />
-    <Text Include="multiclass_theta.txt" />
+    <Text Include="multi_classification.txt">
+      <Filter>data</Filter>
+    </Text>
+    <Text Include="binary_classification.txt">
+      <Filter>data</Filter>
+    </Text>
+    <Text Include="multiclass_theta.txt">
+      <Filter>data</Filter>
+    </Text>
+    <Text Include="multi_classification2.txt">
+      <Filter>data</Filter>
+    </Text>
   </ItemGroup>
 </Project>
