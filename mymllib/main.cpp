@@ -17,11 +17,9 @@ using namespace myml::matrix_operate;
 int main(int argc, char* argv[])
 {
 	matrix<long double> m;
-	matrix<long double> test({ {1,2,3,4,5} });
-
-	//ifstream f(R"(binary_classification.txt)", ios::in);
+	ifstream f(R"(binary_classification.txt)", ios::in);
 	//ifstream f(R"(multi_classification.txt)", ios::in);
-	ifstream f(R"(multi_classification2.txt)", ios::in);
+	//ifstream f(R"(multi_classification2.txt)", ios::in);
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 
 	//ifstream f(argv[1],ios::in);
@@ -79,6 +77,7 @@ int main(int argc, char* argv[])
 
 
 	matrix<size_t> label;
+	matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	//matrix_normalization::set_range<long double>(m, m.col_size() - 1, 0, 3);
 	matrix<long double> temp = m.col(m.col_size() - 1);
 	auto label_map = matrix_normalization::serialize_label<long double, size_t>(temp, label);

@@ -1304,6 +1304,7 @@ namespace myml
 					aver += a.at(row_i, col_i);
 				}
 			}
+			/*防止上溢*/
 			//(EX)^2
 			aver /= a.row_size() * a.col_size();
 			aver *= aver;
@@ -1361,19 +1362,32 @@ namespace myml
 			}
 			return label_map;
 		}
+		/*
+		一列为一个
+		z-score 正则化：减去均值除以方差
+		*/
 		template<class T>
-		void zero_mean_normalization(matrix<T>& m)
+		void zero_mean_by_col(matrix<T>& m)
 		{
 			for (size_t col_i = 0; col_i < m.col_size(); ++col_i)
 			{
+				//DX =  E(X^2) - (EX)^2
 				T aver = 0;
 				T variance = 0;
 				for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
 				{
 					aver += m.at(row_i, col_i);
-					
+					variance += m.at(row_i, col_i) * m.at(row_i, col_i);
+				}
+				aver /= m.row_size();
+				variance /= m.row_size();
+				variance -=   aver * aver;
+				for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
+				{
+					m.at(row_i, col_i) = (m.at(row_i, col_i) - aver) / variance;
 				}
 			}
+
 		}
 	};
 
