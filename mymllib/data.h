@@ -1367,7 +1367,7 @@ namespace myml
 		z-score 正则化：减去均值除以方差
 		*/
 		template<class T>
-		void zero_mean_by_col(matrix<T>& m)
+		void zero_mean_by_col(matrix<T>&& m)//注意这里的参数类型为右值引用，这样写可以使函数可以绑定到右值上，相当于把右值当作左值使用
 		{
 			for (size_t col_i = 0; col_i < m.col_size(); ++col_i)
 			{

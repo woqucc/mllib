@@ -8,13 +8,6 @@ namespace myml
 	{
 		_theta.resize(label_size, feature_size + 1);
 		_theta.fill(0);
-		_pre_theta = _theta;
-
-		_error_matrix = _theta;
-
-		_grad_ewma = _theta;
-		_error_ewma = _theta;
-
 	}
 
 	void softmax_regression::load(const matrix<calc_param_type>& theta)
@@ -120,7 +113,9 @@ namespace myml
 		/*误差矩阵大小与_theta大小相同*/
 		matrix<feature_type> sum_error(_theta.row_size(), _theta.col_size());
 		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
-		/*累加每个特征向量的误差，预测减去准确，梯度下降算法*/
+		/*累加每个特征向量的误差，预测减去准确，梯度下降算法
+		正常是准确-预测，然后乘以负的系数，这里直接将负号带入
+		*/
 		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
 		{
 			for (size_t theta_i = 0; theta_i < predict_matrix.col_size(); ++theta_i)
@@ -137,6 +132,7 @@ namespace myml
 			/*补1*/
 			sum_error.col(_theta.col_size() - 1) = predict_matrix.col(col_i);
 		}
+		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/
 		sum_error /= calc_param_type(feature_matrix.row_size());
 		return sum_error;
 	}

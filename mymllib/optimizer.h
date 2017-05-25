@@ -1,9 +1,10 @@
 ﻿#ifndef OPTIMIZER_H
 #define OPTIMIZER_H
 #include"classifier.h"
+#include"data.h"
 namespace myml
 {
-
+	using namespace matrix_operate;
 	template<class feature_type, class label_type, class calc_param_type ,class class_param_type>
 	class optimizer
 	{
@@ -100,7 +101,7 @@ namespace myml
 	}
 
 	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	inline void grad_desc_optimizer<feature_type, label_type, calc_param_type, class_param_type>::sgd_adadelta(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, calc_param_type epsilon = 1E-6, calc_param_type rho = 0.95)
+	inline void grad_desc_optimizer<feature_type, label_type, calc_param_type, class_param_type>::sgd_adadelta(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, calc_param_type epsilon,calc_param_type rho)
 	{
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{

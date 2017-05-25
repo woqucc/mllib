@@ -53,16 +53,6 @@ namespace myml
 
 	private:
 		matrix<calc_param_type> _theta;
-		matrix<calc_param_type> _pre_theta;
-
-		calc_param_type _learning_rate = 1E-5L;
-
-		matrix<calc_param_type> _grad_ewma;
-		matrix<calc_param_type> _error_ewma;
-
-		/*仅在使用动量法进行梯度下降时使用*/
-		matrix<calc_param_type> _last_error_matrix;/*上一次误差*/
-		matrix<calc_param_type> _error_matrix;/*本次误差*/
 
 		grad_desc_optimizer<feature_type, label_type, calc_param_type,matrix<calc_param_type>> _opt;
 	};
