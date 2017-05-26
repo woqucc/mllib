@@ -39,14 +39,14 @@ int main(int argc, char* argv[])
 	{
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
-	softmax_regression sr(m.col_size() - 1, label_map.size());
-	int n = 50000;
+	ridge_softmax_regression sr(m.col_size() - 1, label_map.size());
+	int n = 2000;
 	size_t r = 0;
 	int out_count = 0;
 	srand(time(nullptr));
 	long double e = 0;
 	long double acc = 0;
-	while (acc < 0.97 || n-- > 0)
+	while (n-- > 0)
 	{
 
 		/*size_t tr = rand() % 4;
@@ -54,16 +54,16 @@ int main(int argc, char* argv[])
 		r = rand() % m.row_size();
 
 		//sr.adadelta(m.cols(0, m.col_size() - 2), label);
-		sr.adadelta(m.cols(0, m.col_size() - 2).row(r), label.row(r));
+		//sr.adadelta(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//e = sr.error(m.cols(0, m.col_size() - 2), label);
 		//sr.sgd(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//sr.sgd(m.cols(0, m.col_size() - 2), label);
 		//sr.sgd_momentum(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//sr.sgd_momentum(m.cols(0, m.col_size() - 2), label);
-		//sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
+		sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
 		//sr.update_learning_rate_bd();
 		//
-		if (out_count++ % 20000 == 0)
+		if (out_count++ % 200 == 0)
 		{
 			acc = sr.accuracy(m.cols(0, m.col_size() - 2), label);
 			e = sr.objective_function(m.cols(0, m.col_size() - 2), label);

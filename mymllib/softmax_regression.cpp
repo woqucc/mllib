@@ -71,7 +71,7 @@ namespace myml
 
 	void softmax_regression::adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix, calc_param_type epsilon, calc_param_type rho)
 	{
-		_opt.sgd_adadelta(_theta, *this, feature_matrix, label_matrix,epsilon,rho);
+		_opt.sgd_adadelta(_theta, *this, feature_matrix, label_matrix, epsilon, rho);
 	}
 
 	calc_param_type softmax_regression::accuracy(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
@@ -138,14 +138,63 @@ namespace myml
 	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{
-		calc_param_type cur_error = 0;
-
+		calc_param_type of = 0;
 		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
 		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
 		{
 			size_t label = label_matrix.at(row_i, 0);
-			cur_error += predict_matrix.at(row_i, label);
+			of += predict_matrix.at(row_i, label);
 		}
-		return cur_error;
+		return of;
+	}
+
+
+	ridge_softmax_regression::ridge_softmax_regression(size_t feature_count, size_t label_count) :softmax_regression(feature_count, label_count)
+	{
+
+	}
+	matrix<calc_param_type> ridge_softmax_regression::gradient(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	{
+		/*误差矩阵大小与_theta大小相同*/
+		matrix<feature_type> sum_error(_theta.row_size(), _theta.col_size());
+		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
+		/*累加每个特征向量的误差，预测减去准确，梯度下降算法
+		正常是准确-预测，然后乘以负的系数，这里直接将负号带入
+		*/
+		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
+		{
+			for (size_t theta_i = 0; theta_i < predict_matrix.col_size(); ++theta_i)
+			{
+				predict_matrix.at(row_i, theta_i) = predict_matrix.at(row_i, theta_i) - (theta_i == label_matrix.row(row_i) ? 1 : 0) ;
+			}
+
+		}
+		predict_matrix.transpose();
+		/*预测结果的每一列误差，乘以对应的特征向量项，*/
+		for (size_t col_i = 0; col_i < predict_matrix.col_size(); ++col_i)
+		{
+			sum_error.cols(0, _theta.col_size() - 2) += predict_matrix.col(col_i) * feature_matrix.row(col_i) ;
+			/*补1*/
+			sum_error.col(_theta.col_size() - 1) = predict_matrix.col(col_i);
+		}
+		
+		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/
+		sum_error /= calc_param_type(feature_matrix.row_size());
+		//加入对目标函数中L2范数项的导数
+		sum_error += _theta * 1E-6L;
+		return sum_error;
+	}
+	calc_param_type ridge_softmax_regression::objective_function(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	{
+		calc_param_type of = 0;
+		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
+		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
+		{
+			size_t label = label_matrix.at(row_i, 0);
+			of += predict_matrix.at(row_i, label);
+		}
+		//在此加入L2范数，目标函数为另似然函数最大且L2范数最小
+		of -= norm_f(_theta)* 1E-6L;
+		return of;
 	}
 }

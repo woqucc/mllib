@@ -1077,7 +1077,7 @@ namespace myml
 			}
 			return sum;
 		}
-		/*矩阵的f范数*/
+		/*矩阵的f范数,向量的二范数*/
 		template<class T>
 		long double norm_f(const matrix<T>& matrix)
 		{

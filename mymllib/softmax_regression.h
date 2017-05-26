@@ -51,13 +51,19 @@ namespace myml
 		*/
 		virtual matrix<calc_param_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const;
 
-	private:
+	protected:
 		matrix<calc_param_type> _theta;
 
 		grad_desc_optimizer<feature_type, label_type, calc_param_type,matrix<calc_param_type>> _opt;
 	};
 
-
+	class ridge_softmax_regression : public softmax_regression
+	{
+	public:
+		ridge_softmax_regression(size_t feature_count, size_t label_count);
+		virtual matrix<calc_param_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
+		calc_param_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
+	};
 
 }
 #endif // !SOFTMAX_REGRESSION
