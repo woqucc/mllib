@@ -142,6 +142,12 @@ namespace myml
 		*/
 		virtual void swap_row(size_t row1, size_t row2);
 		/*
+		@brief 交换两行
+		@param row1 待交换的行1
+		@param row2 待交换的行2
+		*/
+		virtual void swap_col(size_t col1, size_t col2);
+		/*
 		@brief 获取某一元素
 		@param row_num 行数
 		@param col_num 列数
@@ -205,6 +211,7 @@ namespace myml
 		*/
 		matrix& operator %=(const T t);
 
+		T& operator ()(size_t row, size_t col);
 		/*
 		@brief 本矩阵每个元素都exp
 		*/
@@ -288,8 +295,8 @@ namespace myml
 		bool has_data();
 		/*转置本矩阵*/
 		void transpose();
-		/*生成新的转置过的矩阵*/
-		matrix<T> t() const;
+		/*将本矩阵变为本矩阵的逆*/
+		void inverse();
 		/*最大元素的位置*/
 		pair<size_t, size_t> max_position() const;
 		/*最大元素*/
@@ -371,6 +378,11 @@ namespace myml
 	{
 		each_ele(ele %= t);
 		return *this;
+	}
+	template<class T>
+	inline T & matrix<T>::operator()(size_t row, size_t col)
+	{
+		return _data[row][col];
 	}
 	template<class T>
 	inline matrix<T> & matrix<T>::exp()
@@ -741,19 +753,81 @@ namespace myml
 		_data = t_data;
 		_memory = t_memory;
 	}
+
 	template<class T>
-	inline matrix<T> matrix<T>::t() const
+	inline void matrix<T>::inverse()
 	{
-		matrix<T> temp(_col_size, _row_size);
-		for (size_t row_i = 0; row_i < _col_size; ++row_i)
+		assert(_col_size == _row_size);
+		valarray<pair<size_t, size_t>> history(_row_size);
+		T fdet = T(1);
+		for (size_t k = 0; k < _row_size; ++k)
 		{
-			for (size_t col_i = 0; col_i < _row_size; ++col_i)
+			T max = T(0);
+			history[k] = { k,k };
+			for (size_t row_i = k; row_i < _row_size; ++row_i)
 			{
-				temp.at(row_i, col_i) = _data[col_i][row_i];
+				for (size_t col_i = k; col_i < _row_size; ++col_i)
+				{
+					if (abs(_data[row_i][col_i]) > max)
+					{
+						max = abs(_data[row_i][col_i]);
+						history[k] = { row_i,col_i };
+					}
+				}
+			}
+			/*可逆检查*/
+			assert(max > T(0));
+			if (history[k].first != k)
+			{
+				swap_row(history[k].first, k);
+			}
+			if (history[k].second != k)
+			{
+				swap_col(history[k].second, k);
+			}
+			fdet *= _data[k][k];
+			_data[k][k] = T(1) / _data[k][k];
+			// 第三步  
+			for (int j = 0; j < _row_size; j++)
+			{
+				if (j != k)
+					_data[k][j] *= _data[k][k];
+			}
+			// 第四步  
+			for (int i = 0; i < _row_size; i++)
+			{
+				if (i != k)
+				{
+					for (int j = 0; j < _row_size; j++)
+					{
+						if (j != k)
+							_data[i][j] = _data[i][j] - _data[i][k] * _data[k][j];
+					}
+				}
+			}
+			// 第五步  
+			for (int i = 0; i < _col_size; i++)
+			{
+				if (i != k)
+					_data[i][k] *= -_data[k][k];
+			}
+			
+		}
+
+		for (int k = _row_size - 1; k >= 0; k--)
+		{
+			if (history[k].first != k)
+			{
+				swap_col(history[k].first, k);
+			}
+			if (history[k].second != k)
+			{
+				swap_row(history[k].second, k);
+	
 			}
 		}
-		return temp;
 	}
+
 	template<class T>
 	inline pair<size_t, size_t> matrix<T>::max_position() const
 	{
@@ -868,6 +942,15 @@ namespace myml
 		T * temp_row = _data[row1];
 		_data[row1] = _data[row2];
 		_data[row2] = temp_row;
+	}
+
+	template<class T>
+	inline void matrix<T>::swap_col(size_t col1, size_t col2)
+	{
+		for (size_t row_i = 0; row_i < _row_size; ++row_i)
+		{
+			std::swap(_data[row_i][col1], _data[row_i][col2]);
+		}
 	}
 
 	template<class T>
@@ -1207,6 +1290,19 @@ namespace myml
 			}
 			return move(temp);
 		}
+		template<class T>
+		matrix<T> transpose(const matrix<T>& m)
+		{
+			matrix<T> temp(m.col_size(), m.row_size());
+			for (size_t row_i = 0; row_i < m.col_size(); ++row_i)
+			{
+				for (size_t col_i = 0; col_i < m.row_size(); ++col_i)
+				{
+					temp.at(row_i, col_i) = m.at(col_i, row_i);
+				}
+			}
+			return temp;
+		}
 		/*
 		矩阵相除：相同大小的矩阵对应位置相除
 		*/
@@ -1381,7 +1477,7 @@ namespace myml
 				}
 				aver /= m.row_size();
 				variance /= m.row_size();
-				variance -=   aver * aver;
+				variance -= aver * aver;
 				for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
 				{
 					m.at(row_i, col_i) = (m.at(row_i, col_i) - aver) / variance;

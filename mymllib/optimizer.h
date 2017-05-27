@@ -25,7 +25,7 @@ namespace myml
 	{
 	public:
 		grad_desc_optimizer(size_t feature_size, size_t label_size);
-		calc_param_type learning_rate = 1E-2;
+		calc_param_type learning_rate = 1E-5;
 
 		/*
 		随机梯度下降，计算单独样本的梯度后更新

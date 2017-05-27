@@ -40,7 +40,7 @@ namespace myml
 		void adadelta(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix, calc_param_type epsilon = 1E-6, calc_param_type rho = 0.95);
 
 		/*批量梯度下降，如果传入的样本的batch为全部样本，则为正常的梯度下降*/
-		void batch_sgd(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
+		void batch_gd(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
 
 
 		/*
@@ -57,10 +57,11 @@ namespace myml
 		grad_desc_optimizer<feature_type, label_type, calc_param_type,matrix<calc_param_type>> _opt;
 	};
 
-	class ridge_softmax_regression : public softmax_regression
+	class softmax_regression_ridge : public softmax_regression
 	{
 	public:
-		ridge_softmax_regression(size_t feature_count, size_t label_count);
+		calc_param_type _lambda = 1E-8L;
+		softmax_regression_ridge(size_t feature_count, size_t label_count);
 		virtual matrix<calc_param_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
 		calc_param_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
 	};

@@ -25,10 +25,8 @@ int main(int argc, char* argv[])
 	//ifstream f(argv[1],ios::in);
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 	import_matrix_data(m, f, ' ');
-	matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
+	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 
-
-	
 	matrix<size_t> label;
 	matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	//matrix_normalization::set_range<long double>(m, m.col_size() - 1, 0, 3);
@@ -39,7 +37,7 @@ int main(int argc, char* argv[])
 	{
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
-	ridge_softmax_regression sr(m.col_size() - 1, label_map.size());
+	softmax_regression_ridge sr(m.col_size() - 1, label_map.size());
 	int n = 2000;
 	size_t r = 0;
 	int out_count = 0;
@@ -60,7 +58,7 @@ int main(int argc, char* argv[])
 		//sr.sgd(m.cols(0, m.col_size() - 2), label);
 		//sr.sgd_momentum(m.cols(0, m.col_size() - 2).row(r), label.row(r));
 		//sr.sgd_momentum(m.cols(0, m.col_size() - 2), label);
-		sr.batch_sgd(m.cols(0, m.col_size() - 2), label);
+		sr.batch_gd(m.cols(0, m.col_size() - 2), label);
 		//sr.update_learning_rate_bd();
 		//
 		if (out_count++ % 200 == 0)
@@ -78,8 +76,8 @@ int main(int argc, char* argv[])
 		}
 		//cerr << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	}
-	cout << "of" << sr.objective_function(m.cols(0, m.col_size() - 2), label) << endl;
-	cout << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
+	cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 2), label) << '\t';
+	cout << "acc:" << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	sr.print();
 	confusion_matrix(sr, m.cols(0, m.col_size() - 2), label);
 	return 0;

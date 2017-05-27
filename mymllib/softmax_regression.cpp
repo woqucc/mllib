@@ -21,7 +21,7 @@ namespace myml
 		/*最后一列填1*/
 		feature.cols(0, feature_size - 1) = feature_matrix;
 		feature.col(feature_size).fill(1);
-		matrix<calc_param_type> predict_result = feature*_theta.t();
+		matrix<calc_param_type> predict_result = feature* transpose(_theta);
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
 			/*
@@ -64,7 +64,7 @@ namespace myml
 		_opt.sgd_momentum(_theta, *this, feature_matrix, label_matrix, rho, eit);
 	}
 
-	void softmax_regression::batch_sgd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
+	void softmax_regression::batch_gd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
 		_opt.batch_gd(_theta, *this, feature_matrix, label_matrix);
 	}
@@ -93,7 +93,7 @@ namespace myml
 		/*最后一列填1*/
 		feature.cols(0, feature_size - 1) = feature_matrix;
 		feature.col(feature_size).fill(1);
-		matrix<calc_param_type> prob_matrix = feature*_theta.t();
+		matrix<calc_param_type> prob_matrix = feature*transpose(_theta);
 
 		matrix<label_type> predict_result(feature_matrix.row_size(), 1);
 		for (size_t i = 0; i < feature_matrix.row_size(); ++i)
@@ -149,11 +149,11 @@ namespace myml
 	}
 
 
-	ridge_softmax_regression::ridge_softmax_regression(size_t feature_count, size_t label_count) :softmax_regression(feature_count, label_count)
+	softmax_regression_ridge::softmax_regression_ridge(size_t feature_count, size_t label_count) :softmax_regression(feature_count, label_count)
 	{
 
 	}
-	matrix<calc_param_type> ridge_softmax_regression::gradient(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	matrix<calc_param_type> softmax_regression_ridge::gradient(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
 	{
 		/*误差矩阵大小与_theta大小相同*/
 		matrix<feature_type> sum_error(_theta.row_size(), _theta.col_size());
@@ -181,10 +181,10 @@ namespace myml
 		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/
 		sum_error /= calc_param_type(feature_matrix.row_size());
 		//加入对目标函数中L2范数项的导数
-		sum_error += _theta * 1E-6L;
+		sum_error += _theta * _lambda;
 		return sum_error;
 	}
-	calc_param_type ridge_softmax_regression::objective_function(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	calc_param_type softmax_regression_ridge::objective_function(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
 	{
 		calc_param_type of = 0;
 		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
@@ -194,7 +194,7 @@ namespace myml
 			of += predict_matrix.at(row_i, label);
 		}
 		//在此加入L2范数，目标函数为另似然函数最大且L2范数最小
-		of -= norm_f(_theta)* 1E-6L;
+		of -= norm_f(_theta)* _lambda;
 		return of;
 	}
 }
