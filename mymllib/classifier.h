@@ -11,6 +11,8 @@ namespace myml
 	class classifier
 	{
 	public:
+		size_t feature_size;/*特征个数*/
+		size_t label_size;/*类别个数*/
 		/*
 		@brief 预测
 		@param in feature_matrix特征矩阵，其中每一行为一个样本
@@ -61,10 +63,16 @@ namespace myml
 		*/
 		classifier(size_t feature_size, size_t label_size);
 
-		/*计算梯度，需要使用梯度训练的分类器覆盖该方法*/
-		virtual matrix<calc_param_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const { assert(false); return matrix<calc_param_type>(); };
-		size_t feature_size;
-		size_t label_size;
+		/*
+		计算梯度，需要使用梯度的优化方法的分类器需要覆盖该函数
+		否则直接报错
+		*/
+		virtual matrix<calc_param_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const { assert(false); return matrix<calc_param_type>(); }
+		/*
+		返回海森矩阵，需要使用海森矩阵的优化方法的分类器需要覆盖该函数
+		否则直接报错
+		*/
+		virtual matrix<calc_param_type> hessian(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const { assert(false); return matrix<calc_param_type>(); }
 	};
 
 	template<class feature_type, class label_type, class calc_param_type>

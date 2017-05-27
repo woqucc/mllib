@@ -51,6 +51,7 @@ namespace myml
 		*/
 		virtual matrix<calc_param_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const;
 
+		virtual matrix<calc_param_type> hessian(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
 	protected:
 		matrix<calc_param_type> _theta;
 

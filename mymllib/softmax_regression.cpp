@@ -136,6 +136,10 @@ namespace myml
 		sum_error /= calc_param_type(feature_matrix.row_size());
 		return sum_error;
 	}
+	matrix<calc_param_type> softmax_regression::hessian(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	{
+		return matrix<calc_param_type>();
+	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{
 		calc_param_type of = 0;
