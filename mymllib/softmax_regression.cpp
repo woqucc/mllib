@@ -138,7 +138,12 @@ namespace myml
 	}
 	matrix<calc_param_type> softmax_regression::hessian(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
 	{
-		return matrix<calc_param_type>();
+		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
+		/*最后一列填1*/
+		feature.cols(0, feature_size - 1) = feature_matrix;
+		feature.col(feature_size).fill(1);
+		matrix<calc_param_type> hessian = feature * transpose(_theta.row(0)) * transpose(feature);// *feature;
+		return hessian;
 	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{
@@ -169,7 +174,7 @@ namespace myml
 		{
 			for (size_t theta_i = 0; theta_i < predict_matrix.col_size(); ++theta_i)
 			{
-				predict_matrix.at(row_i, theta_i) = predict_matrix.at(row_i, theta_i) - (theta_i == label_matrix.row(row_i) ? 1 : 0) ;
+				predict_matrix.at(row_i, theta_i) = predict_matrix.at(row_i, theta_i) - (theta_i == label_matrix.row(row_i) ? 1 : 0);
 			}
 
 		}
@@ -177,11 +182,11 @@ namespace myml
 		/*预测结果的每一列误差，乘以对应的特征向量项，*/
 		for (size_t col_i = 0; col_i < predict_matrix.col_size(); ++col_i)
 		{
-			sum_error.cols(0, _theta.col_size() - 2) += predict_matrix.col(col_i) * feature_matrix.row(col_i) ;
+			sum_error.cols(0, _theta.col_size() - 2) += predict_matrix.col(col_i) * feature_matrix.row(col_i);
 			/*补1*/
 			sum_error.col(_theta.col_size() - 1) = predict_matrix.col(col_i);
 		}
-		
+
 		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/
 		sum_error /= calc_param_type(feature_matrix.row_size());
 		//加入对目标函数中L2范数项的导数

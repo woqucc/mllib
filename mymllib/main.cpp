@@ -37,7 +37,8 @@ int main(int argc, char* argv[])
 	{
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
-	softmax_regression_ridge sr(m.col_size() - 1, label_map.size());
+	softmax_regression sr(m.col_size() - 1, label_map.size());
+	sr.hessian(m.cols(0, m.col_size() - 2), label);
 	int n = 2000;
 	size_t r = 0;
 	int out_count = 0;
