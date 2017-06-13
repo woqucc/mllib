@@ -142,8 +142,25 @@ namespace myml
 		/*最后一列填1*/
 		feature.cols(0, feature_size - 1) = feature_matrix;
 		feature.col(feature_size).fill(1);
-		matrix<calc_param_type> hessian = feature * transpose(_theta.row(0)) * transpose(feature);// *feature;
-		return hessian;
+
+
+		matrix<calc_param_type> hessian_matrix(feature.col_size() * label_size, feature.col_size() * label_size);
+		matrix<calc_param_type> predict_matrix = probabilities(feature_matrix);
+		matrix<calc_param_type> lambda_matrix(feature_matrix.row_size(), feature_matrix.row_size());
+		//k
+		for (size_t row_i = 0; row_i < label_size; ++row_i)
+		{
+			//j
+			for (size_t col_i = 0; col_i < label_size; ++col_i)
+			{
+				for (size_t lambda_i = 0; lambda_i < feature_matrix.row_size(); ++lambda_i)
+				{
+					lambda_matrix.at(lambda_i, lambda_i) = predict_matrix.at(lambda_i, col_i) * (row_i == col_i ? 1 : 0 - predict_matrix.at(lambda_i, col_i));
+				}
+				hessian_matrix.sub_matrix(row_i * feature.col_size(), col_i * feature.col_size(), (row_i + 1) *  feature.col_size() - 1, (col_i + 1)* feature.col_size() - 1) = (transpose(feature) * lambda_matrix * feature);
+			}
+		}
+		return hessian_matrix;
 	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{

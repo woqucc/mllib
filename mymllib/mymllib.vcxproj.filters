@@ -88,5 +88,8 @@
     <Text Include="multi_classification2.txt">
       <Filter>data</Filter>
     </Text>
+    <Text Include="hessian_test.txt">
+      <Filter>data</Filter>
+    </Text>
   </ItemGroup>
 </Project>

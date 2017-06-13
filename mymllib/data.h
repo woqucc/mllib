@@ -811,7 +811,7 @@ namespace myml
 				if (i != k)
 					_data[i][k] *= -_data[k][k];
 			}
-			
+
 		}
 
 		for (int k = _row_size - 1; k >= 0; k--)
@@ -823,7 +823,7 @@ namespace myml
 			if (history[k].second != k)
 			{
 				swap_row(history[k].second, k);
-	
+
 			}
 		}
 	}
@@ -1049,6 +1049,7 @@ namespace myml
 	template<class T>
 	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const matrix<T> & rn)
 	{
+		assert(_row_size == rn.row_size() && _col_size == rn.col_size());
 		for (size_t row_i = 0; row_i < _row_size; row_i++)
 		{
 			memcpy(_data[row_i], rn.raw_data()[row_i], sizeof(T) / sizeof(char) * _col_size);
@@ -1408,7 +1409,116 @@ namespace myml
 			aver_square /= a.row_size() * a.col_size();
 			return aver_square - aver;
 		}
+		/*克罗内克积*/
+		template<class T>
+		matrix<T> kronecker_product(const matrix<T>& a, const matrix<T>& b)
+		{
+			matrix<T> result(a.row_size() * b.row_size(), a.col_size() * b.col_size());
+			for (size_t row_i = 0; row_i < result.row_size(); ++row_i)
+			{
+				for (size_t col_i = 0; col_i < result.col_size(); ++col_i)
+				{
+					//TODO:未完成
+					assert(false);
+				}
+			}
+			return result;
+		}
+		/*变形*/
+
+		template<class T>
+		matrix<T> reshape(const matrix<T> &ori, size_t row_size, size_t col_size)
+		{
+
+		}
+		template<class T>
+		matrix<T> inverse(const matrix<T> &ori)
+		{
+			assert(ori.row_size() == ori.col_size());
+			matrix<T> m = ori;
+			valarray<pair<size_t, size_t>> history(m.row_size());
+			T fdet = T(1);
+			for (size_t k = 0; k < m.row_size(); ++k)
+			{
+				T max = T(0);
+				history[k] = { k,k };
+				for (size_t row_i = k; row_i < m.row_size(); ++row_i)
+				{
+					for (size_t col_i = k; col_i < m.row_size(); ++col_i)
+					{
+						if (abs(m.at(row_i, col_i)) > max)
+						{
+							max = abs(m.at(row_i, col_i));
+							history[k] = { row_i,col_i };
+						}
+					}
+				}
+				/*可逆检查*/
+				assert(max > T(0));
+				if (history[k].first != k)
+				{
+					m.swap_row(history[k].first, k);
+				}
+				if (history[k].second != k)
+				{
+					m.swap_col(history[k].second, k);
+				}
+				fdet *= m.at(k, k);
+				m.at(k, k) = T(1) / m.at(k, k);
+				// 第三步  
+				for (size_t j = 0; j < m.row_size(); ++j)
+				{
+					if (j != k)
+						m.at(k, j) *= m.at(k, k);
+				}
+				// 第四步  
+				for (size_t i = 0; i < m.row_size(); ++i)
+				{
+					if (i != k)
+					{
+						for (size_t j = 0; j < m.row_size(); ++j)
+						{
+							if (j != k)
+								m.at(i, j) = m.at(i, j) - m.at(i, k) * m.at(k, j);
+						}
+					}
+				}
+				// 第五步  
+				for (size_t i = 0; i < m.col_size(); ++i)
+				{
+					if (i != k)
+						m.at(i, k) *= -m.at(k, k);
+				}
+
+			}
+			for (size_t k = m.row_size() - 1; k >= 0; --k)
+			{
+				if (history[k].first != k)
+				{
+					m.swap_col(history[k].first, k);
+				}
+				if (history[k].second != k)
+				{
+					m.swap_row(history[k].second, k);
+
+				}
+			}
+			return m;
+		}
+		/*生成单位矩阵*/
+		template<class T>
+		matrix<T> identity_matrix(const size_t& size)
+		{
+			matrix<T> result(size, size);
+			for (size_t i = 0; i < size; i++)
+			{
+				result.at(i, i) = T(1);
+			}
+			return result;
+		}
+
 	}
+
 	/*矩阵数据标准化*/
 	namespace matrix_normalization {
 		/*设置元素值的范围，将大于上限upper_bound的元素设置为最大值，将小于下限lower_bound的元素设置为最小值*/
