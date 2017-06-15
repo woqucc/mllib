@@ -116,7 +116,12 @@ namespace myml
 			_error_square_ewma = _error_square_ewma * rho + dot(_error, _error) * (1 - rho);
 		}
 	}
+	/*模板：计算过程中使用的参数类型，传递的参数类型*/
+	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
+	class newton_optimizer :optimizer<feature_type, label_type, calc_param_type, class_param_type>
+	{
 
+	};
 }
 #endif // !OPTIMIZER_H
 

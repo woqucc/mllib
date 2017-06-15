@@ -142,11 +142,24 @@ namespace myml
 		/*最后一列填1*/
 		feature.cols(0, feature_size - 1) = feature_matrix;
 		feature.col(feature_size).fill(1);
-
-
-		matrix<calc_param_type> hessian_matrix(feature.col_size() * label_size, feature.col_size() * label_size);
+		size_t theta_size = feature_size + 1;
+		//海森矩阵大小 (特征数+1)*类别个数x(特征数+1)*类别个数
+		matrix<calc_param_type> hessian_matrix(theta_size * label_size, theta_size * label_size);
 		matrix<calc_param_type> predict_matrix = probabilities(feature_matrix);
-		matrix<calc_param_type> lambda_matrix(feature_matrix.row_size(), feature_matrix.row_size());
+		matrix<calc_param_type> grad = reshape(gradient(feature_matrix, label_matrix), feature_size * label_size + label_size,1);
+		for (size_t label_i = 0; label_i < label_size; ++label_i)
+		{
+			predict_matrix = probabilities(feature_matrix);
+			matrix<calc_param_type> w_diag = dot(predict_matrix.col(label_i),1.0L - predict_matrix.col(label_i));
+			hessian_matrix.sub_matrix(label_i * theta_size, label_i * theta_size, label_i * theta_size + theta_size - 1, label_i * theta_size + theta_size - 1) = transpose(feature) * diag(w_diag) * feature;
+			for (size_t other_label = label_i + 1; other_label < label_size; ++other_label)
+			{
+				matrix<calc_param_type> w_off_diag = -dot(predict_matrix.col(label_i), predict_matrix.col(other_label));
+				hessian_matrix.sub_matrix(label_i * theta_size, other_label * theta_size, label_i * theta_size + theta_size - 1, other_label * theta_size + theta_size - 1) = transpose(feature) * diag(w_off_diag) * feature;
+				hessian_matrix.sub_matrix(other_label * theta_size, label_i * theta_size, other_label * theta_size + theta_size - 1, label_i * theta_size + theta_size - 1) = transpose(feature) * diag(w_off_diag) * feature;
+			}
+		}
+		/*matrix<calc_param_type> lambda_matrix(feature_matrix.row_size(), feature_matrix.row_size());
 		//k
 		for (size_t row_i = 0; row_i < label_size; ++row_i)
 		{
@@ -159,7 +172,9 @@ namespace myml
 				}
 				hessian_matrix.sub_matrix(row_i * feature.col_size(), col_i * feature.col_size(), (row_i + 1) *  feature.col_size() - 1, (col_i + 1)* feature.col_size() - 1) = (transpose(feature) * lambda_matrix * feature);
 			}
-		}
+		}*/
+		(inverse(hessian_matrix) * grad).print();
+		_theta -= reshape(inverse(hessian_matrix) * grad,theta_size,label_size);
 		return hessian_matrix;
 	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const

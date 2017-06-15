@@ -33,7 +33,7 @@ namespace myml
 		//将valarray作为可以push_back的一种形式
 		using index_array = valarray<size_t>;
 		/*遍历元素,row_i,col_i为迭代坐标*/
-#define each_ele(op) for (size_t row_i = 0; row_i < _row_size; row_i++) {for (size_t col_i = 0; col_i < _col_size; col_i++){op;}}
+#define each_ele(op) for (size_t row_i = 0; row_i < _row_size; ++row_i) {for (size_t col_i = 0; col_i < _col_size; ++col_i){op;}}
 #define ele _data[row_i][col_i]
 		class iterator : public std::iterator<std::random_access_iterator_tag, T, ptrdiff_t, T*, T&>
 		{
@@ -721,7 +721,7 @@ namespace myml
 	template<class T>
 	inline void matrix<T>::fill(const T & t)
 	{
-		each_ele(_data[row_i][col_i] = t);
+		each_ele(ele = t);
 	}
 	template<class T>
 	inline bool matrix<T>::has_data()
@@ -1212,7 +1212,7 @@ namespace myml
 			}
 			return move(temp);
 		}
-
+		/*矩阵减元素，矩阵中每个元素减去同一个元素*/
 		template<class T>
 		matrix<T> operator- (const matrix<T>& a, const T& b)
 		{
@@ -1226,6 +1226,35 @@ namespace myml
 			}
 			return move(temp);
 		}
+		/*元素减矩阵，矩阵中每个元素减去同一个元素*/
+		template<class T>
+		matrix<T> operator- (const T& b, const matrix<T>& a)
+		{
+			matrix<T> temp(a.row_size(), a.col_size());
+			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = b - a.at(row_i, col_i);
+				}
+			}
+			return move(temp);
+		}
+		/*元素减矩阵，矩阵中每个元素减去同一个元素*/
+		template<class T>
+		matrix<T> operator- (const matrix<T>& input)
+		{
+			matrix<T> output(input.row_size(), input.col_size());
+			for (size_t row_i = 0; row_i < input.row_size(); ++row_i)
+			{
+				for (size_t col_i = 0; col_i < input.col_size(); ++col_i)
+				{
+					output.at(row_i, col_i) = -input.at(row_i, col_i);
+				}
+			}
+			return output;
+		}
+		/*矩阵相加*/
 		template<class T>
 		inline matrix<T> operator+(const matrix<T>& a, const matrix<T>& b)
 		{
@@ -1240,6 +1269,7 @@ namespace myml
 			}
 			return move(temp);
 		}
+
 		template<class T>
 		inline matrix<T> operator-(const matrix<T>& a, const matrix<T>& b)
 		{
@@ -1409,6 +1439,20 @@ namespace myml
 			aver_square /= a.row_size() * a.col_size();
 			return aver_square - aver;
 		}
+		/*根据所给矩阵生成对角阵，生成对角阵为所给矩阵元素总数大小的方阵*/
+		template<class T>
+		matrix<T> diag(const matrix<T>& input)
+		{
+			matrix<T> d(input.row_size() * input.col_size(), input.row_size() * input.col_size());
+			d.fill(T(0));
+			size_t index = 0;
+			for (const auto& i : input)
+			{
+				d.at(index, index) = i;
+				++index;
+			}
+			return d;
+		}
 		/*克罗内克积*/
 		template<class T>
 		matrix<T> kronecker_product(const matrix<T>& a, const matrix<T>& b)
@@ -1429,7 +1473,18 @@ namespace myml
 		template<class T>
 		matrix<T> reshape(const matrix<T> &ori, size_t row_size, size_t col_size)
 		{
-
+			assert(ori.row_size() * ori.col_size() == row_size * col_size);
+			matrix<T> result(row_size, col_size);
+			size_t ori_count = 0;
+			for (size_t row_i = 0; row_i < row_size; ++row_i)
+			{
+				for (size_t col_i = 0; col_i < col_size; ++col_i)
+				{
+					result.at(row_i, col_i) = ori.at(ori_count / ori.row_size(), ori_count% ori.row_size());
+					++ori_count;
+				}
+			}
+			return result;
 		}
 		template<class T>
 		matrix<T> inverse(const matrix<T> &ori)
@@ -1491,7 +1546,7 @@ namespace myml
 				}
 
 			}
-			for (size_t k = m.row_size() - 1; k >= 0; --k)
+			for (long long k = m.row_size() - 1; k >= 0; --k)
 			{
 				if (history[k].first != k)
 				{
