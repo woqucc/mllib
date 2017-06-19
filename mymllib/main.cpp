@@ -39,18 +39,18 @@ int main(int argc, char* argv[])
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
 	softmax_regression sr(m.col_size() - 1, label_map.size());
-	//sr.load({ { 0.4709,0.5486,0.1839 },{ -2.5932,6.0889,-2.3215 },{ 3.2777,-1.2836,0.0483 } });
-	matrix<long double> h = sr.hessian(m.cols(0, m.col_size() - 2), label);
-	h.print();
-	
-	cerr << endl;
-	//auto hc = reshape(h, 1, 81);
-	cerr << endl;
-	//hc.print();
-	auto hi = inverse(h);
-	hi.print();
-	(h * hi).print();
-	int n = 2000;
+	matrix<long double> theta = { { 0.5486,0.1839,0.4709 } ,{ 6.0889,-2.3215,-2.5932 },{ -1.2836,0.0483,3.2777 } };
+	//theta.transpose();
+	sr.load(theta);
+	cerr << sr.objective_function(m.cols(0, m.col_size() - 2), label);
+	int n = 100;
+	while (n--)
+	{
+		sr.train(m.cols(0, m.col_size() - 2), label);
+	}
+
+
+	confusion_matrix(sr, m.cols(0, m.col_size() - 2), label).print();
 	/*size_t r = 0;
 	int out_count = 0;
 	srand(time(nullptr));
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 			sr.print();
 			cout << "c ma:" << endl;
 			confusion_matrix(sr, m.cols(0, m.col_size() - 2), label).print();
-		
+
 			//sr.predict(m.cols(0, m.col_size() - 2)).print();
 
 		}

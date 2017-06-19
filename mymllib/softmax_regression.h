@@ -54,7 +54,7 @@ namespace myml
 		virtual matrix<calc_param_type> hessian(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
 	protected:
 		matrix<calc_param_type> _theta;
-
+		newton_raphson_optimizer<feature_type, label_type, calc_param_type, matrix<calc_param_type>> _nopt;
 		grad_desc_optimizer<feature_type, label_type, calc_param_type,matrix<calc_param_type>> _opt;
 	};
 

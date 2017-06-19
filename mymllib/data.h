@@ -413,6 +413,7 @@ namespace myml
 	template<class T>
 	inline matrix<T> matrix<T>::operator-=(const matrix<T>& t)
 	{
+		assert(_row_size == t.row_size() && _col_size == t.col_size());
 		each_ele(_data[row_i][col_i] -= t.at(row_i, col_i));
 		return *this;
 	}
@@ -1480,7 +1481,7 @@ namespace myml
 			{
 				for (size_t col_i = 0; col_i < col_size; ++col_i)
 				{
-					result.at(row_i, col_i) = ori.at(ori_count / ori.row_size(), ori_count% ori.row_size());
+					result.at(row_i, col_i) = ori.at(ori_count / ori.col_size(), ori_count% ori.col_size());
 					++ori_count;
 				}
 			}

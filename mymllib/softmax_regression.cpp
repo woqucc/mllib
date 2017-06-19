@@ -39,7 +39,8 @@ namespace myml
 
 	void softmax_regression::train(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
-		adadelta(feature_matrix, label_matrix);
+		//adadelta(feature_matrix, label_matrix);
+		_nopt.newton_raphson(_theta, *this, feature_matrix, label_matrix);
 	}
 
 	bool softmax_regression::load(istream & in)
@@ -173,9 +174,9 @@ namespace myml
 				hessian_matrix.sub_matrix(row_i * feature.col_size(), col_i * feature.col_size(), (row_i + 1) *  feature.col_size() - 1, (col_i + 1)* feature.col_size() - 1) = (transpose(feature) * lambda_matrix * feature);
 			}
 		}*/
-		(inverse(hessian_matrix) * grad).print();
-		_theta -= reshape(inverse(hessian_matrix) * grad,theta_size,label_size);
-		return hessian_matrix;
+		//print();
+		(hessian_matrix * 9.0L).print();
+		return reshape(transpose(inverse(hessian_matrix) * grad),label_size, theta_size);
 	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{
