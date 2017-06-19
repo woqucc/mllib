@@ -123,7 +123,6 @@ namespace myml
 			{
 				predict_matrix.at(row_i, theta_i) = predict_matrix.at(row_i, theta_i) - (theta_i == label_matrix.row(row_i) ? 1 : 0);
 			}
-
 		}
 		predict_matrix.transpose();
 		/*预测结果的每一列误差，乘以对应的特征向量项，*/
@@ -131,10 +130,10 @@ namespace myml
 		{
 			sum_error.cols(0, _theta.col_size() - 2) += predict_matrix.col(col_i) * feature_matrix.row(col_i);
 			/*补1*/
-			sum_error.col(_theta.col_size() - 1) = predict_matrix.col(col_i);
+			sum_error.col(_theta.col_size() - 1) += predict_matrix.col(col_i);
 		}
 		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/
-		sum_error /= calc_param_type(feature_matrix.row_size());
+		sum_error /= calc_param_type(feature_matrix.row_size());		
 		return sum_error;
 	}
 	matrix<calc_param_type> softmax_regression::hessian(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
@@ -148,9 +147,11 @@ namespace myml
 		matrix<calc_param_type> hessian_matrix(theta_size * label_size, theta_size * label_size);
 		matrix<calc_param_type> predict_matrix = probabilities(feature_matrix);
 		matrix<calc_param_type> grad = reshape(gradient(feature_matrix, label_matrix), feature_size * label_size + label_size,1);
+		grad *= 15.0L;
+		predict_matrix = probabilities(feature_matrix);
 		for (size_t label_i = 0; label_i < label_size; ++label_i)
 		{
-			predict_matrix = probabilities(feature_matrix);
+			
 			matrix<calc_param_type> w_diag = dot(predict_matrix.col(label_i),1.0L - predict_matrix.col(label_i));
 			hessian_matrix.sub_matrix(label_i * theta_size, label_i * theta_size, label_i * theta_size + theta_size - 1, label_i * theta_size + theta_size - 1) = transpose(feature) * diag(w_diag) * feature;
 			for (size_t other_label = label_i + 1; other_label < label_size; ++other_label)
@@ -175,8 +176,9 @@ namespace myml
 			}
 		}*/
 		//print();
-		(hessian_matrix * 9.0L).print();
-		return reshape(transpose(inverse(hessian_matrix) * grad),label_size, theta_size);
+		//(hessian_matrix).print();
+		
+		return transpose(reshape(inverse(hessian_matrix) * grad, theta_size, label_size));
 	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{
@@ -217,13 +219,14 @@ namespace myml
 		{
 			sum_error.cols(0, _theta.col_size() - 2) += predict_matrix.col(col_i) * feature_matrix.row(col_i);
 			/*补1*/
-			sum_error.col(_theta.col_size() - 1) = predict_matrix.col(col_i);
+			sum_error.col(_theta.col_size() - 1) += predict_matrix.col(col_i);
 		}
 
 		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/
 		sum_error /= calc_param_type(feature_matrix.row_size());
 		//加入对目标函数中L2范数项的导数
 		sum_error += _theta * _lambda;
+
 		return sum_error;
 	}
 	calc_param_type softmax_regression_ridge::objective_function(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
