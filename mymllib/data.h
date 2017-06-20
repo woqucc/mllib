@@ -20,6 +20,7 @@ namespace myml
 	using namespace std;
 
 	/*声明子类*/
+
 	template<class T>
 	class pseudo_matrix;
 	/*
@@ -43,6 +44,7 @@ namespace myml
 			size_t _row_size;
 			size_t _col_size;
 		public:
+
 			iterator(T** data, size_t row_size, size_t column_size, size_t _index);
 			iterator(const iterator& i);
 			/*

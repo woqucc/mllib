@@ -18,8 +18,8 @@ int main(int argc, char* argv[])
 {
 	matrix<long double> m;
 	//ifstream f(R"(binary_classification.txt)", ios::in);
-	ifstream f(R"(multi_classification.txt)", ios::in);
-	//ifstream f(R"(hessian_test.txt)", ios::in);
+	//ifstream f(R"(multi_classification.txt)", ios::in);
+	ifstream f(R"(hessian_test.txt)", ios::in);
 	//ifstream f(R"(multi_classification2.txt)", ios::in);
 	//auto x = diag<long double>({ {1,2,3,4,5,6,7,8,9,10} });
 	//(-x).print();
@@ -42,7 +42,10 @@ int main(int argc, char* argv[])
 	/*matrix<long double> theta = { { 0.5486,0.1839,0.4709,1 } ,{ 6.0889,-2.3215,-2.5932,2 },{ -1.2836,0.0483,3.2777,3 },{ 4,5,6,7 } };*/
 	//theta.transpose();
 	//sr.load({ { 0,0,0 },{ 0,0,0 },{ 0,0,0 } });
-	//cerr << sr.objective_function(m.cols(0, m.col_size() - 2), label);
+	//cerr << sr.objective_function(m.cols(0, m.col_size() - 2), label);.
+	
+	//inverse(abc).print();
+
 	int n = 30;
 	while (n--)
 	{
