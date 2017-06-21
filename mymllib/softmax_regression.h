@@ -65,6 +65,7 @@ namespace myml
 		softmax_regression_ridge(size_t feature_count, size_t label_count);
 		virtual matrix<calc_param_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
 		calc_param_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
+		virtual matrix<calc_param_type> hessian(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
 	};
 
 }

@@ -126,7 +126,8 @@ namespace myml
 	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
 	inline void newton_raphson_optimizer<feature_type, label_type, calc_param_type, class_param_type>::newton_raphson(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
-		cparam -= cf.hessian(feature_matrix, label_matrix) * 1E-10L;
+		//TODO 优化
+		cparam -= cf.hessian(feature_matrix, label_matrix) ;
 	}
 }
 #endif // !OPTIMIZER_H
