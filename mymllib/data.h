@@ -9,6 +9,7 @@
 #include<functional>
 #include<cassert>
 #include<map>
+#include <type_traits>
 /*g++*/
 #include<cfloat>
 #include<fstream>
@@ -308,18 +309,14 @@ namespace myml
 		*/
 		T& operator ()(size_t row, size_t col);
 		/*
+		括号操作符，用来访问元素
+		*/
+		T operator ()(size_t row, size_t col) const;
+		/*
 		@brief 本矩阵每个元素都exp
 		*/
 		matrix& exp();
 
-		/*
-		@brief 矩阵中只有一个元素时可将其直接转换为单个的T类型变量
-		*/
-		operator const T&() const;
-		/*
-		@brief 矩阵中只有一个元素时可将其直接转换为单个的T类型变量
-		*/
-		operator T&();
 		/*
 		@brief 矩阵相加
 		*/
@@ -480,24 +477,17 @@ namespace myml
 		return _data[row][col];
 	}
 	template<class T>
+	inline T matrix<T>::operator()(size_t row, size_t col) const
+	{
+		return _data[row][col];
+	}
+	template<class T>
 	inline matrix<T> & matrix<T>::exp()
 	{
 		each_ele(ele = std::exp(ele));
 		return *this;
 	}
 
-	template<class T>
-	inline matrix<T>::operator const T&() const
-	{
-		assert(_row_size == 1 && _col_size == 1);
-		return _data[0][0];
-	}
-	template<class T>
-	inline matrix<T>::operator T&()
-	{
-		assert(_row_size == 1 && _col_size == 1);
-		return _data[0][0];
-	}
 	template<class T>
 	inline matrix<T> matrix<T>::operator+=(const matrix<T>& t)
 	{
@@ -1241,23 +1231,37 @@ namespace myml
 	namespace matrix_operate
 	{
 		template<class T>
-		matrix<T> exp(const matrix<T>& a)
+		matrix<T> exp(const matrix<T>& input)
 		{
-			matrix<T> temp(a.row_size(), a.col_size());
-			for (size_t row_i = 0; row_i < a.row_size(); row_i++)
+			matrix<T>&& result = matrix<T>(input.row_size(), input.col_size());
+			for (size_t row_i = 0; row_i < input.row_size(); row_i++)
 			{
-				for (size_t col_i = 0; col_i < a.col_size(); col_i++)
+				for (size_t col_i = 0; col_i < input.col_size(); col_i++)
 				{
-					temp.at(row_i, col_i) = std::exp(a.at(row_i, col_i));
+					result.at(row_i, col_i) = std::exp(input.at(row_i, col_i));
 				}
 			}
-			return move(temp);
+			return move(result);
 		}
-		/*求和*/
+
+		/**
+		 * @fn	template<class T> T sum(const matrix<T>& input)
+		 *
+		 * @brief	求矩阵的中元素的和
+		 *
+		 * @author	Woqucc
+		 * @date	2017/6/23
+		 *
+		 * @tparam	T		Generic type parameter.
+		 * @param	input	输入矩阵
+		 *
+		 * @return	和
+		 */
+
 		template<class T>
 		T sum(const matrix<T>& input)
 		{
-			long double sum = 0;
+			T sum = 0;
 			for (const auto& i : input)
 			{
 				sum += i;
@@ -1292,23 +1296,62 @@ namespace myml
 		}
 
 		/**
-		 * @fn	template<class T> matrix<T> operator* (const matrix<T>& op1, const T& op2)
+		* @fn	template<class T> inline matrix<T> operator*(const matrix<T>& op1, const matrix<T>& op2)
+		*
+		* @brief	矩阵相乘
+		*
+		* @author	Woqucc
+		* @date	2017/6/21
+		*
+		* @tparam	T	Generic type parameter.
+		* @param	op1	The first operation.
+		* @param	op2	The second operation.
+		*
+		* @return	The result of the operation.
+		*/
+
+		template<class T>
+		inline matrix<T> operator*(const matrix<T>& op1, const matrix<T>& op2)
+		{
+			/*可以乘*/
+			assert(op1.col_size() == op2.row_size());
+			matrix<T> temp(op1.row_size(), op2.col_size());
+			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
+				{
+					/* temp = 本矩阵的第row_i行 * t矩阵的地col_i列 */
+					temp.at(row_i, col_i) = 0;
+					for (size_t i = 0; i < op1.col_size(); i++)
+					{
+						temp.at(row_i, col_i) += op1.at(row_i, i) * op2.at(i, col_i);
+					}
+				}
+			}
+			return move(temp);
+		}
+
+		/**
+		 * @fn	template<class T,class E, class = std::enable_if<std::is_fundamental<E>::value>::type> matrix<T> value>::operator* (const matrix<T>& op1, const E& op2)
 		 *
-		 * @brief	矩阵乘元素。
-		 * 			矩阵的每个元素乘以同一个元素。
+		 * @brief	矩阵乘元素。 矩阵的每个元素乘以同一个元素。
 		 *
 		 * @author	Woqucc
 		 * @date	2017/6/21
 		 *
 		 * @tparam	T	Generic type parameter.
+		 * @tparam	E	Type of the e.
+		 * @tparam	E	Type of the e.
 		 * @param	op1	乘数矩阵。
 		 * @param	op2	乘数元素。
 		 *
 		 * @return	The result of the operation.
+		 *
+		 * ### tparam	T	Generic type parameter.
 		 */
 
-		template<class T>
-		matrix<T> operator* (const matrix<T>& op1, const T& op2)
+		template<class T,class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		matrix<T> operator* (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
 			for (size_t row_i = 0; row_i < op1.row_size(); row_i++)
@@ -1322,23 +1365,67 @@ namespace myml
 		}
 
 		/**
-		 * @fn	template<class T> matrix<T> operator/ (const matrix<T>& op1, const T& op2)
+		 * @fn	template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type> matrix<T> value>::operator* (const E& op1, const matrix<T>& op2)
 		 *
-		 * @brief	矩阵除元素。
-		 * 			矩阵的每个元素除以同一个元素。
+		 * @brief	矩阵乘元素。 矩阵的每个元素乘以同一个元素。
 		 *
 		 * @author	Woqucc
-		 * @date	2017/6/21
+		 * @date	2017/6/23
 		 *
 		 * @tparam	T	Generic type parameter.
-		 * @param	op1	The first operation.
-		 * @param	op2	The second operation.
+		 * @tparam	E	Type of the e.
+		 * @tparam	E	Type of the e.
+		 * @param	op1	乘数
+		 * @param	op2	乘数矩阵
 		 *
 		 * @return	The result of the operation.
 		 */
 
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		matrix<T> operator* (const E& op1, const matrix<T>& op2)
+		{
+			matrix<T> temp(op2.row_size(), op2.col_size());
+			for (size_t row_i = 0; row_i < op2.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < op2.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = op2.at(row_i, col_i) * op1;
+				}
+			}
+			return move(temp);
+		}
+		/**
+		* @fn	template<class T> matrix<T> operator/ (const matrix<T>& op1, const matrix<T>& op2)
+		*
+		* @brief	矩阵与矩阵相除
+		* 			相同大小的矩阵对应位置相除
+		*
+		* @author	Woqucc
+		* @date	2017/6/21
+		*
+		* @tparam	T	Generic type parameter.
+		* @param	op1	作为除数的矩阵。
+		* @param	op2	作为被除数的矩阵。
+		*
+		* @return	相除后的结果矩阵。
+		*/
+
 		template<class T>
-		matrix<T> operator/ (const matrix<T>& op1, const T& op2)
+		matrix<T> operator/ (const matrix<T>& op1, const matrix<T>& op2)
+		{
+			assert(op1.row_size() == op2.row_size() && op1.col_size() == op2.col_size());
+			matrix<T> temp(op1.row_size(), op1.col_size());
+			for (size_t row_i = 0; row_i < op1.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < op1.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = op1.at(row_i, col_i) / op2.at(row_i, col_i);
+				}
+			}
+			return move(temp);
+		}
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		matrix<T> operator/ (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
 			for (size_t row_i = 0; row_i < op1.row_size(); row_i++)
@@ -1350,25 +1437,53 @@ namespace myml
 			}
 			return move(temp);
 		}
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		matrix<T> operator/ (const E& op1, const matrix<T>& op2)
+		{
+			matrix<T> temp(op2.row_size(), op2.col_size());
+			for (size_t row_i = 0; row_i < op2.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < op2.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) =  op1 / op2.at(row_i, col_i) ;
+				}
+			}
+			return move(temp);
+		}
 
 		/**
-		 * @fn	template<class T> matrix<T> operator+ (const matrix<T>& op1, const T& op2)
-		 *
-		 * @brief	矩阵加元素。
-		 * 			矩阵的每个元素加上同一个元素。
-		 *
-		 * @author	Woqucc
-		 * @date	2017/6/21
-		 *
-		 * @tparam	T	Generic type parameter.
-		 * @param	op1	加数矩阵
-		 * @param	op2	加数
-		 *
-		 * @return	The result of the operation.
-		 */
+		* @fn	template<class T> inline matrix<T> operator+(const matrix<T>& op1, const matrix<T>& op2)
+		*
+		* @brief	矩阵相加。
+		* 			对应位置元素相加。
+		*
+		* @author	Woqucc
+		* @date	2017/6/21
+		*
+		* @tparam	T	Generic type parameter.
+		* @param	op1	加数矩阵
+		* @param	op2	加数矩阵
+		*
+		* @return	结果矩阵
+		*/
 
 		template<class T>
-		matrix<T> operator+ (const matrix<T>& op1, const T& op2)
+		inline matrix<T> operator+(const matrix<T>& op1, const matrix<T>& op2)
+		{
+			assert(op1.col_size() == op2.col_size() && op1.row_size() == op2.row_size());
+			matrix<T> temp(op1.row_size(), op1.col_size());
+			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = op1.at(row_i, col_i) + op2.at(row_i, col_i);
+				}
+			}
+			return move(temp);
+		}
+
+		template<class T,class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		matrix<T> operator+ (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
 			for (size_t row_i = 0; row_i < op1.row_size(); row_i++)
@@ -1381,24 +1496,22 @@ namespace myml
 			return move(temp);
 		}
 
-		/**
-		 * @fn	template<class T> matrix<T> operator- (const matrix<T>& op1, const T& op2)
-		 *
-		 * @brief	矩阵减元素。
-		 * 			矩阵的每个元素减去同一个元素
-		 *
-		 * @author	Woqucc
-		 * @date	2017/6/21
-		 *
-		 * @tparam	T	Generic type parameter.
-		 * @param	op1	被减数矩阵
-		 * @param	op2	减数
-		 *
-		 * @return	The result of the operation.
-		 */
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		matrix<T> operator+ (const E& op1, const matrix<T>& op2)
+		{
+			matrix<T> temp(op2.row_size(), op2.col_size());
+			for (size_t row_i = 0; row_i < op2.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < op2.col_size(); col_i++)
+				{
+					temp.at(row_i, col_i) = op2.at(row_i, col_i) + op1;
+				}
+			}
+			return move(temp);
+		}
 
-		template<class T>
-		matrix<T> operator- (const matrix<T>& op1, const T& op2)
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		matrix<T> operator- (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
 			for (size_t row_i = 0; row_i < op1.row_size(); row_i++)
@@ -1411,24 +1524,8 @@ namespace myml
 			return move(temp);
 		}
 
-		/**
-		 * @fn	template<class T> matrix<T> operator- (const T& op1, const matrix<T>& op2)
-		 *
-		 * @brief	元素减矩阵。
-		 * 			相减后结果为矩阵。
-		 *
-		 * @author	Woqucc
-		 * @date	2017/6/21
-		 *
-		 * @tparam	T	Generic type parameter.
-		 * @param	op1	被减数元素
-		 * @param	op2	矩阵
-		 *
-		 * @return	The result of the operation.
-		 */
-
-		template<class T>
-		matrix<T> operator- (const T& op1, const matrix<T>& op2)
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		matrix<T> operator- (const E& op1, const matrix<T>& op2)
 		{
 			matrix<T> temp(op2.row_size(), op2.col_size());
 			for (size_t row_i = 0; row_i < op2.row_size(); row_i++)
@@ -1471,51 +1568,20 @@ namespace myml
 		}
 
 		/**
-		 * @fn	template<class T> inline matrix<T> operator+(const matrix<T>& op1, const matrix<T>& op2)
-		 *
-		 * @brief	矩阵相加。
-		 * 			对应位置元素相加。
-		 *
-		 * @author	Woqucc
-		 * @date	2017/6/21
-		 *
-		 * @tparam	T	Generic type parameter.
-		 * @param	op1	加数矩阵
-		 * @param	op2	加数矩阵
-		 *
-		 * @return	结果矩阵
-		 */
-
-		template<class T>
-		inline matrix<T> operator+(const matrix<T>& op1, const matrix<T>& op2)
-		{
-			assert(op1.col_size() == op2.col_size() && op1.row_size() == op2.row_size());
-			matrix<T> temp(op1.row_size(), op1.col_size());
-			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
-			{
-				for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
-				{
-					temp.at(row_i, col_i) = op1.at(row_i, col_i) + op2.at(row_i, col_i);
-				}
-			}
-			return move(temp);
-		}
-
-		/**
-		 * @fn	template<class T> inline matrix<T> operator-(const matrix<T>& op1, const matrix<T>& op2)
-		 *
-		 * @brief	矩阵相减。
-		 * 			对应位置元素相减。
-		 *
-		 * @author	Woqucc
-		 * @date	2017/6/21
-		 *
-		 * @tparam	T	Generic type parameter.
-		 * @param	op1	被减数
-		 * @param	op2	减数
-		 *
-		 * @return	矩阵相减结果
-		 */
+		* @fn	template<class T> inline matrix<T> operator-(const matrix<T>& op1, const matrix<T>& op2)
+		*
+		* @brief	矩阵相减。
+		* 			对应位置元素相减。
+		*
+		* @author	Woqucc
+		* @date	2017/6/21
+		*
+		* @tparam	T	Generic type parameter.
+		* @param	op1	被减数
+		* @param	op2	减数
+		*
+		* @return	矩阵相减结果
+		*/
 
 		template<class T>
 		inline matrix<T> operator-(const matrix<T>& op1, const matrix<T>& op2)
@@ -1531,41 +1597,36 @@ namespace myml
 			}
 			return move(temp);
 		}
-
-		/**
-		 * @fn	template<class T> inline matrix<T> operator*(const matrix<T>& op1, const matrix<T>& op2)
-		 *
-		 * @brief	矩阵相乘
-		 *
-		 * @author	Woqucc
-		 * @date	2017/6/21
-		 *
-		 * @tparam	T	Generic type parameter.
-		 * @param	op1	The first operation.
-		 * @param	op2	The second operation.
-		 *
-		 * @return	The result of the operation.
-		 */
-
 		template<class T>
-		inline matrix<T> operator*(const matrix<T>& op1, const matrix<T>& op2)
+		bool operator ==(const matrix<T>& op1, const matrix<T>& op2)
 		{
-			/*可以乘*/
-			assert(op1.col_size() == op2.row_size());
-			matrix<T> temp(op1.row_size(), op2.col_size());
-			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
+			if(op1.col_size() != op2.col_size() || op1.row_size() != op2.row_size())
+				return false;
+			for (size_t row_i = 0; row_i < op1.row_size(); ++row_i)
 			{
-				for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
+				for (size_t col_i = 0; col_i < op1.col_size(); ++col_i)
 				{
-					/* temp = 本矩阵的第row_i行 * t矩阵的地col_i列 */
-					temp.at(row_i, col_i) = 0;
-					for (size_t i = 0; i < op1.col_size(); i++)
-					{
-						temp.at(row_i, col_i) += op1.at(row_i, i) * op2.at(i, col_i);
-					}
+					if (op1(row_i, col_i) != op2(row_i, col_i))
+						return false;
 				}
 			}
-			return move(temp);
+			return true;
+		}
+
+		template<class T,class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		bool operator ==(const matrix<T>& op1, const E& op2)
+		{
+			if (op1.col_size() != 1 || op1.row_size() != 1)
+				return false;
+			return op1(0,0) == op2;
+		}
+
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		bool operator ==(const E& op2, const matrix<T>& op1)
+		{
+			if (op1.col_size() != 1 || op1.row_size() != 1)
+				return false;
+			return op1(0, 0) == op2;
 		}
 
 		/**
@@ -1627,36 +1688,7 @@ namespace myml
 			return temp;
 		}
 
-		/**
-		 * @fn	template<class T> matrix<T> operator/ (const matrix<T>& op1, const matrix<T>& op2)
-		 *
-		 * @brief	矩阵与矩阵相除
-		 * 			相同大小的矩阵对应位置相除
-		 *
-		 * @author	Woqucc
-		 * @date	2017/6/21
-		 *
-		 * @tparam	T	Generic type parameter.
-		 * @param	op1	作为除数的矩阵。
-		 * @param	op2	作为被除数的矩阵。
-		 *
-		 * @return	相除后的结果矩阵。
-		 */
 
-		template<class T>
-		matrix<T> operator/ (const matrix<T>& op1, const matrix<T>& op2)
-		{
-			assert(op1.row_size() == op2.row_size() && op1.col_size() == op2.col_size());
-			matrix<T> temp(op1.row_size(), op1.col_size());
-			for (size_t row_i = 0; row_i < op1.row_size(); row_i++)
-			{
-				for (size_t col_i = 0; col_i < op1.col_size(); col_i++)
-				{
-					temp.at(row_i, col_i) = op1.at(row_i, col_i) / op2.at(row_i, col_i);
-				}
-			}
-			return move(temp);
-		}
 
 		template<class T>
 		matrix<T> pow(const matrix<T>& input, const T& index)
@@ -1823,15 +1855,14 @@ namespace myml
 		}
 		/*克罗内克积*/
 		template<class T>
-		matrix<T> kronecker_product(const matrix<T>& a, const matrix<T>& b)
+		matrix<T> kronecker_product(const matrix<T>& op1, const matrix<T>& op2)
 		{
-			matrix<T> result(a.row_size() * b.row_size(), a.col_size() * b.col_size());
+			matrix<T> result(op1.row_size() * op2.row_size(), op1.col_size() * op2.col_size());
 			for (size_t row_i = 0; row_i < result.row_size(); ++row_i)
 			{
 				for (size_t col_i = 0; col_i < result.col_size(); ++col_i)
 				{
-					//TODO:未完成
-					assert(false);
+					result(row_i, col_i) = op1(row_i / op1.row_size(), col_i / op1.col_size()) * op2(row_i % op2.row_size(), col_i % op2.col_size());
 				}
 			}
 			return result;
@@ -1943,7 +1974,8 @@ namespace myml
 
 	}
 	/*矩阵数据标准化*/
-	namespace matrix_normalization {
+	namespace matrix_normalization 
+	{
 
 		/*设置元素值的范围，*/
 
@@ -1963,7 +1995,8 @@ namespace myml
 		 */
 
 		template<class T>
-		void set_range(matrix<T>& input, T lower_bound, T upper_bound) {
+		void set_range(matrix<T>& input, T lower_bound, T upper_bound)
+		{
 			for (auto &i : input)
 			{
 				if (i < lower_bound)
@@ -2019,7 +2052,7 @@ namespace myml
 			serialized_label.resize(label_matrix.row_size(), 1);
 			for (size_t row_i = 0; row_i < label_matrix.row_size(); ++row_i)
 			{
-				static_cast<E&>(serialized_label.row(row_i)) = label_map[label_matrix.row(row_i)];
+				static_cast<E&>(serialized_label.at(row_i,0)) = label_map[label_matrix.at(row_i,0)];
 			}
 			return label_map;
 		}

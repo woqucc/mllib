@@ -17,9 +17,9 @@ using namespace myml::matrix_operate;
 int main(int argc, char* argv[])
 {
 	matrix<long double> m;
-	ifstream f(R"(binary_classification.txt)", ios::in);
+	//ifstream f(R"(binary_classification.txt)", ios::in);
 	//ifstream f(R"(multi_classification.txt)", ios::in);
-	//ifstream f(R"(hessian_test.txt)", ios::in);
+	ifstream f(R"(hessian_test.txt)", ios::in);
 	//ifstream f(R"(multi_classification2.txt)", ios::in);
 	//auto x = diag<long double>({ {1,2,3,4,5,6,7,8,9,10} });
 	//(-x).print();
@@ -27,6 +27,12 @@ int main(int argc, char* argv[])
 	//ifstream f(argv[1],ios::in);
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 	
+	matrix<long double> a = { {1,2,3},{4,5,6} };
+	( 3 * a.row(0) * 2.0).print();
+	/*matrix<long double> b = { { 1,2,3 },{ 4,5,6 } };
+	kronecker_product(a, b).print();*/
+
+
 	import_matrix_data(m, f, ' ');
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	matrix<size_t> label;
@@ -52,7 +58,7 @@ int main(int argc, char* argv[])
 	
 	//inverse(abc).print();
 
-	int n = 10000;
+	int n = 6;
 	while (n--)
 	{
 		sr.train(m.cols(0, m.col_size() - 2), label);
