@@ -371,13 +371,23 @@ namespace myml
 		virtual ~matrix<T>();
 
 		/*获取某一行数据，仅用于读取*/
-		pseudo_matrix<T> row(size_t row_index) const;
+		pseudo_matrix<T> row(size_t row_index);
 		/*获取某列数据，仅用于读取*/
-		pseudo_matrix<T> col(size_t col_index) const;
+		pseudo_matrix<T> col(size_t col_index);
 		/*获取某一行数据，仅用于读取*/
-		pseudo_matrix<T> rows(size_t begin, size_t end) const;
+		pseudo_matrix<T> rows(size_t begin, size_t end);
 		/*获取某列数据，仅用于读取*/
-		pseudo_matrix<T> cols(size_t begin, size_t end) const;
+		pseudo_matrix<T> cols(size_t begin, size_t end);
+
+
+		/*获取某一行数据，仅用于读取*/
+		const pseudo_matrix<T> row(size_t row_index) const;
+		/*获取某列数据，仅用于读取*/
+		const pseudo_matrix<T> col(size_t col_index) const;
+		/*获取某一行数据，仅用于读取*/
+		const pseudo_matrix<T> rows(size_t begin, size_t end) const;
+		/*获取某列数据，仅用于读取*/
+		const pseudo_matrix<T> cols(size_t begin, size_t end) const;
 
 		/*重新分配大小*/
 		void resize(size_t row_size, size_t col_size);
@@ -386,16 +396,23 @@ namespace myml
 		/*是否有数据*/
 		bool has_data();
 		/*转置本矩阵*/
-		void transpose();
+		matrix<T>& transpose();
 		/*将本矩阵变为本矩阵的逆*/
-		void inverse();
+		matrix<T>& inverse();
+		/*改变大小*/
+		matrix<T>& reshape(size_t row_size, size_t col_size);
 		/*最大元素的位置*/
 		pair<size_t, size_t> max_position() const;
+		/*交换两个矩阵的内容*/
+		void swap(matrix sm);
 		/*最大元素*/
 		T max() const;
 		/*获取某一元素个数*/
 		size_t count(const T& t) const;
-
+		/*判断是否是向量*/
+		bool is_vector() const;
+		/*元素个数*/
+		size_t size() const;
 	protected:
 		T* _memory = nullptr;
 		T** _data = nullptr;
@@ -766,30 +783,54 @@ namespace myml
 		return _data;
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::row(size_t row_index) const
+	inline pseudo_matrix<T> matrix<T>::row(size_t row_index)
 	{
 		assert(row_index < _row_size);
 		return pseudo_matrix<T>(*this, row_index, 0, 1, _col_size);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::col(size_t col_index) const
+	inline pseudo_matrix<T> matrix<T>::col(size_t col_index)
 	{
 		assert(col_index < _col_size);
 		return pseudo_matrix<T>(*this, 0, col_index, _row_size, 1);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end) const
+	inline pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end)
 	{
 		assert(begin < _row_size && end < _row_size);
 		return pseudo_matrix<T>(*this, begin, 0, end - begin + 1, _col_size);
 	}
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end) const
+	inline pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end)
 	{
 		assert(begin < _col_size && end < _col_size);
 		return pseudo_matrix<T>(*this, 0, begin, _row_size, end - begin + 1);
 	}
 
+	template<class T>
+	inline const pseudo_matrix<T> matrix<T>::row(size_t row_index) const
+	{
+		assert(row_index < _row_size);
+		return pseudo_matrix<T>(*this, row_index, 0, 1, _col_size);
+	}
+	template<class T>
+	inline const pseudo_matrix<T> matrix<T>::col(size_t col_index) const
+	{
+		assert(col_index < _col_size);
+		return pseudo_matrix<T>(*this, 0, col_index, _row_size, 1);
+	}
+	template<class T>
+	inline const pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end) const
+	{
+		assert(begin < _row_size && end < _row_size);
+		return pseudo_matrix<T>(*this, begin, 0, end - begin + 1, _col_size);
+	}
+	template<class T>
+	inline const pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end) const
+	{
+		assert(begin < _col_size && end < _col_size);
+		return pseudo_matrix<T>(*this, 0, begin, _row_size, end - begin + 1);
+	}
 	template<class T>
 	inline void matrix<T>::resize(size_t row_size, size_t col_size)
 	{
@@ -815,7 +856,7 @@ namespace myml
 		return _data != nullptr && _col_size > 0 && _row_size > 0;
 	}
 	template<class T>
-	inline void matrix<T>::transpose()
+	inline matrix<T>& matrix<T>::transpose()
 	{
 		size_t trow_size = _col_size;
 		size_t tcol_size = _row_size;
@@ -838,80 +879,63 @@ namespace myml
 		delete[] _memory;
 		_data = t_data;
 		_memory = t_memory;
+		return *this;
 	}
 
 	template<class T>
-	inline void matrix<T>::inverse()
+	inline matrix<T>& matrix<T>::inverse()
 	{
 		assert(_col_size == _row_size);
-		valarray<pair<size_t, size_t>> history(_row_size);
-		T fdet = T(1);
-		for (size_t k = 0; k < _row_size; ++k)
+		//方阵检查
+		matrix<T> inv = identity_matrix<T>(_col_size);
+		T factor = 0;
+		for (size_t i = 0; i < _col_size; ++i)
 		{
-			T max = T(0);
-			history[k] = { k,k };
-			for (size_t row_i = k; row_i < _row_size; ++row_i)
+			if (_data[i][i] == 0)
 			{
-				for (size_t col_i = k; col_i < _row_size; ++col_i)
+				for (size_t row_i = i; row_i < _col_size; ++row_i)
 				{
-					if (abs(_data[row_i][col_i]) > max)
+					if (_data[row_i][i] != T(0))
 					{
-						max = abs(_data[row_i][col_i]);
-						history[k] = { row_i,col_i };
+						swap_row(row_i, i);
+						inv.swap_row(row_i, i);
 					}
 				}
+				//不可逆
+				//assert(input_copy(i, i) != 0);
+				assert(_data[i][i] > 1E-10L);
 			}
-			/*可逆检查*/
-			assert(max > T(0));
-			if (history[k].first != k)
+			for (size_t row_i = 0; row_i < _col_size; ++row_i)
 			{
-				swap_row(history[k].first, k);
+				if (i == row_i)continue;
+				if (_data[row_i][i] == 0)continue;
+				factor = _data[row_i][i] / _data[i][i];
+				row(row_i) -= row(i) * factor;
+				inv.row(row_i) -= inv.row(i) * factor;
 			}
-			if (history[k].second != k)
-			{
-				swap_col(history[k].second, k);
-			}
-			fdet *= _data[k][k];
-			_data[k][k] = T(1) / _data[k][k];
-			//第三步  
-			for (int j = 0; j < _row_size; j++)
-			{
-				if (j != k)
-					_data[k][j] *= _data[k][k];
-			}
-			// 第四步  
-			for (int i = 0; i < _row_size; i++)
-			{
-				if (i != k)
-				{
-					for (int j = 0; j < _row_size; j++)
-					{
-						if (j != k)
-							_data[i][j] = _data[i][j] - _data[i][k] * _data[k][j];
-					}
-				}
-			}
-			// 第五步  
-			for (int i = 0; i < _col_size; i++)
-			{
-				if (i != k)
-					_data[i][k] *= -_data[k][k];
-			}
-
 		}
 
-		for (int k = _row_size - 1; k >= 0; k--)
+		for (size_t i = 0; i < _col_size; ++i)
 		{
-			if (history[k].first != k)
-			{
-				swap_col(history[k].first, k);
-			}
-			if (history[k].second != k)
-			{
-				swap_row(history[k].second, k);
-
-			}
+			inv.row(i) /= _data[i][i];
 		}
+		swap(inv);
+		return *this;
+	}
+
+	template<class T>
+	inline matrix<T>& matrix<T>::reshape(size_t row_size, size_t col_size)
+	{
+		assert(row_size * col_size == _row_size * _col_size);
+		delete[]_data;
+		_data = new T*[row_size]();
+		for (size_t row_i = 0; row_i < row_size; ++row_i)
+		{
+			_data[row_i] = _memory + row_i * col_size;
+		}
+		_row_size = row_size;
+		_col_size = col_size;
+		return *this;
 	}
 
 	template<class T>
@@ -929,6 +953,15 @@ namespace myml
 			}
 		);
 		return { max_row ,max_col };
+	}
+	template<class T>
+	inline void matrix<T>::swap(matrix<T> sm)
+	{
+		std::swap(_row_size, sm._row_size);
+		std::swap(_col_size, sm._col_size);
+		std::swap(_cur_row_pos, sm._cur_row_pos);
+		std::swap(_data, sm._data);
+		std::swap(_memory, sm._memory);
 	}
 	template<class T>
 	inline T matrix<T>::max() const
@@ -951,6 +984,16 @@ namespace myml
 				++c;
 		);
 		return c;
+	}
+	template<class T>
+	inline size_t matrix<T>::size() const
+	{
+		return _col_size * _row_size;
+	}
+	template<class T>
+	inline bool matrix<T>::is_vector() const
+	{
+		return _row_size == 1 || _col_size == 1;
 	}
 	template<class T>
 	inline bool matrix<T>::rect_check() const
@@ -1285,9 +1328,9 @@ namespace myml
 		 */
 		 //TODO:容易溢出，待完善。迭代器效率有点低？
 		template<class T>
-		long double norm_f(const matrix<T>& input)
+		T norm_f(const matrix<T>& input)
 		{
-			long double sum = 0;
+			T sum = 0;
 			for (const auto& i : input)
 			{
 				sum += i * i;
@@ -1295,6 +1338,19 @@ namespace myml
 			return std::sqrt(sum);
 		}
 
+		template<class T>
+		T v_norm_euclidean(const matrix<T>& input)
+		{
+			T n = 0;
+			for (size_t row_i = 0; row_i < input.row_size(); row_i++)
+			{
+				for (size_t col_i = 0; col_i < input.col_size(); col_i++)
+				{
+					n += input(row_i, col_i) * input(row_i, col_i);
+				}
+			}
+			return std::sqrt(n);
+		}
 		/**
 		* @fn	template<class T> inline matrix<T> operator*(const matrix<T>& op1, const matrix<T>& op2)
 		*
@@ -1315,20 +1371,20 @@ namespace myml
 		{
 			/*可以乘*/
 			assert(op1.col_size() == op2.row_size());
-			matrix<T> temp(op1.row_size(), op2.col_size());
-			for (size_t row_i = 0; row_i < temp.row_size(); row_i++)
+			matrix<T> result(op1.row_size(), op2.col_size());
+			for (size_t row_i = 0; row_i < result.row_size(); row_i++)
 			{
-				for (size_t col_i = 0; col_i < temp.col_size(); col_i++)
+				for (size_t col_i = 0; col_i < result.col_size(); col_i++)
 				{
 					/* temp = 本矩阵的第row_i行 * t矩阵的地col_i列 */
-					temp.at(row_i, col_i) = 0;
+					result.at(row_i, col_i) = 0;
 					for (size_t i = 0; i < op1.col_size(); i++)
 					{
-						temp.at(row_i, col_i) += op1.at(row_i, i) * op2.at(i, col_i);
+						result.at(row_i, col_i) += op1.at(row_i, i) * op2.at(i, col_i);
 					}
 				}
 			}
-			return move(temp);
+			return result;
 		}
 
 		/**
@@ -1350,7 +1406,7 @@ namespace myml
 		 * ### tparam	T	Generic type parameter.
 		 */
 
-		template<class T,class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator* (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
@@ -1445,7 +1501,7 @@ namespace myml
 			{
 				for (size_t col_i = 0; col_i < op2.col_size(); col_i++)
 				{
-					temp.at(row_i, col_i) =  op1 / op2.at(row_i, col_i) ;
+					temp.at(row_i, col_i) = op1 / op2.at(row_i, col_i);
 				}
 			}
 			return move(temp);
@@ -1482,7 +1538,7 @@ namespace myml
 			return move(temp);
 		}
 
-		template<class T,class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator+ (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
@@ -1600,7 +1656,7 @@ namespace myml
 		template<class T>
 		bool operator ==(const matrix<T>& op1, const matrix<T>& op2)
 		{
-			if(op1.col_size() != op2.col_size() || op1.row_size() != op2.row_size())
+			if (op1.col_size() != op2.col_size() || op1.row_size() != op2.row_size())
 				return false;
 			for (size_t row_i = 0; row_i < op1.row_size(); ++row_i)
 			{
@@ -1613,12 +1669,12 @@ namespace myml
 			return true;
 		}
 
-		template<class T,class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
 		bool operator ==(const matrix<T>& op1, const E& op2)
 		{
 			if (op1.col_size() != 1 || op1.row_size() != 1)
 				return false;
-			return op1(0,0) == op2;
+			return op1(0, 0) == op2;
 		}
 
 		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
@@ -1880,6 +1936,17 @@ namespace myml
 			return result;
 		}
 
+		template<class T>
+		void identity_matrix(matrix<T>& input)
+		{
+			for (size_t row_i = 0; row_i < input.row_size(); ++row_i)
+			{
+				for (size_t col_i = 0; col_i < input.col_size(); ++col_i)
+				{
+					input(row_i, col_i) = row_i == col_i ? 1 : 0;
+				}
+			}
+		}
 		/**
 		 * @fn	template<class T> matrix<T> reshape(const matrix<T> &input, size_t row_size, size_t col_size)
 		 *
@@ -1900,16 +1967,8 @@ namespace myml
 		matrix<T> reshape(const matrix<T> &input, size_t row_size, size_t col_size)
 		{
 			assert(input.row_size() * input.col_size() == row_size * col_size);
-			matrix<T> result(row_size, col_size);
-			size_t ori_count = 0;
-			for (size_t row_i = 0; row_i < row_size; ++row_i)
-			{
-				for (size_t col_i = 0; col_i < col_size; ++col_i)
-				{
-					result.at(row_i, col_i) = input.at(ori_count / input.col_size(), ori_count% input.col_size());
-					++ori_count;
-				}
-			}
+			matrix<T> result = input;
+			result.reshape(row_size, col_size);
 			return result;
 		}
 
@@ -1933,48 +1992,119 @@ namespace myml
 		{
 			//方阵检查
 			assert(input.row_size() == input.col_size());
-			matrix<T> input_copy = input;
-			matrix<T> inv = identity_matrix<T>(input.row_size());
-			T factor = 0;
-			size_t n = input.col_size();
-			for (size_t i = 0; i < n; ++i)
-			{
-				if (input_copy(i, i) == 0)
-				{
-					for (size_t row_i = i; row_i < n; ++row_i)
-					{
-						if (input_copy(row_i, i) != T(0))
-						{
-							input_copy.swap_row(row_i, i);
-							inv.swap_row(row_i, i);
-						}
-					}
-					//不可逆
-					//assert(input_copy(i, i) != 0);
-					assert(input_copy(i, i) > 1E-10L);
-				}
-				for (size_t row_i = 0; row_i < n; ++row_i)
-				{
-					if (i == row_i)continue;
-					if (input_copy(row_i, i) == 0)continue;
-					factor = input_copy(row_i, i) / input_copy(i, i) ;
-					input_copy.row(row_i) -= input_copy.row(i) * factor;
-					inv.row(row_i) -= inv.row(i) * factor;
-				}
-			}
-			
-			for (size_t i = 0; i < n; ++i)
-			{
-				inv.row(i) /= input_copy(i, i);
-			}
-
+			matrix<T> inv = input;
+			inv.inverse();
 			return inv;
 		}
 
+		template<class T>
+		void swap(matrix<T>& s1, matrix<T>& s2)
+		{
+			s1.swap(s2);
+		}
+
+		/**
+		 * @fn	template<class T> tuple<matrix<T>,T> householder(const matrix<T> &vector_x, const matrix<T> &vector_y)
+		 *
+		 * @brief	Householder变换
+		 * 			求出可以将向量x变换为y的矩阵H和洗漱rho
+		 * 			即在等式 H * x = rho * y中，输入向量x，y 求出矩阵H和系数rho
+		 *
+		 * @author	Woqucc
+		 * @date	2017/6/28
+		 *
+		 * @tparam	T	Generic type parameter.
+		 * @param	vector_x	向量x
+		 * @param	vector_y	向量y.
+		 *
+		 * @return	HouseHolder矩阵，rho;
+		 */
+
+		template<class T>
+		tuple<matrix<T>, T> householder(const matrix<T> &vector_x, const matrix<T> &vector_y)
+		{
+			assert(vector_x.is_vector() && vector_y.is_vector());
+			assert(vector_x.size() == vector_y.size());
+			T rho = vector_x(0, 0) > 0 ? -v_norm_euclidean(vector_x) / v_norm_euclidean(vector_y) : v_norm_euclidean(vector_x) / v_norm_euclidean(vector_y);
+			// v = x - y
+			matrix<T> vetcor_v = vector_x;
+			vetcor_v -= rho * vector_y;
+			// v = v / ||v||
+			vetcor_v /= v_norm_euclidean(vetcor_v);
+			// h = I - 2 * v * v'
+			matrix<T> h_matrix = identity_matrix<T>(vector_x.size());
+			//TODO:是否需要对列还是行进行判断？应该不需要吧
+			if (vetcor_v.row_size() == 1)
+				h_matrix -= 2 * transpose(vetcor_v) * vetcor_v;
+			else
+				h_matrix -= 2 * vetcor_v * transpose(vetcor_v);
+			return { move(h_matrix), rho };
+		}
+
+		/**
+		 * @fn	template<class T> tuple<matrix<T>, matrix<T>> qr(const matrix<T> &input)
+		 *
+		 * @brief	将矩阵进行QR分解。
+		 * 			A = QR，其中Q为正交阵，R为三角阵。
+		 *			householder变换法。
+		 * @author	Woqucc
+		 * @date	2017/6/28
+		 *
+		 * @tparam	T	Generic type parameter.
+		 * @param	input	输入矩阵
+		 *
+		 * @return	{Q,R};
+		 */
+
+		template<class T>
+		tuple<matrix<T>, matrix<T>> qr(const matrix<T> &input)
+		{
+			size_t n = input.row_size();
+			matrix<T> matrix_r = input;
+			matrix<T> matrix_q = identity_matrix<T>(n);
+			//householder变换基
+			matrix<T> y(n, 1);
+			matrix<T> h(n, n);
+			y(0, 0) = T(1);
+			for (size_t i = 0; i < n - 1; ++i)
+			{
+				//进行变换
+				identity_matrix(h);
+				//使用householder变换将Q变换成正交阵，householder矩阵代表变换方法
+				h.sub_matrix(i, i, n - 1, n - 1) = get<0>(householder(matrix_r.sub_matrix(i, i, n - 1, i), y.rows(0, n - i - 1)));
+				//TODO 编写*=矩阵操作符，可以节省一部分内存
+				matrix_q = matrix_q * h;
+				matrix_r = h * matrix_r;
+			}
+			//input: m x n ;
+			//q: m x n;
+			//r: n x n
+			/*
+			size_t m = input.row_size(), n = input.col_size();
+
+			//Gram-Schmidt正交化，上三角矩阵R记录下变换过程
+			//数值不稳定，弃了
+			matrix_r(0, 0) = v_norm_euclidean(input.col(0));
+			matrix_q.col(0) = input.col(0) / matrix_r(0, 0);
+			for (size_t j = 1; j < n; ++j)
+			{
+				matrix_q.col(j) = input.col(j);
+				for (size_t i = 0; i < j; ++i)
+				{
+					//(transpose(matrix_q.col(i)) * input.col(j)).print();
+					matrix_r(i, j) = (transpose(matrix_q.col(i)) * input.col(j))(0,0);
+					matrix_q.col(j) -= matrix_r(i, j) * matrix_q.col(i);
+				}
+				matrix_r(j, j) = v_norm_euclidean(matrix_q.col(j));
+				matrix_q.col(j) /= matrix_r(j, j);
+			}
+			*/
+			return { move(matrix_q), move(matrix_r) };
+		}
 
 	}
 	/*矩阵数据标准化*/
-	namespace matrix_normalization 
+	namespace matrix_normalization
 	{
 
 		/*设置元素值的范围，*/
@@ -2052,7 +2182,7 @@ namespace myml
 			serialized_label.resize(label_matrix.row_size(), 1);
 			for (size_t row_i = 0; row_i < label_matrix.row_size(); ++row_i)
 			{
-				static_cast<E&>(serialized_label.at(row_i,0)) = label_map[label_matrix.at(row_i,0)];
+				static_cast<E&>(serialized_label.at(row_i, 0)) = label_map[label_matrix.at(row_i, 0)];
 			}
 			return label_map;
 		}

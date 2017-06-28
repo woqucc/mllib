@@ -163,7 +163,9 @@ namespace myml
 				hessian_matrix.sub_matrix(other_label * theta_size, label_i * theta_size, other_label * theta_size + theta_size - 1, label_i * theta_size + theta_size - 1) = transpose(feature) * diag(w_off_diag) * feature;
 			}
 		}
-		return transpose(reshape(inverse(hessian_matrix) * grad, theta_size, label_size));
+		return hessian_matrix;
+		//hessian_matrix.print();
+		//return transpose(reshape(inverse(hessian_matrix) * grad, theta_size, label_size));
 	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{
@@ -270,6 +272,7 @@ namespace myml
 		//inverse(hessian_matrix).print();
 		//(hessian_matrix*inverse(hessian_matrix)).print();
 		hessian_matrix += identity_matrix<calc_param_type>(hessian_matrix.row_size()) * _lambda;
-		return transpose(reshape(inverse(hessian_matrix) * grad, theta_size, label_size));
+		return hessian_matrix;
+		//return transpose(reshape(inverse(hessian_matrix) * grad, theta_size, label_size));
 	}
 }

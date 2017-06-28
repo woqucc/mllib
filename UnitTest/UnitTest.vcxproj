@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{CAB26C3D-6B09-496F-84DF-20A4F100AE32}</ProjectGuid>
-    <RootNamespace>UnitTest</RootNamespace>
+    <ProjectGuid>{55D7B77A-4952-4E3B-B5FB-3C755E77FDD1}</ProjectGuid>
+    <RootNamespace>unittest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -113,11 +113,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\mymllib\mymllib.vcxproj">
-      <Project>{6100dde7-a9a4-4ca4-8322-3f7a02d527fb}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
