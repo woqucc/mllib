@@ -146,14 +146,8 @@ namespace myml
 		//海森矩阵大小 (特征数+1)*类别个数x(特征数+1)*类别个数
 		matrix<calc_param_type> hessian_matrix(theta_size * label_size, theta_size * label_size);
 		matrix<calc_param_type> predict_matrix = probabilities(feature_matrix);
-		matrix<calc_param_type> grad = reshape(gradient(feature_matrix, label_matrix), feature_size * label_size + label_size,1);
-		//TODO:是否需要乘以元素个数？
-		//TODO:hessian矩阵的计算过程？
-		//grad *= 15.0L;
-		predict_matrix = probabilities(feature_matrix);
 		for (size_t label_i = 0; label_i < label_size; ++label_i)
-		{
-			
+		{		
 			matrix<calc_param_type> w_diag = dot(predict_matrix.col(label_i),1.0L - predict_matrix.col(label_i));
 			hessian_matrix.sub_matrix(label_i * theta_size, label_i * theta_size, label_i * theta_size + theta_size - 1, label_i * theta_size + theta_size - 1) = transpose(feature) * diag(w_diag) * feature;
 			for (size_t other_label = label_i + 1; other_label < label_size; ++other_label)
@@ -164,8 +158,6 @@ namespace myml
 			}
 		}
 		return hessian_matrix;
-		//hessian_matrix.print();
-		//return transpose(reshape(inverse(hessian_matrix) * grad, theta_size, label_size));
 	}
 	calc_param_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
 	{

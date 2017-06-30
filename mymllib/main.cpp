@@ -28,15 +28,23 @@ int main(int argc, char* argv[])
 	//ifstream f(argv[1],ios::in);
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 	
-	matrix<long double> a = { {1,2,30},{4,50,6},{ 70,8,9 } };
-	auto b = qr(a);
-
+	matrix<long double> a = { {1,2,30},{4,50,6},{ 70,8,9 },{ 70,8,9 } };
+	matrix<long double> b = { { 1,0,0 },{ 0,1,0 },{ 0,0,1 },{ 0,0,0 } };
+	auto jp = jacobi_param(a, b, 0, 1);
+	(a.cols(0, 1) * jp).print();
+	
+	/*	auto b = svd(a);
 	get<0>(b).print();
 	cerr << endl;
 	get<1>(b).print();
-	(get<0>(b) * transpose(get<0>(b))).print();
-	(get<0>(b) * get<1>(b)).print();
 	cerr << endl;
+	get<2>(b).print();*/
+	
+	/*auto q = get<0>(b);
+	auto r = get<1>(b);
+
+	auto inv_a = inverse(transpose(r)*r)*transpose(r)* transpose(q);
+	(inv_a * a).print();*/
 	
 	
 /*
@@ -70,7 +78,7 @@ int main(int argc, char* argv[])
 	//cerr << sr.objective_function(m.cols(0, m.col_size() - 2), label);.
 	
 	//inverse(abc).print();
-	int n = 2;
+	int n = 6;
 	while (n--)
 	{
 		sr.train(m.cols(0, m.col_size() - 2), label);

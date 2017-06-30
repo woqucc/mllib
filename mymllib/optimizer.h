@@ -127,13 +127,20 @@ namespace myml
 	inline void newton_raphson_optimizer<feature_type, label_type, calc_param_type, class_param_type>::newton_raphson(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
 		auto hessian = cf.hessian(feature_matrix, label_matrix);
-		auto b = hessian;
 		hessian.print();
+		auto qr_m = qr(hessian);
+		auto q = get<0>(qr_m);
+		auto r = get<1>(qr_m);
+		hessian.print();
+		(q*r).print();
+		auto inverse_hessian = inverse(transpose(r)*r)*transpose(r)* transpose(q);
+		//inverse_hessian.print();
+		//(inverse_hessian * hessian).print();
 		auto gradient = cf.gradient(feature_matrix, label_matrix);
-		hessian.inverse().print();
+		
 
 		gradient.reshape(cf.label_size + cf.feature_size * cf.label_size, 1);
-		auto hg = hessian * gradient;
+		auto hg = inverse_hessian * gradient;
 		hg.print();
 		hg.reshape(cf.feature_size + 1, cf.label_size).transpose().print();
 

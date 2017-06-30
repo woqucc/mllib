@@ -305,6 +305,17 @@ namespace myml
 		*/
 		matrix& operator %=(const T t);
 		/*
+		@brief 矩阵相加
+		*/
+		matrix<T> operator +=(const matrix<T>& t);
+
+		/*
+		@brief 矩阵相减
+		*/
+		matrix<T> operator -=(const matrix<T>& t);
+
+
+		/*
 		括号操作符，用来访问元素
 		*/
 		T& operator ()(size_t row, size_t col);
@@ -317,15 +328,7 @@ namespace myml
 		*/
 		matrix& exp();
 
-		/*
-		@brief 矩阵相加
-		*/
-		matrix<T> operator +=(const matrix<T>& t);
 
-		/*
-		@brief 矩阵相减
-		*/
-		matrix<T> operator -=(const matrix<T>& t);
 
 
 		/*
@@ -2034,10 +2037,10 @@ namespace myml
 			// h = I - 2 * v * v'
 			matrix<T> h_matrix = identity_matrix<T>(vector_x.size());
 			//TODO:是否需要对列还是行进行判断？应该不需要吧
-			if (vetcor_v.row_size() == 1)
-				h_matrix -= 2 * transpose(vetcor_v) * vetcor_v;
-			else
-				h_matrix -= 2 * vetcor_v * transpose(vetcor_v);
+			//if (vetcor_v.row_size() == 1)
+			//	h_matrix -= 2 * transpose(vetcor_v) * vetcor_v;
+			//else
+			h_matrix -= 2 * vetcor_v * transpose(vetcor_v);
 			return { move(h_matrix), rho };
 		}
 
@@ -2060,21 +2063,23 @@ namespace myml
 		tuple<matrix<T>, matrix<T>> qr(const matrix<T> &input)
 		{
 			size_t n = input.row_size();
-			matrix<T> matrix_r = input;
-			matrix<T> matrix_q = identity_matrix<T>(n);
+			size_t min_size = min(n - 1, input.col_size());
+			matrix<T> r = input;
+			matrix<T> q = identity_matrix<T>(n);
 			//householder变换基
 			matrix<T> y(n, 1);
 			matrix<T> h(n, n);
 			y(0, 0) = T(1);
-			for (size_t i = 0; i < n - 1; ++i)
+			for (size_t i = 0; i < min_size; ++i)
 			{
+				//TODO:等待一个优化
 				//进行变换
 				identity_matrix(h);
 				//使用householder变换将Q变换成正交阵，householder矩阵代表变换方法
-				h.sub_matrix(i, i, n - 1, n - 1) = get<0>(householder(matrix_r.sub_matrix(i, i, n - 1, i), y.rows(0, n - i - 1)));
+				h.sub_matrix(i, i, n - 1, n - 1) = get<0>(householder(r.sub_matrix(i, i, n - 1, i), y.rows(0, n - i - 1)));
 				//TODO 编写*=矩阵操作符，可以节省一部分内存
-				matrix_q = matrix_q * h;
-				matrix_r = h * matrix_r;
+				q = q * h;
+				r = h * r;
 			}
 			//input: m x n ;
 			//q: m x n;
@@ -2084,23 +2089,91 @@ namespace myml
 
 			//Gram-Schmidt正交化，上三角矩阵R记录下变换过程
 			//数值不稳定，弃了
-			matrix_r(0, 0) = v_norm_euclidean(input.col(0));
-			matrix_q.col(0) = input.col(0) / matrix_r(0, 0);
+			r(0, 0) = v_norm_euclidean(input.col(0));
+			q.col(0) = input.col(0) / r(0, 0);
 			for (size_t j = 1; j < n; ++j)
 			{
-				matrix_q.col(j) = input.col(j);
+				q.col(j) = input.col(j);
 				for (size_t i = 0; i < j; ++i)
 				{
-					//(transpose(matrix_q.col(i)) * input.col(j)).print();
-					matrix_r(i, j) = (transpose(matrix_q.col(i)) * input.col(j))(0,0);
-					matrix_q.col(j) -= matrix_r(i, j) * matrix_q.col(i);
+					//(transpose(q.col(i)) * input.col(j)).print();
+					r(i, j) = (transpose(q.col(i)) * input.col(j))(0,0);
+					q.col(j) -= r(i, j) * q.col(i);
 				}
-				matrix_r(j, j) = v_norm_euclidean(matrix_q.col(j));
-				matrix_q.col(j) /= matrix_r(j, j);
+				r(j, j) = v_norm_euclidean(q.col(j));
+				q.col(j) /= r(j, j);
 			}
 			*/
-			return { move(matrix_q), move(matrix_r) };
+			return { move(q), move(r) };
 		}
+
+		/**
+		 * @fn	template<class T> tuple<matrix<T>, matrix<T>, matrix<T>> svd(const matrix<T> &input)
+		 *
+		 * @brief	对矩阵进行SVD分解
+		 *			将矩阵分解为： U * S * V'
+		 * @author	Woqucc
+		 * @date	2017/6/29
+		 *
+		 * @tparam	T	Generic type parameter.
+		 * @param	input	The input.
+		 *
+		 * @return	｛U,S,V｝;
+		 */
+
+		template<class T>
+		tuple<matrix<T>, matrix<T>, matrix<T>> svd(const matrix<T> &input)
+		{
+			size_t m = input.row_size();
+			size_t n = input.col_size();
+			matrix<T> u = identity_matrix<T>(m);
+			matrix<T> s = transpose(input);
+			matrix<T> st = transpose(s);
+			matrix<T> v = identity_matrix<T>(n);
+			matrix<T> q(m, m);
+			matrix<T> qn(n, n);
+			size_t iter_count = 26;
+			while (iter_count--)
+			{
+				std::tie(q, st) = qr(transpose(s));
+				u = u * q;
+				s = transpose(st);
+				std::tie(qn, s) = qr(s);
+				v = v * qn;
+			}
+			s.transpose();
+			for (size_t i = 0; i < min(m.n); ++i)
+			{
+				if (s(i, i) < 0)
+				{
+					u.col(i) *= -1;
+					s(i, i) = -s(i, i);
+				}
+			}
+
+			return { move(u),move(s) ,move(v) };
+		}
+		template<class T>
+		matrix<T> jacobi_param(const matrix<T>& origin, const matrix<T>& target, size_t i, size_t j)
+		{
+			// 矩阵形式
+			// cos -sin
+			// sin  cos
+			matrix<T> jacobi(2, 2);
+			auto a_i = origin.col(i);
+			auto a_j = origin.col(j);
+			auto b_i = target.col(i);
+			auto b_j = target.col(j);
+			T tao = (sum(dot(a_i, a_i)) + sum(dot(a_j, a_j))) / (2 * sum(dot(a_i, a_j)));
+			T t = T(tao > 0 ? 1 : -1) / (std::abs(tao) + std::sqrt(T(1) + tao * tao));
+
+			jacobi(0, 0) = T(1) / std::sqrt( t * t + T(1));
+			jacobi(1, 1) = jacobi(0, 0);
+			jacobi(1, 0) = t * jacobi(0, 0);
+			jacobi(0, 1) = -jacobi(1, 0);
+			return jacobi;
+		}
+
 
 	}
 	/*矩阵数据标准化*/
