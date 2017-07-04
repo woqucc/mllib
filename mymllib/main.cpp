@@ -11,6 +11,7 @@
 #include<ctime>
 #include<cstdlib>
 #include<tuple>
+#include<limits>
 
 using namespace std;
 using namespace myml;
@@ -27,33 +28,36 @@ int main(int argc, char* argv[])
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 	//ifstream f(argv[1],ios::in);
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
+
+	matrix<long double> a = { {1.0L/3.0L,2,30},{4,50,6},{ 70,8,9 },{ 70,8,9 } };
+	a.print();
+	//(a * pseudo_inverse(a)).print();
+	//matrix<long double> b = { { 1,0,0 },{ 0,1,0 },{ 0,0,1 },{ 0,0,0 } };
+	//matrix<long double> a = { {1,2},{4,50},{3,4} };
+	//matrix<long double> b = { { 1,0 },{ 0,1},{0,1} };
+
 	
-	matrix<long double> a = { {1,2,30},{4,50,6},{ 70,8,9 },{ 70,8,9 } };
-	matrix<long double> b = { { 1,0,0 },{ 0,1,0 },{ 0,0,1 },{ 0,0,0 } };
-	auto jp = jacobi_param(a, b, 0, 1);
-	(a.cols(0, 1) * jp).print();
-	
-	/*	auto b = svd(a);
+	/*auto b = svd_hestenes(a);
 	get<0>(b).print();
 	cerr << endl;
 	get<1>(b).print();
 	cerr << endl;
 	get<2>(b).print();*/
-	
+
 	/*auto q = get<0>(b);
 	auto r = get<1>(b);
 
 	auto inv_a = inverse(transpose(r)*r)*transpose(r)* transpose(q);
 	(inv_a * a).print();*/
-	
-	
-/*
-	auto b =inverse(transpose(a)*a)*transpose(a);
-	(a*b).print();*/
-	/*matrix<long double> b = { { 1,2,3 },{ 4,5,6 } };
-	kronecker_product(a, b).print();*/
 
-	
+
+	/*
+		auto b =inverse(transpose(a)*a)*transpose(a);
+		(a*b).print();*/
+		/*matrix<long double> b = { { 1,2,3 },{ 4,5,6 } };
+		kronecker_product(a, b).print();*/
+
+	//cerr << std::numeric_limits<long double>::digits10 << endl;
 	import_matrix_data(m, f, ' ');
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	matrix<size_t> label;
@@ -67,6 +71,8 @@ int main(int argc, char* argv[])
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
 	softmax_regression sr(m.col_size() - 1, label_map.size());
+	newton_raphson_optimizer<softmax_regression> gdo(sr) ;
+
 	//m.get_order(0);
 
 	//cerr << sum(test);
@@ -76,15 +82,15 @@ int main(int argc, char* argv[])
 	//theta.transpose();
 	//sr.load({ { 0,0,0 },{ 0,0,0 },{ 0,0,0 } });
 	//cerr << sr.objective_function(m.cols(0, m.col_size() - 2), label);.
-	
+
 	//inverse(abc).print();
-	int n = 6;
+	size_t n = 6;
 	while (n--)
 	{
-		sr.train(m.cols(0, m.col_size() - 2), label);
+		gdo.newton_raphson(m.cols(0, m.col_size() - 2),label);
 	}
 
-
+	
 	//confusion_matrix(sr, m.cols(0, m.col_size() - 2), label).print();
 	/*size_t r = 0;
 	int out_count = 0;

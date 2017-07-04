@@ -5,14 +5,13 @@
 namespace myml
 {
 	using namespace matrix_operate;
-	template<class feature_type, class label_type, class calc_param_type ,class class_param_type>
+	template<class classifier_type, class feature_type, class label_type>
 	class optimizer
 	{
 	public:
-
-
-	private:
-
+		optimizer(classifier_type &cf):_classifier(cf) {};
+	protected:
+		classifier_type & _classifier;
 	};
 	/*
 	设计意图：避免重复实施梯度下降系列算法，例如停止条件（未实施），学习速率计算等
@@ -20,46 +19,48 @@ namespace myml
 	
 	
 	/*模板：计算过程中使用的参数类型，传递的参数类型*/
-	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	class grad_desc_optimizer :optimizer<feature_type, label_type, calc_param_type, class_param_type>
+	template<class classifier_type,class feature_type = classifier_type::feature_type,class label_type= classifier_type::label_type>
+	class grad_desc_optimizer :optimizer<classifier_type, feature_type, label_type>
 	{
+		
 	public:
-		grad_desc_optimizer(size_t feature_size, size_t label_size);
-		calc_param_type learning_rate = 1E-5;
+		grad_desc_optimizer(classifier_type& cf);
 
 		/*
 		随机梯度下降，计算单独样本的梯度后更新
 		*/
-		void sgd(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type> &cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix);
+		void sgd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, feature_type learning_rate = 1E-5);
 		/*
 		批量梯度下降，累加本次传入所有样本的梯度后更新
 		*/
-		void batch_gd(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type> &cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix);
+		void batch_gd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, feature_type learning_rate=1E-5);
 		/*
 		随机梯度下降，动量法更新梯度
 		*/
-		void sgd_momentum(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type> &cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, calc_param_type rho, calc_param_type eit);
+		void sgd_momentum(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, feature_type learning_rate = 1E-5,feature_type rho = 0.9, feature_type eit = 0.3);
 		/*
 		随机梯度下降，adadelta方式计算更新速率
 		*/
-		void sgd_adadelta(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type> &cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, calc_param_type epsilon, calc_param_type rho );
+		void sgd_adadelta(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, feature_type epsilon = 1E-6, feature_type rho = 0.95);
 	private:
-		matrix<calc_param_type> _last_grad;/*上一次计算出的梯度矩阵*/
-		matrix<calc_param_type> _grad;/*本次计算出的梯度矩阵*/
+		matrix<feature_type> _last_grad;/*上一次计算出的梯度矩阵*/
+		matrix<feature_type> _grad;/*本次计算出的梯度矩阵*/
 
-		matrix<calc_param_type> _error;/*本次计算出的系数误差，通常为梯度乘以系数*/
-		matrix<calc_param_type> _last_error;/*上次计算出的系数误差*/
+		matrix<feature_type> _error;/*本次计算出的系数误差，通常为梯度乘以系数*/
+		matrix<feature_type> _last_error;/*上次计算出的系数误差*/
 
-		matrix<calc_param_type> _grad_square_ewma;/*梯度平方的移动平均值*/
-		matrix<calc_param_type> _error_square_ewma;/*每次更新误差的平方的移动平均值*/
+		matrix<feature_type> _grad_square_ewma;/*梯度平方的移动平均值*/
+		matrix<feature_type> _error_square_ewma;/*每次更新误差的平方的移动平均值*/
 	};
 
 
 
-	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	inline grad_desc_optimizer<feature_type, label_type, calc_param_type, class_param_type>::grad_desc_optimizer(size_t feature_size, size_t label_size)
+
+
+	template<class classifier_type, class feature_type, class label_type>
+	inline grad_desc_optimizer<classifier_type, feature_type, label_type>::grad_desc_optimizer(classifier_type & cf):optimizer(cf)
 	{
-		_grad.resize(label_size, feature_size + 1);
+		_grad.resize(cf.label_size, cf.feature_size + 1);
 		_grad.fill(0);
 		_last_grad = _grad;
 
@@ -70,85 +71,85 @@ namespace myml
 		_error_square_ewma = _grad;
 	}
 
-	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	inline void grad_desc_optimizer<feature_type, label_type, calc_param_type, class_param_type>::sgd(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
+	template<class classifier_type, class feature_type, class label_type>
+	inline void grad_desc_optimizer<classifier_type, feature_type, label_type>::sgd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, feature_type learning_rate)
 	{
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
-			_grad = cf.gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
-			cparam -= _grad * learning_rate;
+			_grad = _classifier.gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
+			_classifier._theta -= _grad * learning_rate;
 		}
 	}
 	
-	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	inline void grad_desc_optimizer<feature_type, label_type, calc_param_type, class_param_type>::batch_gd(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
+	template<class classifier_type, class feature_type, class label_type>
+	inline void grad_desc_optimizer<classifier_type, feature_type, label_type>::batch_gd(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, feature_type learning_rate)
 	{
-		_grad = cf.gradient(feature_matrix, label_matrix);
-		cparam -= _grad * learning_rate;
+		_grad = _classifier.gradient(feature_matrix, label_matrix);
+		_classifier._theta -= _grad * learning_rate;
 	}
 
-	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	inline void grad_desc_optimizer<feature_type, label_type, calc_param_type, class_param_type>::sgd_momentum(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, calc_param_type rho, calc_param_type eit)
+	template<class classifier_type, class feature_type, class label_type>
+	inline void grad_desc_optimizer<classifier_type, feature_type, label_type>::sgd_momentum(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix,feature_type learning_rate, feature_type rho, feature_type eit)
 	{
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
 			_last_error = _error;
-			_grad = cf.gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
+			_grad = _classifier.gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
 			//思想：本次梯度是本次计算出的梯度和上一次梯度的向量和,待考证
 			_error = _last_error * rho + _grad * (1 - rho);
-			cparam -= _error * learning_rate;
+			_classifier._theta -= _error * learning_rate;
 		}
 	}
 
-	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	inline void grad_desc_optimizer<feature_type, label_type, calc_param_type, class_param_type>::sgd_adadelta(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, calc_param_type epsilon,calc_param_type rho)
+	template<class classifier_type, class feature_type, class label_type>
+	inline void grad_desc_optimizer<classifier_type, feature_type, label_type>::sgd_adadelta(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix, feature_type epsilon, feature_type rho)
 	{
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
-			matrix<calc_param_type> _grad = cf.gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
+			matrix<feature_type> _grad = _classifier.gradient(feature_matrix.row(row_i), label_matrix.row(row_i));
 
 			_grad_square_ewma = _grad_square_ewma * rho + dot(_grad, _grad) * (1 - rho);
 
 			_error = sqrt((_error_square_ewma + epsilon) / (_grad_square_ewma + epsilon));
 			_error = dot(_error, _grad);
 
-			cparam -= _error;
+			_classifier._theta -= _error;
 			_error_square_ewma = _error_square_ewma * rho + dot(_error, _error) * (1 - rho);
 		}
 	}
 	/*模板：计算过程中使用的参数类型，传递的参数类型*/
-	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	class newton_raphson_optimizer :optimizer<feature_type, label_type, calc_param_type, class_param_type>
+	template<class classifier_type, class feature_type = classifier_type::feature_type, class label_type = classifier_type::label_type>
+	class newton_raphson_optimizer :optimizer<classifier_type, feature_type, label_type>
 	{
 	public:
-		void newton_raphson(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type> &cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix);
+		newton_raphson_optimizer(classifier_type &cf) :optimizer(cf) {};
+		void newton_raphson (const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix);
 	};
-	template<class feature_type, class label_type, class calc_param_type, class class_param_type>
-	inline void newton_raphson_optimizer<feature_type, label_type, calc_param_type, class_param_type>::newton_raphson(class_param_type & cparam, const classifier<feature_type, label_type, calc_param_type>& cf, const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
+	
+	
+	template<class classifier_type, class feature_type, class label_type>
+	inline void newton_raphson_optimizer<classifier_type, feature_type, label_type>::newton_raphson(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
-		auto hessian = cf.hessian(feature_matrix, label_matrix);
-		hessian.print();
-		auto qr_m = qr(hessian);
-		auto q = get<0>(qr_m);
-		auto r = get<1>(qr_m);
-		hessian.print();
-		(q*r).print();
-		auto inverse_hessian = inverse(transpose(r)*r)*transpose(r)* transpose(q);
+		auto hessian = _classifier.hessian(feature_matrix, label_matrix);
+		auto x = svd_hestenes(hessian);
+		//(get<0>(x) * transpose(get<0>(x))).print();
+		//hessian.print();
+		//hessian += identity_matrix<feature_type>(hessian.row_size()) * 1E-8;
+		auto inverse_hessian = pseudo_inverse(hessian);
 		//inverse_hessian.print();
 		//(inverse_hessian * hessian).print();
-		auto gradient = cf.gradient(feature_matrix, label_matrix);
+		auto gradient = _classifier.gradient(feature_matrix, label_matrix);
 		
 
-		gradient.reshape(cf.label_size + cf.feature_size * cf.label_size, 1);
+		gradient.reshape(_classifier.label_size + _classifier.feature_size * _classifier.label_size, 1);
 		auto hg = inverse_hessian * gradient;
-		hg.print();
-		hg.reshape(cf.feature_size + 1, cf.label_size).transpose().print();
+		hg.reshape(_classifier.feature_size + 1, _classifier.label_size).transpose();
 
 		//transpose(reshape(inverse(hessian_matrix) * grad, theta_size, label_size));
 		//TODO 优化
 		//cf.hessian(feature_matrix, label_matrix).print();
 		//cparam -= cf.hessian(feature_matrix, label_matrix);
-		cparam -= hg;
+		_classifier._theta -= hg;
 	}
 }
 #endif // !OPTIMIZER_H

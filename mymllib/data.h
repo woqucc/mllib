@@ -314,7 +314,6 @@ namespace myml
 		*/
 		matrix<T> operator -=(const matrix<T>& t);
 
-
 		/*
 		括号操作符，用来访问元素
 		*/
@@ -323,6 +322,16 @@ namespace myml
 		括号操作符，用来访问元素
 		*/
 		T operator ()(size_t row, size_t col) const;
+
+		/*
+		括号操作符，用来访问元素，从前到后访问
+		*/
+		T& operator ()(size_t index);
+		/*
+		括号操作符，用来访问元素，从前到后访问
+		*/
+		T operator ()(size_t index) const;
+
 		/*
 		@brief 本矩阵每个元素都exp
 		*/
@@ -427,7 +436,7 @@ namespace myml
 	template<class T>
 	inline void matrix<T>::print(ostream& out, char split) const
 	{
-		out.precision(6);
+		//out.precision(std::numeric_limits<T>::digits10);
 		out << fixed;
 		for (size_t row = 0; row < row_size(); row++)
 		{
@@ -500,6 +509,16 @@ namespace myml
 	inline T matrix<T>::operator()(size_t row, size_t col) const
 	{
 		return _data[row][col];
+	}
+	template<class T>
+	inline T & matrix<T>::operator()(size_t index)
+	{
+		return _data[index / _col_size][index % _col_size];
+	}
+	template<class T>
+	inline T matrix<T>::operator()(size_t index) const
+	{
+		return _data[index / _col_size][index % _col_size];
 	}
 	template<class T>
 	inline matrix<T> & matrix<T>::exp()
@@ -1090,6 +1109,8 @@ namespace myml
 	{
 		return _data[row_num][col_num];
 	}
+
+
 
 	template<class T>
 	inline matrix<T>::matrix(size_t row_size, size_t col_size)
@@ -1718,7 +1739,17 @@ namespace myml
 			}
 			return move(temp);
 		}
-
+		template<class T>
+		T dot_product(matrix<T> op1, matrix<T> op2)
+		{
+			assert(op1.size() == op2.size());
+			T sum = 0;
+			for (size_t i = 0; i < op1.size(); ++i)
+			{
+				sum += op1(i) * op2(i);
+			}
+			return sum;
+		}
 		/**
 		 * @fn	template<class T> matrix<T> transpose(const matrix<T>& input)
 		 *
@@ -1929,7 +1960,7 @@ namespace myml
 
 		/*生成单位矩阵*/
 		template<class T>
-		matrix<T> identity_matrix(const size_t& size)
+		matrix<T> identity_matrix(size_t size)
 		{
 			matrix<T> result(size, size);
 			for (size_t i = 0; i < size; i++)
@@ -2122,7 +2153,7 @@ namespace myml
 		 */
 
 		template<class T>
-		tuple<matrix<T>, matrix<T>, matrix<T>> svd(const matrix<T> &input)
+		tuple<matrix<T>, matrix<T>, matrix<T>> svd_qr(const matrix<T> &input)
 		{
 			size_t m = input.row_size();
 			size_t n = input.col_size();
@@ -2154,27 +2185,118 @@ namespace myml
 			return { move(u),move(s) ,move(v) };
 		}
 		template<class T>
-		matrix<T> jacobi_param(const matrix<T>& origin, const matrix<T>& target, size_t i, size_t j)
+		matrix<T> pseudo_inverse(const matrix<T>& input)
 		{
-			// 矩阵形式
-			// cos -sin
-			// sin  cos
-			matrix<T> jacobi(2, 2);
-			auto a_i = origin.col(i);
-			auto a_j = origin.col(j);
-			auto b_i = target.col(i);
-			auto b_j = target.col(j);
-			T tao = (sum(dot(a_i, a_i)) + sum(dot(a_j, a_j))) / (2 * sum(dot(a_i, a_j)));
-			T t = T(tao > 0 ? 1 : -1) / (std::abs(tao) + std::sqrt(T(1) + tao * tao));
+			matrix<T> pinv(input.col_size(), input.row_size());
+			matrix<T> u(input.row_size(), input.row_size());
+			matrix<T> s(input.row_size(), input.col_size());
+			matrix<T> v(input.col_size(), input.col_size());
+			//TODO :: 这个svd也不行
+			std::tie(u, s, v) = svd_hestenes(input, std::numeric_limits<T>::epsilon() * 1024 * 16);
+			u.transpose();
+			s.transpose();
+			for (size_t i = 0; i < std::min(input.col_size(), input.row_size()); ++i)
+			{
+				s(i, i) = T(1) / s(i, i);
+			}
+			return v *s *u;
 
-			jacobi(0, 0) = T(1) / std::sqrt( t * t + T(1));
-			jacobi(1, 1) = jacobi(0, 0);
-			jacobi(1, 0) = t * jacobi(0, 0);
-			jacobi(0, 1) = -jacobi(1, 0);
-			return jacobi;
 		}
 
+		/**
+		 * @fn	template<class T> tuple<matrix<T>, matrix<T>, matrix<T>> svd_hestenes(const matrix<T> &input, T epsilon = T(1E-10))
+		 *
+		 * @brief	单边jacobi旋转求svd
+		 * 
+		 *
+		 * @author	Woqucc
+		 * @date	2017/7/4
+		 *
+		 * @tparam	T	Generic type parameter.
+		 * @param	input  	The input.
+		 * @param	epsilon	(Optional) The epsilon.
+		 *
+		 * @return	A tuple&lt;matrix&lt;T&gt;,matrix&lt;T&gt;,matrix&lt;T&gt;&gt;
+		 */
 
+		template<class T>
+		tuple<matrix<T>, matrix<T>, matrix<T>> svd_hestenes(const matrix<T> &input, T epsilon = T(1E-10))
+		{
+			size_t m = input.row_size();
+			size_t n = input.col_size();
+			matrix<T> temp_input = input;
+			matrix<T> u = identity_matrix<T>(m);
+			matrix<T> s(input.row_size(), input.col_size());
+			matrix<T> v = identity_matrix<T>(n);
+
+			while (orth_precision_column(temp_input) > epsilon)
+			{
+				for (size_t i = 0; i < n; i++)
+				{
+					for (size_t j = i + 1; j < n; ++j)
+					{
+						auto gm = orth_givens<T>(temp_input, i, j);
+						givens_rotate(v, gm, i, j);
+					}
+				}
+			}
+			std::tie(u, s) = qr(temp_input);
+			return { move(u),move(s) ,move(v) };
+		}
+		template<class T>
+		T orth_precision_column(const matrix<T> &input)
+		{
+			T orth_pre = 0;
+			for (size_t i = 0; i < input.col_size(); i++)
+			{
+				for (size_t j = i + 1; j < input.col_size(); j++)
+				{
+					orth_pre = std::max(orth_pre, abs(dot_product(input.col(i), input.col(j))));
+				}
+			}
+			return orth_pre;
+		}
+		template<class T>
+		matrix<T> orth_givens(matrix<T> &input, size_t i, size_t j)
+		{
+			matrix<T> givens_matrix(2, 2);
+			T p = dot_product(input.col(i), input.col(j)), q, v;
+			q = dot_product(input.col(i), input.col(i)) - dot_product(input.col(j), input.col(j));
+			v = std::sqrt(4 * p * p + q * q);
+			if (q >= 0)
+			{
+				givens_matrix(0, 0) = std::sqrt((v + q) / (2 * v));//c 
+				givens_matrix(1, 0) = p / (v * givens_matrix(0, 0));//s
+			}
+			else
+			{
+				givens_matrix(1, 0) = p > 0 ? std::sqrt((v - q) / (2 * v)) : -std::sqrt((v - q) / (2 * v));//s
+				givens_matrix(0, 0) = p / (v * givens_matrix(1, 0));//c
+			}
+			T temp_i, temp_j;
+			for (size_t row_i = 0; row_i < input.row_size(); ++row_i)
+			{
+				temp_i = input(row_i, i) * givens_matrix(0, 0) + input(row_i, j) * givens_matrix(1, 0);
+				temp_j = -input(row_i, i) * givens_matrix(1, 0) + input(row_i, j) * givens_matrix(0, 0);
+				input(row_i, i) = temp_i;
+				input(row_i, j) = temp_j;
+			}
+			givens_matrix(1, 1) = givens_matrix(0, 0);
+			givens_matrix(0, 1) = -givens_matrix(1, 0);
+			return givens_matrix;
+		}
+		template<class T>
+		void givens_rotate(matrix<T> &input, const matrix<T> &tiny_givens_matrix, size_t i, size_t j)
+		{
+			T temp_i, temp_j;
+			for (size_t row_i = 0; row_i < input.row_size(); ++row_i)
+			{
+				temp_i = input(row_i, i) * tiny_givens_matrix(0, 0) + input(row_i, j) * tiny_givens_matrix(1, 0);
+				temp_j = -input(row_i, i) * tiny_givens_matrix(1, 0) + input(row_i, j) * tiny_givens_matrix(0, 0);
+				input(row_i, i) = temp_i;
+				input(row_i, j) = temp_j;
+			}
+		}
 	}
 	/*矩阵数据标准化*/
 	namespace matrix_normalization
