@@ -74,7 +74,7 @@ namespace myml
 
 	size_t c45_tree_node::split_by_gain_ratio()
 	{
-		/*		
+		/*
 		//如果不是终结节点
 		if (_finish_node)
 			return 1;
@@ -84,7 +84,7 @@ namespace myml
 		_children_range.resize(selected_attr_counts.size());
 		cerr << "最大信息增益率的属性：" << _gain_ratio_attr << "\t" << _gain_ratio << endl;
 		//使用信息增益率最大的属性进行分割
-		//cerr << "print"; 
+		//cerr << "print";
 		for (const auto& attr : selected_attr_counts)
 		{
 			auto temp_gr = _gain_ratio_attr;
@@ -132,12 +132,12 @@ namespace myml
 	inline count_result c45_tree_node::_get_column_classes_count(size_t column_num, matrix_p data)
 	{
 		count_result&& cr = count_result();
-		for (auto i = data->col_begin(column_num); i != data->col_end(column_num); ++i)
+		for (size_t i = 0; i < data->row_size(); ++i)
 		{
-			auto lable_pair = cr.find(*i);
+			auto lable_pair = cr.find(data->at(i, column_num));
 			if (lable_pair == cr.end())
 			{
-				cr.insert({ *i, 1 });
+				cr.insert({ data->at(i,column_num), 1 });
 			}
 			else
 			{
@@ -196,14 +196,14 @@ namespace myml
 	{
 		auto label_pos = data->col_size() - 1;
 		count_result&& cr = count_result();
-		for (auto i = data->col_begin(column_num); i != data->col_end(column_num); ++i)
+		for (size_t i = 0; i < data->row_size(); ++i)
 		{
-			if (*i != value)
+			if (data->at(i, column_num) != value)
 				continue;
-			auto lable_pair = cr.find(*i);
+			auto lable_pair = cr.find(data->at(i, column_num));
 			if (lable_pair == cr.end())
 			{
-				cr.insert({ *i, 1 });
+				cr.insert({ data->at(i,column_num), 1 });
 			}
 			else
 			{

@@ -131,13 +131,12 @@ namespace myml
 	inline void newton_raphson_optimizer<classifier_type, feature_type, label_type>::newton_raphson(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
 	{
 		auto hessian = _classifier.hessian(feature_matrix, label_matrix);
-		auto x = svd_hestenes(hessian);
 		//(get<0>(x) * transpose(get<0>(x))).print();
 		//hessian.print();
 		//hessian += identity_matrix<feature_type>(hessian.row_size()) * 1E-8;
 		auto inverse_hessian = pseudo_inverse(hessian);
 		//inverse_hessian.print();
-		//(inverse_hessian * hessian).print();
+		//(hessian * inverse_hessian).print();
 		auto gradient = _classifier.gradient(feature_matrix, label_matrix);
 		
 

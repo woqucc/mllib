@@ -22,6 +22,7 @@ int main(int argc, char* argv[])
 	//ifstream f(R"(binary_classification.txt)", ios::in);
 	//ifstream f(R"(multi_classification.txt)", ios::in);
 	ifstream f(R"(hessian_test.txt)", ios::in);
+	
 	//ifstream f(R"(multi_classification2.txt)", ios::in);
 	//auto x = diag<long double>({ {1,2,3,4,5,6,7,8,9,10} });
 	//(-x).print();
@@ -29,10 +30,12 @@ int main(int argc, char* argv[])
 	//ifstream f(argv[1],ios::in);
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 
-	matrix<long double> a = { {1.0L/3.0L,2,30},{4,50,6},{ 70,8,9 },{ 70,8,9 } };
-	a.print();
+	
+	//a.print();
 	//(a * pseudo_inverse(a)).print();
-	//matrix<long double> b = { { 1,0,0 },{ 0,1,0 },{ 0,0,1 },{ 0,0,0 } };
+	matrix<long double> b = { { 1,2,3 },{ 4,5,6 },{ 7,8,9 },{ 10,11,12 } };
+	auto c = pseudo_inverse(b);
+	(b * c).print();
 	//matrix<long double> a = { {1,2},{4,50},{3,4} };
 	//matrix<long double> b = { { 1,0 },{ 0,1},{0,1} };
 
@@ -59,8 +62,10 @@ int main(int argc, char* argv[])
 
 	//cerr << std::numeric_limits<long double>::digits10 << endl;
 	import_matrix_data(m, f, ' ');
+
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	matrix<size_t> label;
+	auto p = identity_matrix<long double>(100);
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	//matrix_normalization::set_range<long double>(m.col(m.col_size() - 1), 0, 3);
 	matrix<long double> temp = m.col(m.col_size() - 1);
@@ -84,7 +89,7 @@ int main(int argc, char* argv[])
 	//cerr << sr.objective_function(m.cols(0, m.col_size() - 2), label);.
 
 	//inverse(abc).print();
-	size_t n = 6;
+	size_t n = 1;
 	while (n--)
 	{
 		gdo.newton_raphson(m.cols(0, m.col_size() - 2),label);
