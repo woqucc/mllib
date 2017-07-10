@@ -5,8 +5,8 @@
 #include<ctime>
 #include<cstring>
 #include<string>
-#include"data.h"
-#include"softmax_regression.h"
+#include"data/matrix.h"
+#include"classifier/softmax_regression.h"
 #include<vector>
 #include<ctime>
 #include<cstdlib>
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 	matrix<long double> m;
 	//ifstream f(R"(binary_classification.txt)", ios::in);
 	//ifstream f(R"(multi_classification.txt)", ios::in);
-	ifstream f(R"(hessian_test.txt)", ios::in);
+	ifstream f(R"(..\\test_data\\hessian_test.txt)", ios::in);
 	
 	//ifstream f(R"(multi_classification2.txt)", ios::in);
 	//auto x = diag<long double>({ {1,2,3,4,5,6,7,8,9,10} });
@@ -33,9 +33,12 @@ int main(int argc, char* argv[])
 	
 	//a.print();
 	//(a * pseudo_inverse(a)).print();
-	matrix<long double> b = { { 1,2,3 },{ 4,5,6 },{ 7,8,9 },{ 10,11,12 } };
+	// matrix<long double> b = { { 1,2,3 },{ 4,5,6 },{ 7,8,9 },{ 10,11,12 } };
+	matrix<long double> b = { { 1,2,3 },{ 4,5,6 } };
 	auto c = pseudo_inverse(b);
-	(b * c).print();
+	c.print();
+	( c * b * c).print();
+	(b * c * b).print();
 	//matrix<long double> a = { {1,2},{4,50},{3,4} };
 	//matrix<long double> b = { { 1,0 },{ 0,1},{0,1} };
 
@@ -75,9 +78,9 @@ int main(int argc, char* argv[])
 	{
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
-	softmax_regression sr(m.col_size() - 1, label_map.size());
-	newton_raphson_optimizer<softmax_regression> gdo(sr) ;
-
+	softmax_regression_ridge sr(m.col_size() - 1, label_map.size());
+	newton_raphson_optimizer<softmax_regression> nro(sr) ;
+	grad_desc_optimizer<softmax_regression> gdo(sr);
 	//m.get_order(0);
 
 	//cerr << sum(test);
@@ -89,10 +92,11 @@ int main(int argc, char* argv[])
 	//cerr << sr.objective_function(m.cols(0, m.col_size() - 2), label);.
 
 	//inverse(abc).print();
-	size_t n = 1;
+	size_t n = 10;
 	while (n--)
 	{
-		gdo.newton_raphson(m.cols(0, m.col_size() - 2),label);
+		//nro.newton_raphson(m.cols(0, m.col_size() - 2),label);
+		gdo.sgd_adadelta(m.cols(0, m.col_size() - 2), label);
 	}
 
 	

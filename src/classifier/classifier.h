@@ -1,6 +1,6 @@
 ﻿#ifndef CLASSIFIER_H
 #define CLASSIFIER_H
-#include"data.h"
+#include"../data/matrix.h"
 #include<iostream>
 #include<cassert>
 namespace myml

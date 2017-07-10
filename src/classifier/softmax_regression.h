@@ -1,8 +1,8 @@
 ﻿#ifndef SOFTMAX_REGRESSION
 #define SOFTMAX_REGRESSION
-#include"data.h"
+#include"../data/matrix.h"
 #include"classifier.h"
-#include"optimizer.h"
+#include"../optimizer/optimizer.h"
 #include<map>
 #include<iostream>
 namespace myml

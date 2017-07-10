@@ -1,5 +1,5 @@
-#include"../mymllib/data.h"
-#include"../mymllib/softmax_regression.h"
+#include"../src/data/matrix.h"
+#include"../src/classifier/softmax_regression.h"
 #define CATCH_CONFIG_MAIN
 #include"catch.hpp"
 using namespace myml;

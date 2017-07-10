@@ -1,8 +1,8 @@
 ﻿#ifndef C45_H
 #define C45_H
-#include"range.h"
-#include"data.h"
-#include"tree.hh"
+#include"../tool/range.h"
+#include"../data/matrix.h"
+#include"../tool/tree.hh"
 #include"classifier.h"
 #include<unordered_map>
 #include<memory>

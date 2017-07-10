@@ -2094,7 +2094,7 @@ namespace myml
 			matrix<T> temp_input = input;
 			matrix<T> u = identity_matrix<T>(m);
 			matrix<T> s(input.row_size(), input.col_size());
-			matrix<T> inv_s(n, n);
+			matrix<T> inv_s(n, m);
 			matrix<T> v = identity_matrix<T>(n);
 
 			//input *v = s * u

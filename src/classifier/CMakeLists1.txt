@@ -1,0 +1,10 @@
+file(GLOB_RECURSE CLASSIFIER_SRCS
+    "*.h"
+	"*.c"
+    "*.hpp"
+	"*.cpp"
+	"*.hh"
+	"*.cc"
+)
+message(${CLASSIFIER_SRCS})
+add_library(classifier ${CLASSIFIER_SRCS})

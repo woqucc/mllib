@@ -1,0 +1,63 @@
+cmake_minimum_required (VERSION 3.3)
+
+#自动加入将带有CMakeLists.txt的子目录
+MACRO(add_subdirs_have_cmakelists curdir)
+	file(GLOB children RELATIVE ${curdir} ${curdir}/*)
+	set(dirlist "")
+	foreach(child ${children})
+		if(IS_DIRECTORY ${curdir}/${child} AND EXISTS "${curdir}/${child}/CMakeLists.txt")
+			add_subdirectory(${child})
+		endif()
+	endforeach()
+ENDMACRO()
+
+#自动引入子目录中所有的.h文件
+MACRO(include_all_hearers)
+	file(GLOB_RECURSE new_list *.h)
+	set(dirlist "")
+	foreach(file_path ${new_list})
+		#获取文件目录
+		get_filename_component(dir_path ${file_path} DIRECTORY)
+		if(NOT ${dir_path} IN_LIST dirlist)
+			list(APPEND dirlist ${dir_path})
+			include_directories(${dir_path})
+		endif()		
+	endforeach()
+	get_property(dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
+ENDMACRO()
+
+#filter生成
+macro(generate_filters_by_dir HEADER SOURCE)
+    if(MSVC)
+		foreach(sgbd_file ${${HEADER}})
+			string(REGEX REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/\(.*\) \\1 sgbd_fpath ${sgbd_file})
+			string(REGEX REPLACE "\(.*\)/.*" \\1 sgbd_group_name ${sgbd_fpath})
+			string(COMPARE EQUAL ${sgbd_fpath} ${sgbd_group_name} sgbd_nogroup)
+			string(REPLACE "/" "\\" sgbd_group_name ${sgbd_group_name})
+			if(sgbd_nogroup)
+				set(sgbd_group_name "\\")
+			endif(sgbd_nogroup)
+			source_group("Hearder Files\\${sgbd_group_name}" FILES ${sgbd_file})
+		endforeach(sgbd_file)
+		foreach(sgbd_file ${${SOURCE}})
+			string(REGEX REPLACE ${CMAKE_CURRENT_SOURCE_DIR}/\(.*\) \\1 sgbd_fpath ${sgbd_file})
+			string(REGEX REPLACE "\(.*\)/.*" \\1 sgbd_group_name ${sgbd_fpath})
+			string(COMPARE EQUAL ${sgbd_fpath} ${sgbd_group_name} sgbd_nogroup)
+			string(REPLACE "/" "\\" sgbd_group_name ${sgbd_group_name})
+			if(sgbd_nogroup)
+				set(sgbd_group_name "\\")
+			endif(sgbd_nogroup)
+			source_group("Source Files\\${sgbd_group_name}" FILES ${sgbd_file})
+		endforeach(sgbd_file)
+    endif(MSVC)
+endmacro()
+
+#项目名称
+project  (mllib)
+#加入所有包含CMakeLists.txt的子目录
+add_subdirs_have_cmakelists(${CMAKE_CURRENT_SOURCE_DIR})
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+#复制测试用例文件
+file(COPY test_data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+set(CMAKE_CXX_STANDARD 11)
+

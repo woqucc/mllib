@@ -1,7 +1,7 @@
 ﻿#ifndef OPTIMIZER_H
 #define OPTIMIZER_H
-#include"classifier.h"
-#include"data.h"
+#include"../classifier/classifier.h"
+#include"../data/matrix.h"
 namespace myml
 {
 	using namespace matrix_operate;
@@ -137,7 +137,8 @@ namespace myml
 		auto inverse_hessian = pseudo_inverse(hessian);
 		//inverse_hessian.print();
 		//(hessian * inverse_hessian).print();
-		auto gradient = _classifier.gradient(feature_matrix, label_matrix);
+		auto gradient = dynamic_cast<softmax_regression&>(_classifier).gradient(feature_matrix, label_matrix);
+		//auto gradient = _classifier.gradient(feature_matrix, label_matrix);
 		
 
 		gradient.reshape(_classifier.label_size + _classifier.feature_size * _classifier.label_size, 1);
