@@ -108,7 +108,7 @@ namespace myml
 		for (size_t col_i = 0; col_i < predict_matrix.col_size(); ++col_i)
 		{
 			sum_error.cols(0, _theta.col_size() - 2) += predict_matrix.col(col_i) * feature_matrix.row(col_i);
-			/*补1*/
+			/*计算常数项误差*/
 			sum_error.col(_theta.col_size() - 1) += predict_matrix.col(col_i);
 		}
 		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/

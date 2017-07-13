@@ -1,7 +1,5 @@
 project  (mllib)
 
-aux_source_directory(. DIR_SRCS)
-
 add_subdirs_have_cmakelists(${CMAKE_CURRENT_SOURCE_DIR})
 include_all_hearers()
 file(GLOB_RECURSE HEADER "*.h" "*.hpp" "*.hh")

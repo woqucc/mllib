@@ -1297,7 +1297,7 @@ namespace myml
 		 * ### tparam	T	Generic type parameter.
 		 */
 
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator* (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
@@ -1328,7 +1328,7 @@ namespace myml
 		 * @return	The result of the operation.
 		 */
 
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, class = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator* (const E& op1, const matrix<T>& op2)
 		{
 			matrix<T> temp(op2.row_size(), op2.col_size());
@@ -1371,7 +1371,7 @@ namespace myml
 			}
 			return move(temp);
 		}
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator/ (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
@@ -1384,7 +1384,7 @@ namespace myml
 			}
 			return move(temp);
 		}
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator/ (const E& op1, const matrix<T>& op2)
 		{
 			matrix<T> temp(op2.row_size(), op2.col_size());
@@ -1429,7 +1429,7 @@ namespace myml
 			return move(temp);
 		}
 
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator+ (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
@@ -1443,7 +1443,7 @@ namespace myml
 			return move(temp);
 		}
 
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator+ (const E& op1, const matrix<T>& op2)
 		{
 			matrix<T> temp(op2.row_size(), op2.col_size());
@@ -1457,7 +1457,7 @@ namespace myml
 			return move(temp);
 		}
 
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator- (const matrix<T>& op1, const E& op2)
 		{
 			matrix<T> temp(op1.row_size(), op1.col_size());
@@ -1471,7 +1471,7 @@ namespace myml
 			return move(temp);
 		}
 
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		matrix<T> operator- (const E& op1, const matrix<T>& op2)
 		{
 			matrix<T> temp(op2.row_size(), op2.col_size());
@@ -1560,7 +1560,7 @@ namespace myml
 			return true;
 		}
 
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		bool operator ==(const matrix<T>& op1, const E& op2)
 		{
 			if (op1.col_size() != 1 || op1.row_size() != 1)
@@ -1568,7 +1568,7 @@ namespace myml
 			return op1(0, 0) == op2;
 		}
 
-		template<class T, class E, class = std::enable_if<std::is_fundamental<E>::value>::type>
+		template<class T, class E, typename = typename std::enable_if<std::is_fundamental<E>::value>::type>
 		bool operator ==(const E& op2, const matrix<T>& op1)
 		{
 			if (op1.col_size() != 1 || op1.row_size() != 1)
@@ -1838,7 +1838,7 @@ namespace myml
 		}
 
 		template<class T>
-		void identity_matrix(matrix<T>& input)
+		void identity_matrix(matrix<T>&& input)
 		{
 			for (size_t row_i = 0; row_i < input.row_size(); ++row_i)
 			{
@@ -1939,7 +1939,7 @@ namespace myml
 			//	h_matrix -= 2 * transpose(vetcor_v) * vetcor_v;
 			//else
 			h_matrix -= 2 * vetcor_v * transpose(vetcor_v);
-			return { move(h_matrix), rho };
+			return std::make_tupe(move(h_matrix), rho);
 		}
 
 		/**
@@ -2002,7 +2002,7 @@ namespace myml
 				q.col(j) /= r(j, j);
 			}
 			*/
-			return { move(q), move(r) };
+			return std::make_tupe(move(q), move(r));
 		}
 
 		/**
@@ -2040,7 +2040,7 @@ namespace myml
 				v = v * qn;
 			}
 			s.transpose();
-			for (size_t i = 0; i < min(m.n); ++i)
+			for (size_t i = 0; i < min(m, n); ++i)
 			{
 				if (s(i, i) < 0)
 				{
@@ -2049,7 +2049,7 @@ namespace myml
 				}
 			}
 
-			return { move(u),move(s) ,move(v) };
+			return std::make_tupe(move(u), move(s), move(v));
 		}
 		template<class T>
 		matrix<T> pseudo_inverse(const matrix<T>& input)
@@ -2058,7 +2058,6 @@ namespace myml
 			matrix<T> u(input.row_size(), input.row_size());
 			matrix<T> s(input.row_size(), input.col_size());
 			matrix<T> v(input.col_size(), input.col_size());
-			//TODO :: 这个svd也不行
 			std::tie(u, s, v) = svd_hestenes(input, std::numeric_limits<T>::epsilon() * 1024 * 16);
 			u.transpose();
 			s.transpose();
@@ -2101,6 +2100,7 @@ namespace myml
 			//计算出v
 			while (orth_precision_column(temp_input) > epsilon)
 			{
+				//TODO:在每次正交化列的选择上，需要进行优化
 				for (size_t i = 0; i < n; i++)
 				{
 					for (size_t j = i + 1; j < n; ++j)
@@ -2112,7 +2112,6 @@ namespace myml
 			}
 			// temp_input = u * s
 			// temp_input * temp_input' = s * u * u ' * s' = s * s' = s特征值的平方形成的矩阵
-			//
 			for (size_t i = 0; i < std::min(m, n); ++i)
 			{
 				auto temp_col = temp_input.col(i);
@@ -2121,8 +2120,9 @@ namespace myml
 			}
 			//u = input * v * inverse(s)
 			u = input * v * inv_s;
-			return { move(u),move(s) ,move(v) };
+			return std::make_tupe(move(u), move(s), move(v));
 		}
+		//求矩阵的列正交化精度，即矩阵列之间内积的最大值
 		template<class T>
 		T orth_precision_column(const matrix<T> &input)
 		{

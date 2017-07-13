@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.3)
-
+set(CMAKE_CXX_STANDARD 11)
 #自动加入将带有CMakeLists.txt的子目录
 MACRO(add_subdirs_have_cmakelists curdir)
 	file(GLOB children RELATIVE ${curdir} ${curdir}/*)
@@ -59,5 +59,3 @@ add_subdirs_have_cmakelists(${CMAKE_CURRENT_SOURCE_DIR})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 #复制测试用例文件
 file(COPY test_data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-set(CMAKE_CXX_STANDARD 11)
-

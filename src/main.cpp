@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 	//matrix<long double> a = { {1,2},{4,50},{3,4} };
 	//matrix<long double> b = { { 1,0 },{ 0,1},{0,1} };
 
-	
+
 	/*auto b = svd_hestenes(a);
 	get<0>(b).print();
 	cerr << endl;
@@ -65,10 +65,10 @@ int main(int argc, char* argv[])
 
 	//cerr << std::numeric_limits<long double>::digits10 << endl;
 	import_matrix_data(m, f, ' ');
-
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	matrix<size_t> label;
 	auto p = identity_matrix<long double>(100);
+	p.print();
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	//matrix_normalization::set_range<long double>(m.col(m.col_size() - 1), 0, 3);
 	matrix<long double> temp = m.col(m.col_size() - 1);

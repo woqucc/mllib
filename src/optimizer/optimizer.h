@@ -19,11 +19,12 @@ namespace myml
 	
 	
 	/*模板：计算过程中使用的参数类型，传递的参数类型*/
-	template<class classifier_type,class feature_type = classifier_type::feature_type,class label_type= classifier_type::label_type>
+	template<class classifier_type,class feature_type = typename classifier_type::feature_type,class label_type= typename classifier_type::label_type>
 	class grad_desc_optimizer :optimizer<classifier_type, feature_type, label_type>
 	{
 		
 	public:
+		using optimizer<classifier_type, feature_type, label_type>::_classifier;
 		grad_desc_optimizer(classifier_type& cf);
 
 		/*
@@ -58,7 +59,7 @@ namespace myml
 
 
 	template<class classifier_type, class feature_type, class label_type>
-	inline grad_desc_optimizer<classifier_type, feature_type, label_type>::grad_desc_optimizer(classifier_type & cf):optimizer(cf)
+	inline grad_desc_optimizer<classifier_type, feature_type, label_type>::grad_desc_optimizer(classifier_type & cf):optimizer<classifier_type, feature_type, label_type>::optimizer(cf)
 	{
 		_grad.resize(cf.label_size, cf.feature_size + 1);
 		_grad.fill(0);
@@ -118,11 +119,12 @@ namespace myml
 		}
 	}
 	/*模板：计算过程中使用的参数类型，传递的参数类型*/
-	template<class classifier_type, class feature_type = classifier_type::feature_type, class label_type = classifier_type::label_type>
+	template<class classifier_type, class feature_type = typename classifier_type::feature_type, class label_type = typename classifier_type::label_type>
 	class newton_raphson_optimizer :optimizer<classifier_type, feature_type, label_type>
 	{
 	public:
-		newton_raphson_optimizer(classifier_type &cf) :optimizer(cf) {};
+		using optimizer<classifier_type, feature_type, label_type>::_classifier;
+		newton_raphson_optimizer(classifier_type &cf) :optimizer<classifier_type, feature_type, label_type>::optimizer(cf) {};
 		void newton_raphson (const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix);
 	};
 	
