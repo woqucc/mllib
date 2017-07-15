@@ -139,7 +139,7 @@ namespace myml
 		auto inverse_hessian = pseudo_inverse(hessian);
 		//inverse_hessian.print();
 		//(hessian * inverse_hessian).print();
-		auto gradient = dynamic_cast<softmax_regression&>(_classifier).gradient(feature_matrix, label_matrix);
+		auto gradient = _classifier.gradient(feature_matrix, label_matrix);
 		//auto gradient = _classifier.gradient(feature_matrix, label_matrix);
 		
 

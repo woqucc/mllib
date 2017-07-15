@@ -163,6 +163,7 @@ namespace myml
 			@return 自减前的迭代器副本
 			*/
 			virtual typename matrix<T>::iterator operator --();
+
 			/*
 			@brief  加号操作符
 			@return 自减前的迭代器副本
@@ -173,6 +174,11 @@ namespace myml
 			@return 自减前的迭代器副本
 			*/
 			virtual size_t operator -(const iterator& i) const;
+			virtual bool operator > (const iterator& i) const;
+			virtual bool operator < (const iterator& i) const;
+			virtual bool operator == (const iterator& i) const;
+			virtual typename matrix<T>::iterator operator --(int);
+			virtual typename matrix<T>::iterator operator ++(int);
 		};
 		/*默认构造函数，构造空矩阵，无法使用*/
 		matrix() = default;
@@ -564,19 +570,16 @@ namespace myml
 	template<class T>
 	inline typename matrix<T>::iterator matrix<T>::iterator::operator++()
 	{
-		iterator temp(*this);
 		++_index;
-		return temp;
+		return *this;
 	}
-
 
 
 	template<class T>
 	typename matrix<T>::iterator matrix<T>::iterator::operator--()
 	{
-		iterator temp(*this);
 		--_index;
-		return temp;
+		return *this;
 	}
 
 	template<class T>
@@ -589,6 +592,40 @@ namespace myml
 	inline size_t matrix<T>::iterator::operator-(const iterator & i) const
 	{
 		return _index - i._index;
+	}
+
+	template<class T>
+	inline bool matrix<T>::iterator::operator>(const iterator & i) const
+	{
+		return _index > i._index;
+	}
+
+	template<class T>
+	inline bool matrix<T>::iterator::operator<(const iterator & i) const
+	{
+		return _index < i._index;
+	}
+
+	template<class T>
+	inline bool matrix<T>::iterator::operator==(const iterator & i) const
+	{
+		return _index == i._index;
+	}
+
+	template<class T>
+	inline typename matrix<T>::iterator matrix<T>::iterator::operator--(int)
+	{
+		iterator temp(*this);
+		--_index;
+		return temp;
+	}
+
+	template<class T>
+	inline typename matrix<T>::iterator matrix<T>::iterator::operator++(int)
+	{
+		iterator temp(*this);
+		++_index;
+		return temp;
 	}
 
 	template<class T>
@@ -2120,7 +2157,7 @@ namespace myml
 			}
 			//u = input * v * inverse(s)
 			u = input * v * inv_s;
-			return std::make_tupe(move(u), move(s), move(v));
+			return std::make_tuple(move(u), move(s), move(v));
 		}
 		//求矩阵的列正交化精度，即矩阵列之间内积的最大值
 		template<class T>
