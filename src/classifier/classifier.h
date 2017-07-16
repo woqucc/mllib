@@ -28,12 +28,6 @@ namespace myml
 		*/
 		virtual const matrix<label_type_t> predict(const matrix<feature_type_t> & feature_matrix) const = 0;
 		/*
-		@brief 训练
-		@param in feature_matrix 特征矩阵，其中每一行为一个样本
-		@param in label_matrix 每个样本对应的类别
-		*/
-		virtual void train(const matrix<feature_type_t> &feature_matrix, const matrix<label_type_t> &label_matrix) = 0;
-		/*
 		@brief 保存模型
 		@param in 文件
 		*/

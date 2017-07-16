@@ -13,3 +13,11 @@ TEST_CASE("Matrix Operate Test 1")
 	REQUIRE(a + b == c);
 	REQUIRE(a - b == d);
 }
+TEST_CASE("Pesudo inverse Test")
+{
+	matrix<long double> b = { { 4,5,6 },{ 1,2,3 } };
+	auto c = pseudo_inverse(b);
+	//¾«¶È
+	REQUIRE((c * b * c) == c);
+	REQUIRE((b * c * b) == b);
+}

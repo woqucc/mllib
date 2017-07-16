@@ -6,7 +6,7 @@
 #include<cstring>
 #include<string>
 #include"data/matrix.h"
-#include"classifier\percep"
+#include"classifier/perceptron.h"
 #include"classifier/softmax_regression.h"
 #include<vector>
 #include<ctime>
@@ -63,11 +63,7 @@ int main(int argc, char* argv[])
 
 
 
-	matrix<long double> b = { { 4,5,6 },{ 1,2,3 } };
-	auto c = pseudo_inverse(b);
-	c.print();
-	(c * b * c).print();
-	(b * c * b).print();
+
 
 	return 0;
 }

@@ -36,12 +36,6 @@ namespace myml
 		return predict_result;
 	}
 
-	void softmax_regression::train(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
-	{
-		//adadelta(feature_matrix, label_matrix);
-		//_opt.sgd_adadelta(_theta, *this, feature_matrix, label_matrix);
-		//_nopt.newton_raphson(_theta, *this, feature_matrix, label_matrix);
-	}
 
 	bool softmax_regression::load(istream & in)
 	{
