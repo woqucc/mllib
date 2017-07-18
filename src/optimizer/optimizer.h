@@ -52,6 +52,7 @@ namespace myml
 
 		matrix<feature_type> _grad_square_ewma;/*梯度平方的移动平均值*/
 		matrix<feature_type> _error_square_ewma;/*每次更新误差的平方的移动平均值*/
+
 	};
 
 
@@ -61,7 +62,8 @@ namespace myml
 	template<class classifier_type, class feature_type, class label_type>
 	inline grad_desc_optimizer<classifier_type, feature_type, label_type>::grad_desc_optimizer(classifier_type & cf):optimizer<classifier_type, feature_type, label_type>::optimizer(cf)
 	{
-		_grad.resize(cf.label_size, cf.feature_size + 1);
+		//TODO:优化抽象方式！比如说加个get_matrix_param啥的
+		_grad = _classifier._theta;
 		_grad.fill(0);
 		_last_grad = _grad;
 

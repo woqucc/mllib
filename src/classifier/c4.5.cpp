@@ -240,9 +240,5 @@ namespace myml
 	}
 
 
-	void c45::train(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
-	{
-
-	}
 
 }

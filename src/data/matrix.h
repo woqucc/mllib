@@ -315,11 +315,10 @@ namespace myml
 		*/
 		virtual pseudo_matrix<T> fetch_row(const initializer_list<size_t>& row_indexs) const;
 
-		/*
-		@brief 提取满足指定条件的行
-		*/
-		virtual pseudo_matrix<T> fetch_row(function<bool(const T* val, size_t col_size)> condition) const;
 
+
+		template<class Condition>
+		pseudo_matrix<T> fetch_row(Condition condition) const;
 		/*
 		@brief 提取指定行成为新的矩阵
 		*/
@@ -945,19 +944,6 @@ namespace myml
 	}
 
 	template<class T>
-	inline pseudo_matrix<T> matrix<T>::fetch_row(function<bool(const T* val, size_t col_size)> condition) const
-	{
-		pseudo_matrix<T> temp(*this, _row_size, _col_size);
-		for (size_t row_i = 0; row_i < row_size(); row_i++)
-		{
-			if (condition(_data[row_i], _col_size))
-				temp.raw_data()[row_i] = _data[row_i];
-		}
-		return temp;
-	}
-
-
-	template<class T>
 	inline void matrix<T>::remove_row(const initializer_list<size_t>& row_indexs)
 	{
 		for (auto & ri : row_indexs)
@@ -1007,6 +993,21 @@ namespace myml
 	}
 
 
+	//TODO::
+	template<class T>
+	template<class Condition>
+	inline pseudo_matrix<T> matrix<T>::fetch_row(Condition condition) const
+	{
+		pseudo_matrix<T> temp(*this, _row_size, _col_size);
+		size_t fetched_row_i = 0;
+		for (size_t row_i = 0; row_i < row_size(); row_i++)
+		{
+			if (condition(_data[row_i], _col_size))
+				temp.raw_data()[fetched_row_i++] = _data[row_i];
+		}
+		assert(fetched_row_i > 0);
+		return temp.sub_matrix(0,0, fetched_row_i - 1,temp.col_size() - 1);
+	}
 
 	template<class T>
 	inline matrix<T>::matrix(size_t row_size, size_t col_size)

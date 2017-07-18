@@ -1,4 +1,4 @@
-#include"../src/data/matrix.h"
+ï»¿#include"../src/data/matrix.h"
 #include"../src/classifier/softmax_regression.h"
 #define CATCH_CONFIG_MAIN
 #include"catch.hpp"
@@ -17,7 +17,24 @@ TEST_CASE("Pesudo inverse Test")
 {
 	matrix<long double> b = { { 4,5,6 },{ 1,2,3 } };
 	auto c = pseudo_inverse(b);
-	//¾«¶È
+	//ç²¾åº¦
 	REQUIRE((c * b * c) == c);
 	REQUIRE((b * c * b) == b);
+}
+TEST_CASE("Softmax Test")
+{
+	/*ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
+	matrix<long double> m;
+	import_matrix_data(m, f, ' ');
+	matrix<size_t> label;
+	auto label_map = matrix_normalization::serialize_label<long double, size_t>(m.cols(0, m.col_size() - 2), label);
+	softmax_regression sr(m.col_size() - 1, label_map.size());
+	newton_raphson_optimizer<softmax_regression> nro(sr);
+	grad_desc_optimizer<softmax_regression> gdo(sr);
+	size_t n = 20;
+	while (n--)
+	{
+		gdo.sgd_adadelta(m.cols(0, m.col_size() - 2), label);
+	}
+	REQUIRE(sr.accuracy(m.cols(0, m.col_size() - 2), label) == 1.0);*/
 }

@@ -24,7 +24,6 @@ namespace myml
 		bool load(istream &in) override;
 		bool save(ostream &out) override;
 		feature_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
-		feature_type accuracy(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
 		const matrix<label_type> predict(const matrix<feature_type> & feature_matrix) const override;
 		void print(ostream & out = cout) const override;
 		

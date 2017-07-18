@@ -48,7 +48,7 @@ namespace myml
 		/*
 		@brief 获取输入样本的准确率
 		*/
-		virtual feature_type_t accuracy(const matrix<feature_type_t> &feature_matrix, const matrix<label_type_t> &label_matrix) const = 0;
+		virtual feature_type_t accuracy(const matrix<feature_type_t> &feature_matrix, const matrix<label_type_t> &label_matrix) const;
 
 		/*
 		@brief 输出分类器信息
@@ -69,10 +69,45 @@ namespace myml
 		否则直接报错
 		*/
 		virtual matrix<feature_type_t> hessian(const matrix<feature_type_t> &feature_matrix, const matrix<label_type_t> &label_matrix) const { assert(false); return matrix<feature_type_t>(); }
+		/*获取分类错误的样本*/
+		const pseudo_matrix<feature_type_t> error_sample(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix);
 	};
 
 	template<class feature_type_t, class label_type_t>
+	inline feature_type_t classifier<feature_type_t, label_type_t>::accuracy(const matrix<feature_type_t>& feature_matrix, const matrix<label_type_t>& label_matrix) const
+	{
+		matrix<feature_type_t> pr = probabilities(feature_matrix);
+		size_t total = pr.row_size();
+		size_t correct = 0;
+		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
+		{
+			if (pr.row(row_i).max_position().second == label_matrix(row_i,0))
+				correct++;
+		}
+		return (correct + .0) / total;
+	}
+
+	template<class feature_type_t, class label_type_t>
 	inline classifier<feature_type_t, label_type_t>::classifier(size_t feature_size, size_t label_size) :feature_size(feature_size), label_size(label_size) {}
+
+	template<class feature_type_t, class label_type_t>
+	inline const pseudo_matrix<feature_type_t> classifier<feature_type_t, label_type_t>::error_sample(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
+	{
+		matrix<feature_type_t> pr = probabilities(feature_matrix);
+		size_t row_i = 0;
+		return feature_matrix.fetch_row([&pr,&label_matrix,&row_i](feature_type_t* data,size_t col_size) {
+			if (pr.row(row_i).max_position().second != label_matrix(row_i))
+			{
+				row_i++;
+				return true;
+			}
+			else
+			{
+				row_i++;
+				return false;
+			}
+		});
+	}
 
 
 

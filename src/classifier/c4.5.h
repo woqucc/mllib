@@ -77,7 +77,6 @@ namespace myml
 	public:
 		/*实现分类器标准接口*/
 		const matrix<feature_type> probabilities(const matrix<feature_type> & feature_matrix) const override;
-		void train(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) override;
 		bool load(istream &in) override;
 		bool save(ostream &out) override;
 		feature_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;

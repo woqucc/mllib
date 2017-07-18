@@ -48,18 +48,6 @@ namespace myml
 		return true;
 	}
 
-	softmax_regression::feature_type softmax_regression::accuracy(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
-	{
-		matrix<feature_type> pr = probabilities(feature_matrix);
-		size_t total = pr.row_size();
-		size_t correct = 0;
-		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
-		{
-			if (pr.row(row_i).max_position().second == label_matrix.row(row_i))
-				correct++;
-		}
-		return (correct + .0) / total;
-	}
 
 	const matrix<softmax_regression::label_type> softmax_regression::predict(const matrix<feature_type>& feature_matrix) const
 	{

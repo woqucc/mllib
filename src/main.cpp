@@ -45,25 +45,34 @@ int main(int argc, char* argv[])
 	{
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
-	softmax_regression_ridge sr(m.col_size() - 1, label_map.size());
+	
+	/*softmax_regression_ridge sr(m.col_size() - 1, label_map.size());
 	newton_raphson_optimizer<softmax_regression> nro(sr);
 	grad_desc_optimizer<softmax_regression> gdo(sr);
 	size_t n = 20;
 	while (n--)
 	{
-		nro.newton_raphson(m.cols(0, m.col_size() - 2),label);
-		//gdo.sgd_adadelta(m.cols(0, m.col_size() - 2), label);
+		//nro.newton_raphson(m.cols(0, m.col_size() - 2),label);
+		gdo.sgd_adadelta(m.cols(0, m.col_size() - 2), label);
 	}
 
 	cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 2), label) << '\t';
 	cout << "acc:" << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
 	sr.print();
 	confusion_matrix(sr, m.cols(0, m.col_size() - 2), label).print();
-
-
-
-
-
-
+	*/
+	perceptron p(m.col_size() - 1);
+	grad_desc_optimizer<perceptron> gdo(p);
+	size_t n = 2;
+	while (n--)
+	{
+		//nro.newton_raphson(m.cols(0, m.col_size() - 2),label);
+		//gdo.sgd_adadelta(m.cols(0, m.col_size() - 2), label);
+		gdo.sgd(m.cols(0, m.col_size() - 2), label,1E-3);
+	}
+	p.print(cout);
+	cout << "of:" << p.objective_function(m.cols(0, m.col_size() - 2), label) << '\t';
+	cout << "acc:" << p.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
+	confusion_matrix(p, m.cols(0, m.col_size() - 2), label).print();
 	return 0;
 }
