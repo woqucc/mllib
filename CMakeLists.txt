@@ -54,6 +54,7 @@ endmacro()
 
 #项目名称
 project  (mllib)
+find_package(CUDA)
 #加入所有包含CMakeLists.txt的子目录
 add_subdirs_have_cmakelists(${CMAKE_CURRENT_SOURCE_DIR})
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

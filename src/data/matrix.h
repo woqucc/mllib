@@ -1,6 +1,5 @@
 ﻿#ifndef DATA_H
 #define DATA_H
-#include<vector>
 #include<algorithm>
 #include<stack>
 #include<iostream>
@@ -9,11 +8,13 @@
 #include<functional>
 #include<cassert>
 #include<map>
-#include <type_traits>
+#include<type_traits>
+#include<cstdarg>
 /*g++*/
 #include<cfloat>
 #include<fstream>
 #include<cstring>
+
 
 
 namespace myml
@@ -93,6 +94,7 @@ namespace myml
 			/** @brief	矩阵列数*/
 			size_t _col_size;
 		public:
+			~iterator() = default;
 			/**
 			 * @fn	iterator::iterator(T** data, size_t row_size, size_t column_size, size_t _index);
 			 *
@@ -192,31 +194,57 @@ namespace myml
 		*/
 		virtual void sort_by(size_t column_num);
 
-		/*
-		@brief 获取元素个数
-		*/
+		/**
+		 * @fn	virtual size_t matrix::row_size() const;
+		 *
+		 * @brief	矩阵的行数。
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @return	A size_t.
+		 */
+
 		virtual size_t row_size() const;
-		/*
-		@brief 获取元素维数
-		*/
+		/**
+		 * @fn	virtual size_t matrix::col_size() const;
+		 *
+		 * @brief	获取矩阵列数
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @return	A size_t.
+		 */
+
 		virtual size_t col_size() const;
-		/*
-		@brief 检查矩阵中每行数据列数是否相同,即数据是否合法
-		@return true 每行数据列数相同，合法
-		@return false 每行数据列数不同，非法;矩阵为空
-		*/
-		virtual bool rect_check() const;
-		/*
-		@brief 交换两行
-		@param row1 待交换的行1
-		@param row2 待交换的行2
-		*/
+
+		/**
+		 * @fn	virtual void matrix::swap_row(size_t row1, size_t row2);
+		 *
+		 * @brief	交换矩阵中的两行
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	row1	The first row.
+		 * @param	row2	The second row.
+		 */
+
 		virtual void swap_row(size_t row1, size_t row2);
-		/*
-		@brief 交换两行
-		@param row1 待交换的行1
-		@param row2 待交换的行2
-		*/
+
+		/**
+		 * @fn	virtual void matrix::swap_col(size_t col1, size_t col2);
+		 *
+		 * @brief	交换矩阵中的两列
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	col1	The first col.
+		 * @param	col2	The second col.
+		 */
+
 		virtual void swap_col(size_t col1, size_t col2);
 		/*
 		@brief 获取某一元素
@@ -239,15 +267,22 @@ namespace myml
 		*/
 		virtual iterator end() const;
 
+		/**
+		 * @fn	virtual pseudo_matrix<T> matrix::sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end) const;
+		 *
+		 * @brief	获取该矩阵的子阵
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	row_begin   	The row begin.
+		 * @param	column_begin	The column begin.
+		 * @param	row_end			The row end.
+		 * @param	column_end  	The column end.
+		 *
+		 * @return	A pseudo_matrix&lt;T&gt;
+		 */
 
-		/*
-		@brief 返回子阵
-		@param row_begin	第一个元素横坐标，由0开始
-		@param column_begin	第一个元素纵坐标，由0开始
-		@param row_end	最后一个元素横坐标，由0开始
-		@param column_end	最后一个元素纵坐标，由0开始
-		@return 指向新子阵的指针（shared_ptr）
-		*/
 		virtual pseudo_matrix<T> sub_matrix(size_t row_begin, size_t column_begin, size_t row_end, size_t column_end) const;
 		/*
 		@brief 赋值操作符
@@ -302,12 +337,24 @@ namespace myml
 		*/
 		T operator ()(size_t index) const;
 
-		/*
-		@brief 本矩阵每个元素都exp
-		*/
-		matrix& exp();
 
 
+		/**
+		 * @fn	template<class OP> matrix& matrix::each(OP op);
+		 *
+		 * @brief	将每个元素的值设置为传入函数的返回值
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/1
+		 *
+		 * @tparam	OP	Type of the operation.
+		 * @param	op	传入函数，其参数为矩阵中的元素，返回值为元素的新值
+		 *
+		 * @return	A reference to a matrix.
+		 */
+
+		template<class OP>
+		matrix& each(OP op);
 
 
 		/*
@@ -344,54 +391,311 @@ namespace myml
 		matrix<T>(matrix&& m);
 		/*初始化列表*/
 		matrix<T>(const initializer_list<initializer_list<T>>&);
+		
 		/*复制构造函数*/
-		matrix<T>(const matrix& m);
+		template<class E>
+		matrix<T>(const matrix<E>& m);
+		matrix<T>(const matrix<T>& m);
+
 		/*析构函数*/
 		virtual ~matrix<T>();
 
-		/*获取某一行数据，仅用于读取*/
+		/**
+		 * @fn	pseudo_matrix<T> matrix::row(size_t row_index);
+		 *
+		 * @brief	获取矩阵中的某一行
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	row_index	Zero-based index of the row.
+		 *
+		 * @return	A pseudo_matrix&lt;T&gt;
+		 */
+
 		pseudo_matrix<T> row(size_t row_index);
-		/*获取某列数据，仅用于读取*/
+
+		/**
+		 * @fn	pseudo_matrix<T> matrix::col(size_t col_index);
+		 *
+		 * @brief	获取矩阵中的每一列
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	col_index	Zero-based index of the col.
+		 *
+		 * @return	A pseudo_matrix&lt;T&gt;
+		 */
+
 		pseudo_matrix<T> col(size_t col_index);
-		/*获取某一行数据，仅用于读取*/
+
+		/**
+		 * @fn	pseudo_matrix<T> matrix::rows(size_t begin, size_t end);
+		 *
+		 * @brief	获取矩阵中连续的几行.
+		 * 			输入范围是闭开区间
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	begin	The begin.
+		 * @param	end  	The end.
+		 *
+		 * @return	A pseudo_matrix&lt;T&gt;
+		 */
+
 		pseudo_matrix<T> rows(size_t begin, size_t end);
-		/*获取某列数据，仅用于读取*/
+
+		/**
+		 * @fn	pseudo_matrix<T> matrix::cols(size_t begin, size_t end);
+		 *
+		 * @brief	获取矩阵中的连续几列
+		 * 			输入范围是闭开区间
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	begin	The begin.
+		 * @param	end  	The end.
+		 *
+		 * @return	A pseudo_matrix&lt;T&gt;
+		 */
+
 		pseudo_matrix<T> cols(size_t begin, size_t end);
 
+		/**
+		 * @fn	const pseudo_matrix<T> matrix::row(size_t row_index) const;
+		 *
+		 * @brief	获取矩阵中的某一行
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	row_index	Zero-based index of the row.
+		 *
+		 * @return	A const pseudo_matrix&lt;T&gt;
+		 */
 
-		/*获取某一行数据，仅用于读取*/
 		const pseudo_matrix<T> row(size_t row_index) const;
-		/*获取某列数据，仅用于读取*/
+
+		/**
+		 * @fn	const pseudo_matrix<T> matrix::col(size_t col_index) const;
+		 *
+		 * @brief	获取矩阵中每一列
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	col_index	Zero-based index of the col.
+		 *
+		 * @return	A const pseudo_matrix&lt;T&gt;
+		 */
+
 		const pseudo_matrix<T> col(size_t col_index) const;
-		/*获取某一行数据，仅用于读取*/
+
+		/**
+		 * @fn	const pseudo_matrix<T> matrix::rows(size_t begin, size_t end) const;
+		 *
+		 * @brief	获取矩阵中连续的几行.
+		 * 			输入范围是闭开区间
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	begin	The begin.
+		 * @param	end  	The end.
+		 *
+		 * @return	A const pseudo_matrix&lt;T&gt;
+		 */
+
 		const pseudo_matrix<T> rows(size_t begin, size_t end) const;
-		/*获取某列数据，仅用于读取*/
+
+		/**
+		 * @fn	const pseudo_matrix<T> matrix::cols(size_t begin, size_t end) const;
+		 *
+		 * @brief	获取矩阵中连续的几列
+		 * 			输入范围是闭开区间
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	begin	The begin.
+		 * @param	end  	The end.
+		 *
+		 * @return	A const pseudo_matrix&lt;T&gt;
+		 */
+
 		const pseudo_matrix<T> cols(size_t begin, size_t end) const;
 
-		/*重新分配大小*/
+		/**
+		 * @fn	void matrix::resize(size_t row_size, size_t col_size);
+		 *
+		 * @brief	重新改变矩阵大小.
+		 * 			重新后矩阵为新矩阵，不保留原来数据。
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	row_size	Size of the row.
+		 * @param	col_size	Size of the col.
+		 */
+
 		void resize(size_t row_size, size_t col_size);
-		/*设置所有元素为指定值*/
+
+		/**
+		 * @fn	void matrix::fill(const T &t);
+		 *
+		 * @brief	使用指定元素填满矩阵
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	t	A T to process.
+		 */
+
 		void fill(const T &t);
-		/*是否有数据*/
+
+		/**
+		 * @fn	bool matrix::has_data();
+		 *
+		 * @brief	判断矩阵中是否有数据
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @return	True if data, false if not.
+		 */
+
 		bool has_data();
-		/*转置本矩阵*/
+
+		/**
+		 * @fn	matrix<T>& matrix::transpose();
+		 *
+		 * @brief	转置本矩阵
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @return	A reference to a matrix&lt;T&gt;
+		 */
+
 		matrix<T>& transpose();
-		/*将本矩阵变为本矩阵的逆*/
+
+		/**
+		 * @fn	matrix<T>& matrix::inverse();
+		 *
+		 * @brief	使用初等行列式变换求矩阵的逆。
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @return	A reference to a matrix&lt;T&gt;
+		 */
+
 		matrix<T>& inverse();
-		/*改变大小*/
+
+		/**
+		 * @fn	matrix<T>& matrix::reshape(size_t row_size, size_t col_size);
+		 *
+		 * @brief	重新改变矩阵大小。
+		 * 			保留所有元素，但新矩阵中元素个数必须与原矩阵相同。
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	row_size	Size of the row.
+		 * @param	col_size	Size of the col.
+		 *
+		 * @return	A reference to a matrix&lt;T&gt;
+		 */
+
 		matrix<T>& reshape(size_t row_size, size_t col_size);
-		/*最大元素的位置*/
+
+		/**
+		 * @fn	pair<size_t, size_t> matrix::max_position() const;
+		 *
+		 * @brief	得到矩阵中最大的元素的位置。
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @return	最大元素的位置
+		 */
+
 		pair<size_t, size_t> max_position() const;
 		/*交换两个矩阵的内容*/
 		void swap(matrix& sm);
-		/*最大元素*/
+
+		/**
+		 * @fn	T matrix::max() const;
+		 *
+		 * @brief	获取矩阵中最大元素的值。
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @return	The maximum value.
+		 */
+
 		T max() const;
-		/*获取某一元素个数*/
+
+		/**
+		 * @fn	size_t matrix::count(const T& t) const;
+		 *
+		 * @brief	获取矩阵中某一元素的个数
+		 *
+		 * @author	woqucc
+		 * @date	2017/8/2
+		 *
+		 * @param	t	输入元素
+		 *
+		 * @return	A	size_t.
+		 */
+
 		size_t count(const T& t) const;
-		/*判断是否是向量*/
+
+		/**
+		 * @fn	bool matrix::is_vector() const;
+		 *
+		 * @brief	判断当前矩阵是否是一个向量
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/2
+		 *
+		 * @return	True if vector, false if not.
+		 */
+
 		bool is_vector() const;
-		/*元素个数*/
+
+		/**
+		 * @fn	size_t matrix::size() const;
+		 *
+		 * @brief	获取元素个数
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/23
+		 *
+		 * @return	A size_t.
+		 */
+
 		size_t size() const;
+
+		/**
+		 * @fn	matrix<T>& matrix::replace(const T& old_element, const T& new_element);
+		 *
+		 * @brief	使用新元素替换矩阵中的旧元素.
+		 *
+		 * @author	Woqucc
+		 * @date	2017/8/23
+		 *
+		 * @param	old_element	The old element.
+		 * @param	new_element	The new element.
+		 *
+		 * @return	A reference to a matrix&lt;T&gt;
+		 */
+
+		matrix<T>& replace(const T& old_element, const T& new_element);
 	protected:
 		T* _memory = nullptr;
 		T** _data = nullptr;
@@ -472,25 +776,20 @@ namespace myml
 	{
 		return _data[index / _col_size][index % _col_size];
 	}
-	template<class T>
-	inline matrix<T> & matrix<T>::exp()
-	{
-		each_ele(ele = std::exp(ele));
-		return *this;
-	}
+
 
 	template<class T>
 	inline matrix<T> matrix<T>::operator+=(const matrix<T>& t)
 	{
 		assert(_row_size == t.row_size() && _col_size == t.col_size());
-		each_ele(_data[row_i][col_i] += t.at(row_i, col_i));
+		each_ele(ele += t.at(row_i, col_i));
 		return *this;
 	}
 	template<class T>
 	inline matrix<T> matrix<T>::operator-=(const matrix<T>& t)
 	{
 		assert(_row_size == t.row_size() && _col_size == t.col_size());
-		each_ele(_data[row_i][col_i] -= t.at(row_i, col_i));
+		each_ele(ele -= t.at(row_i, col_i));
 		return *this;
 	}
 	//TODO :优化逻辑
@@ -717,14 +1016,14 @@ namespace myml
 	template<class T>
 	inline pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end)
 	{
-		assert(begin < _row_size && end < _row_size);
-		return pseudo_matrix<T>(*this, begin, 0, end - begin + 1, _col_size);
+		assert(begin < _row_size && end <= _row_size);
+		return pseudo_matrix<T>(*this, begin, 0, end - begin, _col_size);
 	}
 	template<class T>
 	inline pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end)
 	{
-		assert(begin < _col_size && end < _col_size);
-		return pseudo_matrix<T>(*this, 0, begin, _row_size, end - begin + 1);
+		assert(begin < _col_size && end <= _col_size);
+		return pseudo_matrix<T>(*this, 0, begin, _row_size, end - begin);
 	}
 
 	template<class T>
@@ -742,14 +1041,14 @@ namespace myml
 	template<class T>
 	inline const pseudo_matrix<T> matrix<T>::rows(size_t begin, size_t end) const
 	{
-		assert(begin < _row_size && end < _row_size);
-		return pseudo_matrix<T>(*this, begin, 0, end - begin + 1, _col_size);
+		assert(begin < _row_size && end <= _row_size);
+		return pseudo_matrix<T>(*this, begin, 0, end - begin, _col_size);
 	}
 	template<class T>
 	inline const pseudo_matrix<T> matrix<T>::cols(size_t begin, size_t end) const
 	{
-		assert(begin < _col_size && end < _col_size);
-		return pseudo_matrix<T>(*this, 0, begin, _row_size, end - begin + 1);
+		assert(begin < _col_size && end <= _col_size);
+		return pseudo_matrix<T>(*this, 0, begin, _row_size, end - begin);
 	}
 	template<class T>
 	inline void matrix<T>::resize(size_t row_size, size_t col_size)
@@ -909,25 +1208,32 @@ namespace myml
 	{
 		return _col_size * _row_size;
 	}
+
+	template<class T>
+	inline matrix<T>& matrix<T>::replace(const T & old_element, const T & new_element)
+	{
+		each_ele(
+			if (ele == old_element)
+				ele = new_element;
+		);
+		return *this;
+	}
+
 	template<class T>
 	inline bool matrix<T>::is_vector() const
 	{
 		return _row_size == 1 || _col_size == 1;
 	}
-	template<class T>
-	inline bool matrix<T>::rect_check() const
-	{
-		return true;
-	}
+
 
 	template<class T>
 	pseudo_matrix<T> matrix<T>::sub_matrix(size_t row_begin, size_t col_begin, size_t row_end, size_t col_end) const
 	{
 		/*范围正确*/
-		assert(row_begin <= row_end && col_begin <= col_end);
-		assert(row_end - row_begin < _row_size && col_end - col_begin < _col_size);
-		assert(row_end < _row_size && col_end < _col_size);
-		return pseudo_matrix<T>(*this, row_begin, col_begin, row_end - row_begin + 1, col_end - col_begin + 1);
+		assert(row_begin < row_end && col_begin < col_end);
+		assert(row_end - row_begin <= _row_size && col_end - col_begin <= _col_size);
+		assert(row_end <= _row_size && col_end <= _col_size);
+		return pseudo_matrix<T>(*this, row_begin, col_begin, row_end - row_begin, col_end - col_begin);
 	}
 
 	template<class T>
@@ -993,6 +1299,14 @@ namespace myml
 	}
 
 
+	template<class T>
+	template<class OP>
+	inline matrix<T> & matrix<T>::each(OP op)
+	{
+		each_ele(ele = op(ele));
+		return *this;
+	}
+
 	//TODO::
 	template<class T>
 	template<class Condition>
@@ -1006,7 +1320,7 @@ namespace myml
 				temp.raw_data()[fetched_row_i++] = _data[row_i];
 		}
 		assert(fetched_row_i > 0);
-		return temp.sub_matrix(0,0, fetched_row_i - 1,temp.col_size() - 1);
+		return temp.sub_matrix(0, 0, fetched_row_i, temp.col_size());
 	}
 
 	template<class T>
@@ -1052,6 +1366,19 @@ namespace myml
 		}
 	}
 	template<class T>
+	template<class E>
+	inline matrix<T>::matrix(const matrix<E>& m)
+	{
+		resize(m.row_size(), m.col_size());
+		for (size_t row_i = 0; row_i < m.row_size(); ++row_i)
+		{
+			for (size_t col_i = 0; col_i < m.col_size(); ++col_i)
+			{
+				at(row_i, col_i) = static_cast<E>(m(row_i, col_i));
+			}
+		}
+	}
+	template<class T>
 	inline matrix<T>::matrix(const matrix<T>& m)
 	{
 		resize(m._row_size, m._col_size);
@@ -1077,22 +1404,25 @@ namespace myml
 		using matrix<T>::_row_size;
 		using matrix<T>::_col_size;
 	public:
-		pseudo_matrix& operator =(pseudo_matrix rn);
+		pseudo_matrix& operator =(const pseudo_matrix& rn);
 		pseudo_matrix& operator =(const matrix<T>& rn);
 		pseudo_matrix(const pseudo_matrix<T>& m);
 		pseudo_matrix(pseudo_matrix<T>&& m);
 		pseudo_matrix(const matrix<T>& m, size_t row_size, size_t col_size);
 		pseudo_matrix(const matrix<T>& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size);
-		pseudo_matrix(matrix<T>&& m, size_t row_size, size_t col_size) { static_assert(false); }
-		pseudo_matrix(matrix<T>&& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size) { static_assert(false); }
+		pseudo_matrix(matrix<T>&& m, size_t row_size, size_t col_size) { assert(false); }
+		pseudo_matrix(matrix<T>&& m, size_t row_begin, size_t col_begin, size_t row_size, size_t col_size) { assert(false); }
 		~pseudo_matrix();
 
-	private:
 	};
 	template<class T>
-	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(pseudo_matrix rn)
+	inline pseudo_matrix<T> & pseudo_matrix<T>::operator=(const pseudo_matrix& rn)
 	{
-		swap(rn);
+		assert(_row_size == rn.row_size() && _col_size == rn.col_size());
+		for (size_t row_i = 0; row_i < _row_size; ++row_i)
+		{
+			memcpy(_data[row_i], rn.raw_data()[row_i], sizeof(T) * _col_size);
+		}
 		return *this;
 	}
 	template<class T>
@@ -1645,7 +1975,7 @@ namespace myml
 			return move(temp);
 		}
 		template<class T>
-		T dot_product(matrix<T> op1, matrix<T> op2)
+		T dot_product(const matrix<T>& op1, const matrix<T>& op2)
 		{
 			assert(op1.size() == op2.size());
 			T sum = 0;
@@ -1876,7 +2206,7 @@ namespace myml
 		}
 
 		template<class T>
-		void identity_matrix(matrix<T>&& input)
+		void identity_matrix(matrix<T>& input)
 		{
 			for (size_t row_i = 0; row_i < input.row_size(); ++row_i)
 			{
@@ -1977,7 +2307,7 @@ namespace myml
 			//	h_matrix -= 2 * transpose(vetcor_v) * vetcor_v;
 			//else
 			h_matrix -= 2 * vetcor_v * transpose(vetcor_v);
-			return std::make_tupe(move(h_matrix), rho);
+			return std::make_tuple(move(h_matrix), rho);
 		}
 
 		/**
@@ -2012,7 +2342,7 @@ namespace myml
 				//进行变换
 				identity_matrix(h);
 				//使用householder变换将Q变换成正交阵，householder矩阵代表变换方法
-				h.sub_matrix(i, i, n - 1, n - 1) = get<0>(householder(r.sub_matrix(i, i, n - 1, i), y.rows(0, n - i - 1)));
+				h.sub_matrix(i, i, n, n) = get<0>(householder(r.sub_matrix(i, i, n, i + 1), y.rows(0, n - i)));
 				//TODO 编写*=矩阵操作符，可以节省一部分内存
 				q = q * h;
 				r = h * r;
@@ -2040,7 +2370,7 @@ namespace myml
 				q.col(j) /= r(j, j);
 			}
 			*/
-			return std::make_tupe(move(q), move(r));
+			return std::make_tuple(move(q), move(r));
 		}
 
 		/**
@@ -2087,7 +2417,7 @@ namespace myml
 				}
 			}
 
-			return std::make_tupe(move(u), move(s), move(v));
+			return std::make_tuple(move(u), move(s), move(v));
 		}
 		template<class T>
 		matrix<T> pseudo_inverse(const matrix<T>& input)
@@ -2326,6 +2656,31 @@ namespace myml
 				}
 			}
 
+		}
+
+		template<class T>
+		matrix<T> merge_matrices_by_cols(size_t num, ...)
+		{
+			va_list arg_list;
+			va_start(arg_list, num);
+			auto matrix_array = make_unique<matrix<T>[]>(num);
+			size_t row_size = 0, col_size = 0;
+			for (size_t matrix_i = 0; matrix_i < num; ++matrix_i)
+			{
+				//可变参数不能按引用传递，只能拷贝一次了
+				matrix_array[matrix_i] = va_arg(arg_list, matrix<T>);
+				col_size += matrix_array[matrix_i].col_size();
+				row_size = std::max(row_size, matrix_array[matrix_i].row_size());
+			}
+			matrix<T> result(row_size, col_size);
+			size_t col_i = 0;
+			for (size_t matrix_i = 0; matrix_i < num; ++matrix_i)
+			{
+				result.sub_matrix(0, col_i, matrix_array[matrix_i].row_size(), col_i + matrix_array[matrix_i].col_size()) = matrix_array[matrix_i];
+				col_i += matrix_array[matrix_i].col_size();
+			}
+			va_end(arg_list);
+			return result;
 		}
 	};
 

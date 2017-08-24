@@ -18,7 +18,7 @@ namespace myml
 	{
 		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
 		/*最后一列填1*/
-		feature.cols(0, feature_size - 1) = feature_matrix;
+		feature.cols(0, feature_size) = feature_matrix;
 		feature.col(feature_size).fill(1);
 		matrix<feature_type> predict_result = feature* transpose(_theta);
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
@@ -53,7 +53,7 @@ namespace myml
 	{
 		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
 		/*最后一列填1*/
-		feature.cols(0, feature_size - 1) = feature_matrix;
+		feature.cols(0, feature_size) = feature_matrix;
 		feature.col(feature_size).fill(1);
 		matrix<feature_type> prob_matrix = feature*transpose(_theta);
 
@@ -89,7 +89,7 @@ namespace myml
 		/*预测结果的每一列误差，乘以对应的特征向量项，*/
 		for (size_t col_i = 0; col_i < predict_matrix.col_size(); ++col_i)
 		{
-			sum_error.cols(0, _theta.col_size() - 2) += predict_matrix.col(col_i) * feature_matrix.row(col_i);
+			sum_error.cols(0, _theta.col_size() - 1) += predict_matrix.col(col_i) * feature_matrix.row(col_i);
 			/*计算常数项误差*/
 			sum_error.col(_theta.col_size() - 1) += predict_matrix.col(col_i);
 		}
@@ -101,7 +101,7 @@ namespace myml
 	{
 		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
 		/*最后一列填1*/
-		feature.cols(0, feature_size - 1) = feature_matrix;
+		feature.cols(0, feature_size) = feature_matrix;
 		feature.col(feature_size).fill(1);
 		size_t theta_size = feature_size + 1;
 		//海森矩阵大小 (特征数+1)*类别个数x(特征数+1)*类别个数
@@ -110,12 +110,12 @@ namespace myml
 		for (size_t label_i = 0; label_i < label_size; ++label_i)
 		{		
 			matrix<feature_type> w_diag = dot(predict_matrix.col(label_i),1.0L - predict_matrix.col(label_i));
-			hessian_matrix.sub_matrix(label_i * theta_size, label_i * theta_size, label_i * theta_size + theta_size - 1, label_i * theta_size + theta_size - 1) = transpose(feature) * diag(w_diag) * feature;
+			hessian_matrix.sub_matrix(label_i * theta_size, label_i * theta_size, label_i * theta_size + theta_size , label_i * theta_size + theta_size) = transpose(feature) * diag(w_diag) * feature;
 			for (size_t other_label = label_i + 1; other_label < label_size; ++other_label)
 			{
 				matrix<feature_type> w_off_diag = -dot(predict_matrix.col(label_i), predict_matrix.col(other_label));
-				hessian_matrix.sub_matrix(label_i * theta_size, other_label * theta_size, label_i * theta_size + theta_size - 1, other_label * theta_size + theta_size - 1) = transpose(feature) * diag(w_off_diag) * feature;
-				hessian_matrix.sub_matrix(other_label * theta_size, label_i * theta_size, other_label * theta_size + theta_size - 1, label_i * theta_size + theta_size - 1) = transpose(feature) * diag(w_off_diag) * feature;
+				hessian_matrix.sub_matrix(label_i * theta_size, other_label * theta_size, label_i * theta_size + theta_size , other_label * theta_size + theta_size) = transpose(feature) * diag(w_off_diag) * feature;
+				hessian_matrix.sub_matrix(other_label * theta_size, label_i * theta_size, other_label * theta_size + theta_size, label_i * theta_size + theta_size) = transpose(feature) * diag(w_off_diag) * feature;
 			}
 		}
 		return hessian_matrix;

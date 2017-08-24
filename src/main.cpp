@@ -5,6 +5,7 @@
 #include<ctime>
 #include<cstring>
 #include<string>
+
 #include"data/matrix.h"
 #include"classifier/perceptron.h"
 #include"classifier/softmax_regression.h"
@@ -14,17 +15,27 @@
 #include<tuple>
 #include<limits>
 
+#include"svm.h"
+
+//#include"cublas_v2.h"
+//#include"cuda_runtime.h"
+
 using namespace std;
 using namespace myml;
 using namespace myml::matrix_operate;
+
 int main(int argc, char* argv[])
 {
+#ifdef _DEBUG
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif // DEBUG
+
 	matrix<long double> m;
 	ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
 	//ifstream f(R"(multi_classification.txt)", ios::in);
 	//ifstream f(R"(..\\test_data\\hessian_test.txt)", ios::in);
 
-	//ifstream f(R"(multi_classification2.txt)", ios::in);
+	//ifstream f(R"(..\test_data\binary_classification.txt)", ios::in);
 	//auto x = diag<long double>({ {1,2,3,4,5,6,7,8,9,10} });
 	//(-x).print();
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
@@ -45,34 +56,53 @@ int main(int argc, char* argv[])
 	{
 		us[label.at(row_i, 0)].push_back(row_i);
 	}
-	
-	/*softmax_regression_ridge sr(m.col_size() - 1, label_map.size());
+
+	softmax_regression_ridge sr(m.col_size() - 1, label_map.size());
 	newton_raphson_optimizer<softmax_regression> nro(sr);
 	grad_desc_optimizer<softmax_regression> gdo(sr);
 	size_t n = 20;
 	while (n--)
 	{
 		//nro.newton_raphson(m.cols(0, m.col_size() - 2),label);
-		gdo.sgd_adadelta(m.cols(0, m.col_size() - 2), label);
+		gdo.sgd_adadelta(m.cols(0, m.col_size() - 1), label);
 	}
-
-	cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 2), label) << '\t';
-	cout << "acc:" << sr.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
+	cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 1), label) << '\t';
+	cout << "acc:" << sr.accuracy(m.cols(0, m.col_size() - 1), label) << endl;
 	sr.print();
-	confusion_matrix(sr, m.cols(0, m.col_size() - 2), label).print();
-	*/
+	auto cm = confusion_matrix(sr, m.cols(0, m.col_size() - 1), label);
+
+
+	svm s(m.col_size() - 1);
+	
+	s.train(m.cols(0, m.col_size() - 1), label);
+	//s.predict(m.cols(0, m.col_size() - 1)).print();
+	confusion_matrix(s, m.cols(0, m.col_size() - 1), label).print();
+	/*
 	perceptron p(m.col_size() - 1);
 	grad_desc_optimizer<perceptron> gdo(p);
-	size_t n = 2;
+	size_t n = 1000;
 	while (n--)
 	{
 		//nro.newton_raphson(m.cols(0, m.col_size() - 2),label);
-		//gdo.sgd_adadelta(m.cols(0, m.col_size() - 2), label);
-		gdo.sgd(m.cols(0, m.col_size() - 2), label,1E-3);
+		gdo.sgd_adadelta(m.cols(0, m.col_size() - 1), label);
+		//gdo.sgd(m.cols(0, m.col_size() - 2), label,1E-10);
 	}
 	p.print(cout);
-	cout << "of:" << p.objective_function(m.cols(0, m.col_size() - 2), label) << '\t';
-	cout << "acc:" << p.accuracy(m.cols(0, m.col_size() - 2), label) << endl;
-	confusion_matrix(p, m.cols(0, m.col_size() - 2), label).print();
+	cout << "of:" << p.objective_function(m.cols(0, m.col_size() - 1), label) << '\t';
+	cout << "acc:" << p.accuracy(m.cols(0, m.col_size() - 1), label) << endl;
+	auto cm = confusion_matrix(p, m.cols(0, m.col_size() - 1), label);
+	cm.print();*/
+	/*matrix<long double> m[4];
+	ifstream f[4] = { ifstream(R"(cwnd0.txt)", ios::in), ifstream(R"(cwnd1.txt)", ios::in), ifstream(R"(cwnd2.txt)", ios::in), ifstream(R"(cwnd3.txt)", ios::in)};
+	for (size_t i = 0; i < 4; i++)
+	{
+		import_matrix_data(m[i], f[i], '\t');
+		cerr << m[i].row_size() << '\t' << m[i].col_size() <<  endl;
+	}
+
+	auto result = matrix_normalization::merge_matrices_by_cols<long double>(4, m[0], m[1], m[2], m[3]);
+	ofstream out("all.txt", ios::out);
+	result.print(out);*/
+
 	return 0;
 }
