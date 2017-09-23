@@ -1,7 +1,7 @@
 #ifndef PERCEPTRON_H
 #define PERCEPTRON_H
 #include"classifier.h"
-#include"matrix.h"
+#include"../data/matrix.h"
 #include"../optimizer/optimizer.h"
 namespace myml
 {

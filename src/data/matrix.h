@@ -706,7 +706,7 @@ namespace myml
 	template<class T>
 	inline void matrix<T>::print(ostream& out, char split) const
 	{
-		//out.precision(std::numeric_limits<T>::digits10);
+		out.precision(std::numeric_limits<T>::digits10);
 		out << fixed;
 		for (size_t row = 0; row < row_size(); row++)
 		{
@@ -1374,7 +1374,7 @@ namespace myml
 		{
 			for (size_t col_i = 0; col_i < m.col_size(); ++col_i)
 			{
-				at(row_i, col_i) = static_cast<E>(m(row_i, col_i));
+				at(row_i, col_i) = static_cast<T>(m(row_i, col_i));
 			}
 		}
 	}
@@ -1922,7 +1922,9 @@ namespace myml
 				for (size_t col_i = 0; col_i < op1.col_size(); ++col_i)
 				{
 					if (op1(row_i, col_i) != op2(row_i, col_i))
+					{
 						return false;
+					}
 				}
 			}
 			return true;
@@ -1985,6 +1987,7 @@ namespace myml
 			}
 			return sum;
 		}
+		
 		/**
 		 * @fn	template<class T> matrix<T> transpose(const matrix<T>& input)
 		 *

@@ -1,4 +1,10 @@
 include_all_hearers()
-file(GLOB_RECURSE HEADER "*.h" "*.hpp" "*.hh")
-file(GLOB_RECURSE SOURCE "*.c" "*.cpp" "*.cc")
-add_executable(unit_test ${HEADER} ${SOURCE})
+FILE(GLOB_RECURSE HEADER "*.h" "*.hpp" "*.hh")
+FILE(GLOB_RECURSE SOURCE "*.c" "*.cpp" "*.cc")
+
+ADD_EXECUTABLE(unit_test ${HEADER} ${SOURCE})
+ADD_DEPENDENCIES(unit_test mllib)
+TARGET_LINK_LIBRARIES(unit_test mllib)
+#FILE(COPY test_data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+MESSAGE(STATUS ${EXECUTABLE_OUTPUT_PATH})
+#MESSAGE(STATUS ${PROJECT_BINARY_DIR})

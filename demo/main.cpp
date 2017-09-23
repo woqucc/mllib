@@ -6,16 +6,16 @@
 #include<cstring>
 #include<string>
 
-#include"data/matrix.h"
-#include"classifier/perceptron.h"
-#include"classifier/softmax_regression.h"
+#include"../src/data/matrix.h"
+#include"../src/classifier/perceptron.h"
+#include"../src/classifier/softmax_regression.h"
 #include<vector>
 #include<ctime>
 #include<cstdlib>
 #include<tuple>
 #include<limits>
 
-#include"svm.h"
+#include"../src/classifier/svm.h"
 
 //#include"cublas_v2.h"
 //#include"cuda_runtime.h"
@@ -26,16 +26,13 @@ using namespace myml::matrix_operate;
 
 int main(int argc, char* argv[])
 {
-#ifdef _DEBUG
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif // DEBUG
 
 	matrix<long double> m;
-	ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
+	//ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
 	//ifstream f(R"(multi_classification.txt)", ios::in);
 	//ifstream f(R"(..\\test_data\\hessian_test.txt)", ios::in);
 
-	//ifstream f(R"(..\test_data\binary_classification.txt)", ios::in);
+	ifstream f(R"(..\test_data\binary_classification.txt)", ios::in);
 	//auto x = diag<long double>({ {1,2,3,4,5,6,7,8,9,10} });
 	//(-x).print();
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
@@ -71,7 +68,6 @@ int main(int argc, char* argv[])
 	sr.print();
 	auto cm = confusion_matrix(sr, m.cols(0, m.col_size() - 1), label);
 
-
 	svm s(m.col_size() - 1);
 	
 	s.train(m.cols(0, m.col_size() - 1), label);
@@ -103,6 +99,6 @@ int main(int argc, char* argv[])
 	auto result = matrix_normalization::merge_matrices_by_cols<long double>(4, m[0], m[1], m[2], m[3]);
 	ofstream out("all.txt", ios::out);
 	result.print(out);*/
-
+	
 	return 0;
 }

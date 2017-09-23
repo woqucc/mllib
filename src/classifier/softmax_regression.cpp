@@ -55,7 +55,7 @@ namespace myml
 		/*最后一列填1*/
 		feature.cols(0, feature_size) = feature_matrix;
 		feature.col(feature_size).fill(1);
-		matrix<feature_type> prob_matrix = feature*transpose(_theta);
+		matrix<feature_type> prob_matrix = feature * transpose(_theta);
 
 		matrix<label_type> predict_result(feature_matrix.row_size(), 1);
 		for (size_t i = 0; i < feature_matrix.row_size(); ++i)
@@ -94,7 +94,7 @@ namespace myml
 			sum_error.col(_theta.col_size() - 1) += predict_matrix.col(col_i);
 		}
 		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/
-		sum_error /= feature_type(feature_matrix.row_size());		
+		sum_error /= feature_type(feature_matrix.row_size());
 		return sum_error;
 	}
 	matrix<softmax_regression::feature_type> softmax_regression::hessian(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
@@ -108,13 +108,13 @@ namespace myml
 		matrix<feature_type> hessian_matrix(theta_size * label_size, theta_size * label_size);
 		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
 		for (size_t label_i = 0; label_i < label_size; ++label_i)
-		{		
-			matrix<feature_type> w_diag = dot(predict_matrix.col(label_i),1.0L - predict_matrix.col(label_i));
-			hessian_matrix.sub_matrix(label_i * theta_size, label_i * theta_size, label_i * theta_size + theta_size , label_i * theta_size + theta_size) = transpose(feature) * diag(w_diag) * feature;
+		{
+			matrix<feature_type> w_diag = dot(predict_matrix.col(label_i), 1.0L - predict_matrix.col(label_i));
+			hessian_matrix.sub_matrix(label_i * theta_size, label_i * theta_size, label_i * theta_size + theta_size, label_i * theta_size + theta_size) = transpose(feature) * diag(w_diag) * feature;
 			for (size_t other_label = label_i + 1; other_label < label_size; ++other_label)
 			{
 				matrix<feature_type> w_off_diag = -dot(predict_matrix.col(label_i), predict_matrix.col(other_label));
-				hessian_matrix.sub_matrix(label_i * theta_size, other_label * theta_size, label_i * theta_size + theta_size , other_label * theta_size + theta_size) = transpose(feature) * diag(w_off_diag) * feature;
+				hessian_matrix.sub_matrix(label_i * theta_size, other_label * theta_size, label_i * theta_size + theta_size, other_label * theta_size + theta_size) = transpose(feature) * diag(w_off_diag) * feature;
 				hessian_matrix.sub_matrix(other_label * theta_size, label_i * theta_size, other_label * theta_size + theta_size, label_i * theta_size + theta_size) = transpose(feature) * diag(w_off_diag) * feature;
 			}
 		}
