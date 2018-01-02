@@ -1,8 +1,9 @@
-#ifndef SVM_H
+﻿#ifndef SVM_H
 #define SVM_H
 #include"perceptron.h"
 namespace myml
 {
+	using std::size_t;
 	namespace kernel {
 		template<class feature_type,int param_d = 3>
 		static feature_type polynomial(const matrix<feature_type>& op1, const matrix<feature_type>& op2)

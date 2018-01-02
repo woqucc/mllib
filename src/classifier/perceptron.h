@@ -5,6 +5,7 @@
 #include"../optimizer/optimizer.h"
 namespace myml
 {
+	using std::size_t;
 	class perceptron : public classifier<long double, size_t>
 	{
 	protected:

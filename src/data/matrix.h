@@ -706,7 +706,7 @@ namespace myml
 	template<class T>
 	inline void matrix<T>::print(ostream& out, char split) const
 	{
-		out.precision(std::numeric_limits<T>::digits10);
+		//out.precision(std::numeric_limits<T>::digits10);
 		out << fixed;
 		for (size_t row = 0; row < row_size(); row++)
 		{

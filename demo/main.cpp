@@ -1,4 +1,4 @@
-﻿#include<iostream>
+#include<iostream>
 #include<fstream>
 #include<memory>
 #include<unordered_map>
@@ -14,6 +14,7 @@
 #include<cstdlib>
 #include<tuple>
 #include<limits>
+#include<random>
 
 #include"../src/classifier/svm.h"
 
@@ -27,67 +28,64 @@ using namespace myml::matrix_operate;
 int main(int argc, char* argv[])
 {
 
-	matrix<long double> m;
+	matrix<long double> am;
+	ifstream f(R"(C:\Users\woqucc\Desktop\feature0.txt)", ios::in);
 	//ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
-	//ifstream f(R"(multi_classification.txt)", ios::in);
+	//ifstream f(R"(..\test_data\multi_classification.txt)", ios::in);
 	//ifstream f(R"(..\\test_data\\hessian_test.txt)", ios::in);
 
-	ifstream f(R"(..\test_data\binary_classification.txt)", ios::in);
+	//ifstream f(R"(..\test_data\binary_classification.txt)", ios::in);
+	//ifstream f(R"(D:\研\ss_project\workspace_20170924\data\20170924.txt)", ios::in);
 	//auto x = diag<long double>({ {1,2,3,4,5,6,7,8,9,10} });
 	//(-x).print();
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 	//ifstream f(argv[1],ios::in);
 //	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 
-
-	import_matrix_data(m, f, ' ');
-
+	random_device rd;
+	import_matrix_data(am, f, ' ');
+	
+	auto m = am.cols(0, am.col_size() - 1);
+	
+	cout << m.row_size() << endl;
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	matrix<size_t> label;
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	//matrix_normalization::set_range<long double>(m.col(m.col_size() - 1), 0, 3);
 	matrix<long double> temp = m.col(m.col_size() - 1);
 	auto label_map = matrix_normalization::serialize_label<long double, size_t>(temp, label);
-	vector<size_t> us[6];
-	for (size_t row_i = 0; row_i < m.row_size(); row_i++)
-	{
-		us[label.at(row_i, 0)].push_back(row_i);
-	}
-
-	softmax_regression_ridge sr(m.col_size() - 1, label_map.size());
-	newton_raphson_optimizer<softmax_regression> nro(sr);
+	
+	
+	
+	softmax_regression sr(m.col_size() - 1, label_map.size());
+	//newton_raphson_optimizer<softmax_regression> nro(sr);
 	grad_desc_optimizer<softmax_regression> gdo(sr);
-	size_t n = 20;
+	size_t n = 200000;
+
 	while (n--)
 	{
+		auto sample_id = rd() % m.row_size();
 		//nro.newton_raphson(m.cols(0, m.col_size() - 2),label);
+		//gdo.sgd_adadelta(m.cols(0, m.col_size() - 1).row(sample_id), label.row(sample_id));
 		gdo.sgd_adadelta(m.cols(0, m.col_size() - 1), label);
+		if (n % 10 == 0)
+		{
+			cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 1), label) << '\t';
+			cout << "acc:" << sr.accuracy(m.cols(0, m.col_size() - 1), label) << endl;
+			confusion_matrix(sr, m.cols(0, m.col_size() - 1), label).print();
+			sr.print();
+		}
 	}
 	cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 1), label) << '\t';
 	cout << "acc:" << sr.accuracy(m.cols(0, m.col_size() - 1), label) << endl;
-	sr.print();
-	auto cm = confusion_matrix(sr, m.cols(0, m.col_size() - 1), label);
+	//sr.print();
+	//auto cm = confusion_matrix(sr, m.cols(0, m.col_size() - 1), label);
 
-	svm s(m.col_size() - 1);
-	
-	s.train(m.cols(0, m.col_size() - 1), label);
 	//s.predict(m.cols(0, m.col_size() - 1)).print();
-	confusion_matrix(s, m.cols(0, m.col_size() - 1), label).print();
-	/*
-	perceptron p(m.col_size() - 1);
-	grad_desc_optimizer<perceptron> gdo(p);
-	size_t n = 1000;
-	while (n--)
-	{
-		//nro.newton_raphson(m.cols(0, m.col_size() - 2),label);
-		gdo.sgd_adadelta(m.cols(0, m.col_size() - 1), label);
-		//gdo.sgd(m.cols(0, m.col_size() - 2), label,1E-10);
-	}
-	p.print(cout);
-	cout << "of:" << p.objective_function(m.cols(0, m.col_size() - 1), label) << '\t';
-	cout << "acc:" << p.accuracy(m.cols(0, m.col_size() - 1), label) << endl;
-	auto cm = confusion_matrix(p, m.cols(0, m.col_size() - 1), label);
-	cm.print();*/
+	
+	confusion_matrix(sr, m.cols(0, m.col_size() - 1), label).print();
+
+
 	/*matrix<long double> m[4];
 	ifstream f[4] = { ifstream(R"(cwnd0.txt)", ios::in), ifstream(R"(cwnd1.txt)", ios::in), ifstream(R"(cwnd2.txt)", ios::in), ifstream(R"(cwnd3.txt)", ios::in)};
 	for (size_t i = 0; i < 4; i++)
@@ -98,7 +96,7 @@ int main(int argc, char* argv[])
 
 	auto result = matrix_normalization::merge_matrices_by_cols<long double>(4, m[0], m[1], m[2], m[3]);
 	ofstream out("all.txt", ios::out);
-	result.print(out);*/
-	
+	result.print(out);
+	*/
 	return 0;
 }
