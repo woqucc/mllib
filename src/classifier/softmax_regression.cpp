@@ -153,7 +153,7 @@ namespace myml
 	matrix<softmax_regression::feature_type> softmax_regression_ridge::hessian(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
 	{
 		matrix<feature_type> hessian_matrix = softmax_regression::hessian(feature_matrix, label_matrix);
-		hessian_matrix += identity_matrix<feature_type>(hessian_matrix.row_size()) * _lambda;
+		hessian_matrix += matrix<feature_type>::identity_matrix(hessian_matrix.row_size()) * _lambda;
 		return hessian_matrix;
 	}
 }

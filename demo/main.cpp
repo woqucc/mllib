@@ -29,8 +29,8 @@ int main(int argc, char* argv[])
 {
 
 	matrix<long double> am;
-	ifstream f(R"(C:\Users\woqucc\Desktop\feature0.txt)", ios::in);
-	//ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
+	//ifstream f(R"(C:\Users\woqucc\Desktop\feature0.txt)", ios::in);
+	ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
 	//ifstream f(R"(..\test_data\multi_classification.txt)", ios::in);
 	//ifstream f(R"(..\\test_data\\hessian_test.txt)", ios::in);
 
@@ -45,8 +45,8 @@ int main(int argc, char* argv[])
 	random_device rd;
 	import_matrix_data(am, f, ' ');
 	
-	auto m = am.cols(0, am.col_size() - 1);
-	
+	//auto m = am.cols(0, am.col_size() - 1);
+	auto m = am;
 	cout << m.row_size() << endl;
 	//matrix_normalization::zero_mean_by_col(m.cols(0, m.col_size() - 2));
 	matrix<size_t> label;

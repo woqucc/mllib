@@ -88,7 +88,7 @@ namespace myml
 		{
 		protected:
 			/** @brief	矩阵内数据内存的指针 */
-			T** _data;
+			T * * _data;
 			/** @brief	迭代器指向元素在矩阵内的位置，一行行挨排数 */
 			size_t _index;
 			/** @brief	矩阵列数*/
@@ -391,7 +391,7 @@ namespace myml
 		matrix<T>(matrix&& m);
 		/*初始化列表*/
 		matrix<T>(const initializer_list<initializer_list<T>>&);
-		
+
 		/*复制构造函数*/
 		template<class E>
 		matrix<T>(const matrix<E>& m);
@@ -692,12 +692,28 @@ namespace myml
 		 * @param	old_element	The old element.
 		 * @param	new_element	The new element.
 		 *
-		 * @return	A reference to a matrix&lt;T&gt;
+		 * @return	A reference to a matrix;
 		 */
 
 		matrix<T>& replace(const T& old_element, const T& new_element);
+
+		/**
+		 * @fn	static matrix<T> matrix::identity_matrix(const size_t& size);
+		 *
+		 * @brief	生成单位矩阵.
+		 *
+		 * @author	Woqucc
+		 * @date	2018/1/14
+		 *
+		 * @param	size	The size.
+		 *
+		 * @return	A matrix;
+		 */
+
+		static matrix<T> identity_matrix(const size_t& size);
+
 	protected:
-		T* _memory = nullptr;
+		T * _memory = nullptr;
 		T** _data = nullptr;
 		size_t _row_size = 0;
 		size_t _col_size = 0;
@@ -1106,7 +1122,7 @@ namespace myml
 	{
 		assert(_col_size == _row_size);
 		//方阵检查
-		matrix<T> inv = identity_matrix<T>(_col_size);
+		matrix<T> inv = matrix<T>::identity_matrix(_col_size);
 		T factor = 0;
 		for (size_t i = 0; i < _col_size; ++i)
 		{
@@ -1217,6 +1233,17 @@ namespace myml
 				ele = new_element;
 		);
 		return *this;
+	}
+
+	template<class T>
+	inline matrix<T> matrix<T>::identity_matrix(const size_t & size)
+	{
+		matrix<T> result(size, size);
+		for (size_t i = 0; i < size; i++)
+		{
+			result.at(i, i) = T(1);
+		}
+		return result;
 	}
 
 	template<class T>
@@ -1404,7 +1431,7 @@ namespace myml
 		using matrix<T>::_row_size;
 		using matrix<T>::_col_size;
 	public:
-		pseudo_matrix& operator =(const pseudo_matrix& rn);
+		pseudo_matrix & operator =(const pseudo_matrix& rn);
 		pseudo_matrix& operator =(const matrix<T>& rn);
 		pseudo_matrix(const pseudo_matrix<T>& m);
 		pseudo_matrix(pseudo_matrix<T>&& m);
@@ -1987,7 +2014,7 @@ namespace myml
 			}
 			return sum;
 		}
-		
+
 		/**
 		 * @fn	template<class T> matrix<T> transpose(const matrix<T>& input)
 		 *
@@ -2196,29 +2223,7 @@ namespace myml
 			return result;
 		}
 
-		/*生成单位矩阵*/
-		template<class T>
-		matrix<T> identity_matrix(size_t size)
-		{
-			matrix<T> result(size, size);
-			for (size_t i = 0; i < size; i++)
-			{
-				result.at(i, i) = T(1);
-			}
-			return result;
-		}
 
-		template<class T>
-		void identity_matrix(matrix<T>& input)
-		{
-			for (size_t row_i = 0; row_i < input.row_size(); ++row_i)
-			{
-				for (size_t col_i = 0; col_i < input.col_size(); ++col_i)
-				{
-					input(row_i, col_i) = row_i == col_i ? 1 : 0;
-				}
-			}
-		}
 		/**
 		 * @fn	template<class T> matrix<T> reshape(const matrix<T> &input, size_t row_size, size_t col_size)
 		 *
@@ -2304,7 +2309,7 @@ namespace myml
 			// v = v / ||v||
 			vetcor_v /= v_norm_euclidean(vetcor_v);
 			// h = I - 2 * v * v'
-			matrix<T> h_matrix = identity_matrix<T>(vector_x.size());
+			matrix<T> h_matrix = matrix<T>::identity_matrix(vector_x.size());
 			//TODO:是否需要对列还是行进行判断？应该不需要吧
 			//if (vetcor_v.row_size() == 1)
 			//	h_matrix -= 2 * transpose(vetcor_v) * vetcor_v;
@@ -2334,7 +2339,7 @@ namespace myml
 			size_t n = input.row_size();
 			size_t min_size = min(n - 1, input.col_size());
 			matrix<T> r = input;
-			matrix<T> q = identity_matrix<T>(n);
+			matrix<T> q = matrix<T>::identity_matrix(n);
 			//householder变换基
 			matrix<T> y(n, 1);
 			matrix<T> h(n, n);
@@ -2343,7 +2348,7 @@ namespace myml
 			{
 				//TODO:等待一个优化
 				//进行变换
-				identity_matrix(h);
+				h = matrix<T>::identity_matrix(h.row_size());
 				//使用householder变换将Q变换成正交阵，householder矩阵代表变换方法
 				h.sub_matrix(i, i, n, n) = get<0>(householder(r.sub_matrix(i, i, n, i + 1), y.rows(0, n - i)));
 				//TODO 编写*=矩阵操作符，可以节省一部分内存
@@ -2395,10 +2400,10 @@ namespace myml
 		{
 			size_t m = input.row_size();
 			size_t n = input.col_size();
-			matrix<T> u = identity_matrix<T>(m);
+			matrix<T> u = matrix<T>::identity_matrix(m);
 			matrix<T> s = transpose(input);
 			matrix<T> st = transpose(s);
-			matrix<T> v = identity_matrix<T>(n);
+			matrix<T> v = matrix<T>::identity_matrix(n);
 			matrix<T> q(m, m);
 			matrix<T> qn(n, n);
 			size_t iter_count = 26;
@@ -2422,91 +2427,7 @@ namespace myml
 
 			return std::make_tuple(move(u), move(s), move(v));
 		}
-		template<class T>
-		matrix<T> pseudo_inverse(const matrix<T>& input)
-		{
-			matrix<T> pinv(input.col_size(), input.row_size());
-			matrix<T> u(input.row_size(), input.row_size());
-			matrix<T> s(input.row_size(), input.col_size());
-			matrix<T> v(input.col_size(), input.col_size());
-			std::tie(u, s, v) = svd_hestenes(input, std::numeric_limits<T>::epsilon() * 1024 * 16);
-			u.transpose();
-			s.transpose();
-			for (size_t i = 0; i < std::min(input.col_size(), input.row_size()); ++i)
-			{
-				s(i, i) = T(1) / s(i, i);
-			}
-			return v *s *u;
 
-		}
-
-		/**
-		 * @fn	template<class T> tuple<matrix<T>, matrix<T>, matrix<T>> svd_hestenes(const matrix<T> &input, T epsilon = T(1E-10))
-		 *
-		 * @brief	单边jacobi旋转求svd
-		 *
-		 *
-		 * @author	Woqucc
-		 * @date	2017/7/4
-		 *
-		 * @tparam	T	Generic type parameter.
-		 * @param	input  	The input.
-		 * @param	epsilon	(Optional) The epsilon.
-		 *
-		 * @return	A tuple&lt;matrix&lt;T&gt;,matrix&lt;T&gt;,matrix&lt;T&gt;&gt;
-		 */
-
-		template<class T>
-		tuple<matrix<T>, matrix<T>, matrix<T>> svd_hestenes(const matrix<T> &input, T epsilon = T(1E-10))
-		{
-			size_t m = input.row_size();
-			size_t n = input.col_size();
-			matrix<T> temp_input = input;
-			matrix<T> u = identity_matrix<T>(m);
-			matrix<T> s(input.row_size(), input.col_size());
-			matrix<T> inv_s(n, m);
-			matrix<T> v = identity_matrix<T>(n);
-
-			//input *v = s * u
-			//计算出v
-			while (orth_precision_column(temp_input) > epsilon)
-			{
-				//TODO:在每次正交化列的选择上，需要进行优化
-				for (size_t i = 0; i < n; i++)
-				{
-					for (size_t j = i + 1; j < n; ++j)
-					{
-						auto gm = orth_givens<T>(temp_input, i, j);
-						givens_rotate(v, gm, i, j);
-					}
-				}
-			}
-			// temp_input = u * s
-			// temp_input * temp_input' = s * u * u ' * s' = s * s' = s特征值的平方形成的矩阵
-			for (size_t i = 0; i < std::min(m, n); ++i)
-			{
-				auto temp_col = temp_input.col(i);
-				s(i, i) = std::sqrt(dot_product(temp_col, temp_col));
-				inv_s(i, i) = T(1) / s(i, i);
-			}
-			//u = input * v * inverse(s)
-			u = input * v * inv_s;
-			return std::make_tuple(move(u), move(s), move(v));
-		}
-		//求矩阵的列正交化精度，即矩阵列之间内积的最大值
-		template<class T>
-		T orth_precision_column(const matrix<T> &input)
-		{
-			T orth_pre = 0;
-			for (size_t i = 0; i < input.col_size(); i++)
-			{
-				for (size_t j = i + 1; j < input.col_size(); j++)
-				{
-					orth_pre = std::max(orth_pre, abs(dot_product(input.col(i), input.col(j))));
-				}
-			}
-			return orth_pre;
-		}
 		template<class T>
 		matrix<T> orth_givens(matrix<T> &input, size_t i, size_t j)
 		{
@@ -2536,6 +2457,7 @@ namespace myml
 			givens_matrix(0, 1) = -givens_matrix(1, 0);
 			return givens_matrix;
 		}
+
 		template<class T>
 		void givens_rotate(matrix<T> &input, const matrix<T> &tiny_givens_matrix, size_t i, size_t j)
 		{
@@ -2548,6 +2470,94 @@ namespace myml
 				input(row_i, j) = temp_j;
 			}
 		}
+
+		//求矩阵的列正交化精度，即矩阵列之间内积的最大值
+		template<class T>
+		T orth_precision_column(const matrix<T> &input)
+		{
+			T orth_pre = 0;
+			for (size_t i = 0; i < input.col_size(); i++)
+			{
+				for (size_t j = i + 1; j < input.col_size(); j++)
+				{
+					orth_pre = std::max(orth_pre, abs(dot_product(input.col(i), input.col(j))));
+				}
+			}
+			return orth_pre;
+		}
+		
+		/**
+		 * @fn	template<class T> tuple<matrix<T>, matrix<T>, matrix<T>> svd_hestenes(const matrix<T> &input, T epsilon = T(1E-10))
+		 *
+		 * @brief	单边jacobi旋转求svd
+		 *
+		 *
+		 * @author	Woqucc
+		 * @date	2017/7/4
+		 *
+		 * @tparam	T	Generic type parameter.
+		 * @param	input  	The input.
+		 * @param	epsilon	(Optional) The epsilon.
+		 *
+		 * @return	A tuple&lt;matrix&lt;T&gt;,matrix&lt;T&gt;,matrix&lt;T&gt;&gt;
+		 */
+
+		template<class T>
+		tuple<matrix<T>, matrix<T>, matrix<T>> svd_hestenes(const matrix<T> &input, T epsilon = T(1E-10))
+		{
+			size_t m = input.row_size();
+			size_t n = input.col_size();
+			matrix<T> temp_input = input;
+			matrix<T> u = matrix<T>::identity_matrix(m);
+			matrix<T> s(input.row_size(), input.col_size());
+			matrix<T> inv_s(n, m);
+			matrix<T> v = matrix<T>::identity_matrix(n);
+
+			//input *v = s * u
+			//计算出v
+			while (orth_precision_column(temp_input) > epsilon)
+			{
+				//TODO:在每次正交化列的选择上，需要进行优化
+				for (size_t i = 0; i < n; i++)
+				{
+					for (size_t j = i + 1; j < n; ++j)
+					{
+						auto gm = orth_givens<T>(temp_input, i, j);
+						givens_rotate(v, gm, i, j);
+					}
+				}
+			}
+			// temp_input = u * s
+			// temp_input * temp_input' = s * u * u ' * s' = s * s' = s特征值的平方形成的矩阵
+			for (size_t i = 0; i < std::min(m, n); ++i)
+			{
+				auto temp_col = temp_input.col(i);
+				s(i, i) = std::sqrt(dot_product(temp_col, temp_col));
+				inv_s(i, i) = T(1) / s(i, i);
+			}
+			//u = input * v * inverse(s)
+			u = input * v * inv_s;
+			return std::make_tuple(move(u), move(s), move(v));
+		}
+
+		template<class T>
+		matrix<T> pseudo_inverse(const matrix<T>& input)
+		{
+			matrix<T> pinv(input.col_size(), input.row_size());
+			matrix<T> u(input.row_size(), input.row_size());
+			matrix<T> s(input.row_size(), input.col_size());
+			matrix<T> v(input.col_size(), input.col_size());
+			std::tie(u, s, v) = svd_hestenes(input, std::numeric_limits<T>::epsilon() * 1024 * 16);
+			u.transpose();
+			s.transpose();
+			for (size_t i = 0; i < std::min(input.col_size(), input.row_size()); ++i)
+			{
+				s(i, i) = T(1) / s(i, i);
+			}
+			return v * s *u;
+
+		}
+
 
 	}
 	/*矩阵数据标准化*/
@@ -2661,30 +2671,30 @@ namespace myml
 
 		}
 
-		template<class T>
-		matrix<T> merge_matrices_by_cols(size_t num, ...)
-		{
-			va_list arg_list;
-			va_start(arg_list, num);
-			auto matrix_array = make_unique<matrix<T>[]>(num);
-			size_t row_size = 0, col_size = 0;
-			for (size_t matrix_i = 0; matrix_i < num; ++matrix_i)
-			{
-				//可变参数不能按引用传递，只能拷贝一次了
-				matrix_array[matrix_i] = va_arg(arg_list, matrix<T>);
-				col_size += matrix_array[matrix_i].col_size();
-				row_size = std::max(row_size, matrix_array[matrix_i].row_size());
-			}
-			matrix<T> result(row_size, col_size);
-			size_t col_i = 0;
-			for (size_t matrix_i = 0; matrix_i < num; ++matrix_i)
-			{
-				result.sub_matrix(0, col_i, matrix_array[matrix_i].row_size(), col_i + matrix_array[matrix_i].col_size()) = matrix_array[matrix_i];
-				col_i += matrix_array[matrix_i].col_size();
-			}
-			va_end(arg_list);
-			return result;
-		}
+		//template<class T>
+		//matrix<T> merge_matrices_by_cols(size_t num, ...)
+		//{
+		//	va_list arg_list;
+		//	va_start(arg_list, num);
+		//	auto matrix_array = make_unique<matrix<T>[]>(num);
+		//	size_t row_size = 0, col_size = 0;
+		//	for (size_t matrix_i = 0; matrix_i < num; ++matrix_i)
+		//	{
+		//		//可变参数不能按引用传递，只能拷贝一次了
+		//		matrix_array[matrix_i] = va_arg(arg_list, matrix<T>);
+		//		col_size += matrix_array[matrix_i].col_size();
+		//		row_size = std::max(row_size, matrix_array[matrix_i].row_size());
+		//	}
+		//	matrix<T> result(row_size, col_size);
+		//	size_t col_i = 0;
+		//	for (size_t matrix_i = 0; matrix_i < num; ++matrix_i)
+		//	{
+		//		result.sub_matrix(0, col_i, matrix_array[matrix_i].row_size(), col_i + matrix_array[matrix_i].col_size()) = matrix_array[matrix_i];
+		//		col_i += matrix_array[matrix_i].col_size();
+		//	}
+		//	va_end(arg_list);
+		//	return result;
+		//}
 	};
 
 };

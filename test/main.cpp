@@ -92,7 +92,7 @@ TEST_CASE("Pesudo inverse Test")
 }
 TEST_CASE("Softmax with Grandient")
 {
-	ifstream f(R"(..\test_data\perceptron_test.txt)", ios::in);
+	ifstream f(R"(../test_data/perceptron_test.txt)", ios::in);
 	matrix<long double> m;
 	import_matrix_data(m, f, ' ');
 	matrix<size_t> label;
