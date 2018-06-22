@@ -9,18 +9,18 @@ namespace myml
 		_theta.fill(0);
 	}
 
-	void softmax_regression::load(const matrix<feature_type>& theta)
+	void softmax_regression::load(const matrix<feature_t>& theta)
 	{
 		_theta = theta;
 	}
 
-	const matrix<softmax_regression::feature_type> softmax_regression::probabilities(const matrix<feature_type>& feature_matrix) const
+	const matrix<softmax_regression::feature_t> softmax_regression::probabilities(const matrix<feature_t>& feature_matrix) const
 	{
-		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
+		matrix<feature_t> feature(feature_matrix.row_size(), feature_size + 1);
 		/*最后一列填1*/
 		feature.cols(0, feature_size) = feature_matrix;
 		feature.col(feature_size).fill(1);
-		matrix<feature_type> predict_result = feature* transpose(_theta);
+		matrix<feature_t> predict_result = feature* transpose(_theta);
 		for (size_t row_i = 0; row_i < feature_matrix.row_size(); ++row_i)
 		{
 			/*
@@ -32,14 +32,14 @@ namespace myml
 			predict_result.row(row_i) /= sum(predict_result.row(row_i));
 		}
 
-		//label_type(result.row(row_i)) = predict_result.max_position().first;
+		//label_t(result.row(row_i)) = predict_result.max_position().first;
 		return predict_result;
 	}
 
 
 	bool softmax_regression::load(istream & in)
 	{
-		return import_matrix_data<feature_type>(_theta, in);
+		return import_matrix_data<feature_t>(_theta, in);
 	}
 
 	bool softmax_regression::save(ostream & out)
@@ -49,15 +49,15 @@ namespace myml
 	}
 
 
-	const matrix<softmax_regression::label_type> softmax_regression::predict(const matrix<feature_type>& feature_matrix) const
+	const matrix<softmax_regression::label_t> softmax_regression::predict(const matrix<feature_t>& feature_matrix) const
 	{
-		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
+		matrix<feature_t> feature(feature_matrix.row_size(), feature_size + 1);
 		/*最后一列填1*/
 		feature.cols(0, feature_size) = feature_matrix;
 		feature.col(feature_size).fill(1);
-		matrix<feature_type> prob_matrix = feature * transpose(_theta);
+		matrix<feature_t> prob_matrix = feature * transpose(_theta);
 
-		matrix<label_type> predict_result(feature_matrix.row_size(), 1);
+		matrix<label_t> predict_result(feature_matrix.row_size(), 1);
 		for (size_t i = 0; i < feature_matrix.row_size(); ++i)
 		{
 			predict_result.at(i, 0) = prob_matrix.row(i).max_position().second;
@@ -70,11 +70,11 @@ namespace myml
 		_theta.print(out);
 	}
 
-	matrix<softmax_regression::feature_type> softmax_regression::gradient(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	matrix<softmax_regression::feature_t> softmax_regression::gradient(const matrix<feature_t>& feature_matrix, const matrix<label_t>& label_matrix) const
 	{
 		/*误差矩阵大小与_theta大小相同*/
-		matrix<feature_type> sum_error(_theta.row_size(), _theta.col_size());
-		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
+		matrix<feature_t> sum_error(_theta.row_size(), _theta.col_size());
+		matrix<feature_t> predict_matrix = probabilities(feature_matrix);
 		/*累加每个特征向量的误差，预测减去准确，梯度下降算法
 		正常是准确-预测，然后乘以负的系数，这里直接将负号带入
 		*/
@@ -94,36 +94,36 @@ namespace myml
 			sum_error.col(_theta.col_size() - 1) += predict_matrix.col(col_i);
 		}
 		/*正常为 乘以 -1/m 因为上面将负号带入了，这里不用再加负号*/
-		sum_error /= feature_type(feature_matrix.row_size());
+		sum_error /= feature_t(feature_matrix.row_size());
 		return sum_error;
 	}
-	matrix<softmax_regression::feature_type> softmax_regression::hessian(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	matrix<softmax_regression::feature_t> softmax_regression::hessian(const matrix<feature_t>& feature_matrix, const matrix<label_t>& label_matrix) const
 	{
-		matrix<feature_type> feature(feature_matrix.row_size(), feature_size + 1);
+		matrix<feature_t> feature(feature_matrix.row_size(), feature_size + 1);
 		/*最后一列填1*/
 		feature.cols(0, feature_size) = feature_matrix;
 		feature.col(feature_size).fill(1);
 		size_t theta_size = feature_size + 1;
 		//海森矩阵大小 (特征数+1)*类别个数x(特征数+1)*类别个数
-		matrix<feature_type> hessian_matrix(theta_size * label_size, theta_size * label_size);
-		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
+		matrix<feature_t> hessian_matrix(theta_size * label_size, theta_size * label_size);
+		matrix<feature_t> predict_matrix = probabilities(feature_matrix);
 		for (size_t label_i = 0; label_i < label_size; ++label_i)
 		{
-			matrix<feature_type> w_diag = dot(predict_matrix.col(label_i), 1.0L - predict_matrix.col(label_i));
+			matrix<feature_t> w_diag = dot(predict_matrix.col(label_i), 1.0L - predict_matrix.col(label_i));
 			hessian_matrix.sub_matrix(label_i * theta_size, label_i * theta_size, label_i * theta_size + theta_size, label_i * theta_size + theta_size) = transpose(feature) * diag(w_diag) * feature;
 			for (size_t other_label = label_i + 1; other_label < label_size; ++other_label)
 			{
-				matrix<feature_type> w_off_diag = -dot(predict_matrix.col(label_i), predict_matrix.col(other_label));
+				matrix<feature_t> w_off_diag = -dot(predict_matrix.col(label_i), predict_matrix.col(other_label));
 				hessian_matrix.sub_matrix(label_i * theta_size, other_label * theta_size, label_i * theta_size + theta_size, other_label * theta_size + theta_size) = transpose(feature) * diag(w_off_diag) * feature;
 				hessian_matrix.sub_matrix(other_label * theta_size, label_i * theta_size, other_label * theta_size + theta_size, label_i * theta_size + theta_size) = transpose(feature) * diag(w_off_diag) * feature;
 			}
 		}
 		return hessian_matrix;
 	}
-	softmax_regression::feature_type softmax_regression::objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const
+	softmax_regression::feature_t softmax_regression::objective_function(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const
 	{
-		feature_type of = 0;
-		matrix<feature_type> predict_matrix = probabilities(feature_matrix);
+		feature_t of = 0;
+		matrix<feature_t> predict_matrix = probabilities(feature_matrix);
 		for (size_t row_i = 0; row_i < predict_matrix.row_size(); ++row_i)
 		{
 			size_t label = label_matrix.at(row_i, 0);
@@ -137,23 +137,23 @@ namespace myml
 	{
 
 	}
-	matrix<softmax_regression::feature_type> softmax_regression_ridge::gradient(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	matrix<softmax_regression::feature_t> softmax_regression_ridge::gradient(const matrix<feature_t>& feature_matrix, const matrix<label_t>& label_matrix) const
 	{
 		/*误差矩阵大小与_theta大小相同*/
-		matrix<feature_type> sum_error = softmax_regression::gradient(feature_matrix, label_matrix);
+		matrix<feature_t> sum_error = softmax_regression::gradient(feature_matrix, label_matrix);
 		sum_error += _theta * _lambda;
 		return sum_error;
 	}
-	softmax_regression::feature_type softmax_regression_ridge::objective_function(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	softmax_regression::feature_t softmax_regression_ridge::objective_function(const matrix<feature_t>& feature_matrix, const matrix<label_t>& label_matrix) const
 	{
-		feature_type of = softmax_regression::objective_function(feature_matrix, label_matrix);
+		feature_t of = softmax_regression::objective_function(feature_matrix, label_matrix);
 		of -= norm_f(_theta)* _lambda;
 		return of;
 	}
-	matrix<softmax_regression::feature_type> softmax_regression_ridge::hessian(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	matrix<softmax_regression::feature_t> softmax_regression_ridge::hessian(const matrix<feature_t>& feature_matrix, const matrix<label_t>& label_matrix) const
 	{
-		matrix<feature_type> hessian_matrix = softmax_regression::hessian(feature_matrix, label_matrix);
-		hessian_matrix += matrix<feature_type>::identity_matrix(hessian_matrix.row_size()) * _lambda;
+		matrix<feature_t> hessian_matrix = softmax_regression::hessian(feature_matrix, label_matrix);
+		hessian_matrix += matrix<feature_t>::identity_matrix(hessian_matrix.row_size()) * _lambda;
 		return hessian_matrix;
 	}
 }

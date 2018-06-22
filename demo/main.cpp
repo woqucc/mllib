@@ -1,4 +1,4 @@
-#include<iostream>
+﻿#include<iostream>
 #include<fstream>
 #include<memory>
 #include<unordered_map>
@@ -30,17 +30,17 @@ int main(int argc, char* argv[])
 
 	matrix<long double> am;
 	//ifstream f(R"(C:\Users\woqucc\Desktop\feature0.txt)", ios::in);
-	ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
-	//ifstream f(R"(..\test_data\multi_classification.txt)", ios::in);
+	//ifstream f(R"(..\\test_data\\perceptron_test.txt)", ios::in);
+	ifstream f(R"(..\test_data\multi_classification.txt)", ios::in);
 	//ifstream f(R"(..\\test_data\\hessian_test.txt)", ios::in);
 
 	//ifstream f(R"(..\test_data\binary_classification.txt)", ios::in);
-	//ifstream f(R"(D:\研\ss_project\workspace_20170924\data\20170924.txt)", ios::in);
+	//ifstream f(R"(D:\鐮擻ss_project\workspace_20170924\data\20170924.txt)", ios::in);
 	//auto x = diag<long double>({ {1,2,3,4,5,6,7,8,9,10} });
 	//(-x).print();
 	//ifstream f(R"(E:\paper\feature\compound-10Mb-10ms-r1-q1000pa1\feature\feature1.txt)",ios::in);
 	//ifstream f(argv[1],ios::in);
-//	ifstream f(R"(D:\paper\features实验\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
+//	ifstream f(R"(D:\paper\features瀹為獙\cubic-10Mb-10ms-r1-q1000pa1\feature\feature0.txt)", ios::in);
 
 	random_device rd;
 	import_matrix_data(am, f, ' ');
@@ -56,11 +56,10 @@ int main(int argc, char* argv[])
 	auto label_map = matrix_normalization::serialize_label<long double, size_t>(temp, label);
 	
 	
-	
 	softmax_regression sr(m.col_size() - 1, label_map.size());
 	//newton_raphson_optimizer<softmax_regression> nro(sr);
 	grad_desc_optimizer<softmax_regression> gdo(sr);
-	size_t n = 200000;
+	size_t n = 200;
 
 	while (n--)
 	{
@@ -70,17 +69,16 @@ int main(int argc, char* argv[])
 		gdo.sgd_adadelta(m.cols(0, m.col_size() - 1), label);
 		if (n % 10 == 0)
 		{
-			cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 1), label) << '\t';
-			cout << "acc:" << sr.accuracy(m.cols(0, m.col_size() - 1), label) << endl;
-			confusion_matrix(sr, m.cols(0, m.col_size() - 1), label).print();
+			auto cf = confusion_matrix(sr, m.cols(0, m.col_size() - 1), label);
+			cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 1), label) << '\t';		
+			cout << "acc:" << accuracy(cf) << endl;
+			precision(cf).print();
+			
 			sr.print();
 		}
 	}
-	cout << "of:" << sr.objective_function(m.cols(0, m.col_size() - 1), label) << '\t';
-	cout << "acc:" << sr.accuracy(m.cols(0, m.col_size() - 1), label) << endl;
-	//sr.print();
-	//auto cm = confusion_matrix(sr, m.cols(0, m.col_size() - 1), label);
 
+	//auto cm = confusion_matrix(sr, m.cols(0, m.col_size() - 1), label);
 	//s.predict(m.cols(0, m.col_size() - 1)).print();
 	
 	confusion_matrix(sr, m.cols(0, m.col_size() - 1), label).print();

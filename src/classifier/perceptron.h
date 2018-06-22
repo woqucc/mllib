@@ -6,20 +6,20 @@
 namespace myml
 {
 	using std::size_t;
-	class perceptron : public classifier<long double, size_t>
+	class perceptron : public classifier
 	{
 	protected:
-		matrix<feature_type> _theta;
+		matrix<feature_t> _theta;
 	public:
-		friend class grad_desc_optimizer<perceptron, feature_type, label_type>;
-		virtual const matrix<feature_type> probabilities(const matrix<feature_type> & feature_matrix) const override;
-		virtual const matrix<label_type> predict(const matrix<feature_type> & feature_matrix) const  override;
+		friend class grad_desc_optimizer<perceptron>;
+		virtual const matrix<feature_t> probabilities(const matrix<feature_t> & feature_matrix) const override;
+		virtual const matrix<label_t> predict(const matrix<feature_t> & feature_matrix) const  override;
 		virtual bool load(istream &in)  override;
 		virtual bool save(ostream &out)  override;
-		virtual feature_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const  override;
+		virtual feature_t objective_function(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const  override;
 		virtual void print(ostream & out) const  override;
 		perceptron(size_t feature_size);
-		virtual matrix<feature_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
+		virtual matrix<feature_t> gradient(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const override;
 	};
 }
 

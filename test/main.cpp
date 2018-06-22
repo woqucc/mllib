@@ -105,5 +105,5 @@ TEST_CASE("Softmax with Grandient")
 	{
 		gdo.sgd_adadelta(m.cols(0, m.col_size() - 1), label);
 	}
-	REQUIRE(sr.accuracy(m.cols(0, m.col_size() - 1), label) == 1.0);
+	REQUIRE(accuracy(sr,m.cols(0, m.col_size() - 1), label) == 1.0);
 }

@@ -9,27 +9,25 @@ namespace myml
 {
 	/*设置数据类型，不想用template*/
 
-	class softmax_regression : public classifier<long double, size_t>
+	class softmax_regression : public classifier
 	{
 	public:
 
-		using label_class_map = map<label_type, long double>;
-
-		friend class grad_desc_optimizer<softmax_regression, feature_type,label_type>;
-		friend class newton_raphson_optimizer<softmax_regression, feature_type, label_type>;
+		friend class grad_desc_optimizer<softmax_regression>;
+		friend class newton_raphson_optimizer<softmax_regression>;
 		softmax_regression(size_t feature_count, size_t label_count);
 
 		/*实现分类器标准接口*/
-		const matrix<feature_type> probabilities(const matrix<feature_type> & feature_matrix) const override;
+		const matrix<feature_t> probabilities(const matrix<feature_t> & feature_matrix) const override;
 		bool load(istream &in) override;
 		bool save(ostream &out) override;
-		feature_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
-		const matrix<label_type> predict(const matrix<feature_type> & feature_matrix) const override;
+		feature_t objective_function(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const override;
+		const matrix<label_t> predict(const matrix<feature_t> & feature_matrix) const override;
 		void print(ostream & out = cout) const override;
-		
-		
+
+
 		/*实现特有方法*/
-		void load(const matrix<feature_type>& theta);
+		void load(const matrix<feature_t>& theta);
 
 
 
@@ -39,23 +37,23 @@ namespace myml
 			@param in label_matrix 与特征矩阵每一行相对应的具体类标，用来计算误差
 			@param out 输出误差矩阵，矩阵大小与_theta大小相同
 		*/
-		virtual matrix<feature_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const;
+		virtual matrix<feature_t> gradient(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const;
 
-		virtual matrix<feature_type> hessian(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
+		virtual matrix<feature_t> hessian(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const override;
 	protected:
-		matrix<feature_type> _theta;
-		//newton_raphson_optimizer<feature_type, label_type, feature_type, matrix<feature_type>> _nopt;
-		//grad_desc_optimizer<softmax_regression,feature_type,label_type> _opt;
+		matrix<feature_t> _theta;
+		//newton_raphson_optimizer<feature_t, label_t, feature_t, matrix<feature_t>> _nopt;
+		//grad_desc_optimizer<softmax_regression,feature_t,label_t> _opt;
 	};
 
 	class softmax_regression_ridge : public softmax_regression
 	{
 	public:
-		feature_type _lambda = static_cast<feature_type>(1E-8L);
+		feature_t _lambda = static_cast<feature_t>(1E-8L);
 		softmax_regression_ridge(size_t feature_count, size_t label_count);
-		virtual matrix<feature_type> gradient(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
-		feature_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
-		virtual matrix<feature_type> hessian(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
+		virtual matrix<feature_t> gradient(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const override;
+		feature_t objective_function(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const override;
+		virtual matrix<feature_t> hessian(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const override;
 	};
 
 }

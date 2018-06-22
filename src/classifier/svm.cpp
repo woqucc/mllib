@@ -1,14 +1,14 @@
 #include "svm.h"
 namespace myml
 {
-	const matrix<svm::feature_type> svm::probabilities(const matrix<feature_type>& feature_matrix) const
+	const matrix<svm::feature_t> svm::probabilities(const matrix<feature_t>& feature_matrix) const
 	{
-		return matrix<feature_type>();
+		return matrix<feature_t>();
 	}
-	const matrix<svm::label_type> svm::predict(const matrix<feature_type>& feature_matrix) const
+	const matrix<svm::label_t> svm::predict(const matrix<feature_t>& feature_matrix) const
 	{
-		matrix<label_type> result(feature_matrix.row_size(), 1);
-		feature_type y;
+		matrix<label_t> result(feature_matrix.row_size(), 1);
+		feature_t y;
 		for (size_t f_row_i = 0; f_row_i < feature_matrix.row_size(); ++f_row_i)
 		{
 			y = b;
@@ -28,37 +28,37 @@ namespace myml
 	{
 		return false;
 	}
-	svm::feature_type svm::objective_function(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix) const
+	svm::feature_t svm::objective_function(const matrix<feature_t>& feature_matrix, const matrix<label_t>& label_matrix) const
 	{
-		return feature_type();
+		return feature_t();
 	}
 	void svm::print(ostream & out) const
 	{
 	}
-	svm::svm(size_t feature_size, function<feature_type(const matrix<feature_type>&, const matrix<feature_type>&)> kernel) : classifier(feature_size, 2), _kernel(kernel)
+	svm::svm(size_t feature_size, function<feature_t(const matrix<feature_t>&, const matrix<feature_t>&)> kernel) : classifier(feature_size, 2), _kernel(kernel)
 	{
 
 	}
 
-	void svm::train(const matrix<feature_type>& feature_matrix, const matrix<label_type>& label_matrix)
+	void svm::train(const matrix<feature_t>& feature_matrix, const matrix<label_t>& label_matrix)
 	{
 		// 临时变量：
 		// 第0列:temp(i,0),存储拉格朗日算子
 		// 第1列:temp(i,1),存储每个样本的的误差
 		// 第2列:temp(i,2),存储将label_matrix中0替换为-后的类标,temp(i,0)
-		matrix<feature_type> temp(feature_matrix.row_size(), 3);
+		matrix<feature_t> temp(feature_matrix.row_size(), 3);
 
 		temp.fill(0);
 		(temp.col(2) = label_matrix).replace(0, -1);
 
 
-		matrix<feature_type> label = label_matrix;
+		matrix<feature_t> label = label_matrix;
 		label.replace(0, -1);
-		//feature_type error_i = 0;
-		//feature_type error_j = 0;
-		feature_type tol = 1E-8;
-		feature_type old_lm_i, old_lm_j;
-		feature_type eta;
+		//feature_t error_i = 0;
+		//feature_t error_j = 0;
+		feature_t tol = 1E-8;
+		feature_t old_lm_i, old_lm_j;
+		feature_t eta;
 
 
 		//计算Ek=f(xk) -yk
@@ -93,16 +93,16 @@ namespace myml
 						if (i != j)
 						{
 							//计算第j个算子调节的范围，在调节第j个算子时，需要使第i个算子也满足约束条件
-							feature_type L, H;
+							feature_t L, H;
 							if (label_matrix(i) != label_matrix(j))
 							{
-								L = std::max(static_cast<feature_type>(0), temp(j, 0) - temp(i, 0));
-								H = std::min(static_cast<feature_type>(C), C + temp(j, 0) - temp(i, 0));
+								L = std::max(static_cast<feature_t>(0), temp(j, 0) - temp(i, 0));
+								H = std::min(static_cast<feature_t>(C), C + temp(j, 0) - temp(i, 0));
 							}
 							else
 							{
-								L = std::max(static_cast<feature_type>(0), temp(i, 0) + temp(j, 0) - C);
-								H = std::min(static_cast<feature_type>(C), temp(i, 0) + temp(j, 0));
+								L = std::max(static_cast<feature_t>(0), temp(i, 0) + temp(j, 0) - C);
+								H = std::min(static_cast<feature_t>(C), temp(i, 0) + temp(j, 0));
 							}
 
 							if (L == H)
@@ -128,8 +128,8 @@ namespace myml
 							temp(i, 0) += (old_lm_j - temp(j, 0)) * label(i) * label(j);
 
 							//计算参数b的值
-							feature_type b1 = b - temp(i, 1) - label(i) * (temp(i, 0) - old_lm_i) * _kernel(feature_matrix.row(i), feature_matrix.row(i)) - label(j) * (temp(j, 0) - old_lm_j) * _kernel(feature_matrix.row(i), feature_matrix.row(j));
-							feature_type b2 = b - temp(j, 1) - label(i) * (temp(i, 0) - old_lm_i) * _kernel(feature_matrix.row(i), feature_matrix.row(j)) - label(j) * (temp(j, 0) - old_lm_j) * _kernel(feature_matrix.row(j), feature_matrix.row(j));
+							feature_t b1 = b - temp(i, 1) - label(i) * (temp(i, 0) - old_lm_i) * _kernel(feature_matrix.row(i), feature_matrix.row(i)) - label(j) * (temp(j, 0) - old_lm_j) * _kernel(feature_matrix.row(i), feature_matrix.row(j));
+							feature_t b2 = b - temp(j, 1) - label(i) * (temp(i, 0) - old_lm_i) * _kernel(feature_matrix.row(i), feature_matrix.row(j)) - label(j) * (temp(j, 0) - old_lm_j) * _kernel(feature_matrix.row(j), feature_matrix.row(j));
 							if (temp(i, 0) > 0 && temp(i, 0) < C && temp(i, 0) > 0 && temp(i, 0) < C)
 								b = (b1 + b2) / 2;
 							else if (temp(i, 0) > 0 && temp(i, 0) < C)

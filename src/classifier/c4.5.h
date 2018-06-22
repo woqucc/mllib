@@ -11,9 +11,9 @@ namespace myml
 	using namespace std;
 	using count_result = unordered_map<long double, int>;
 	using matrix_p = shared_ptr<matrix<long double>>;
-	using feature_type = long double;
-	using label_type = size_t;
-	using feature_type = long double;
+	using feature_t = long double;
+	using label_t = size_t;
+	using feature_t = long double;
 	class c45_tree_node
 	{
 
@@ -72,16 +72,15 @@ namespace myml
 		*/
 		long double _calc_intrinsic_value(const count_result& cr);
 	};
-	class c45 : public classifier<feature_type, label_type>
+	class c45 : public classifier
 	{
 	public:
 		/*实现分类器标准接口*/
-		const matrix<feature_type> probabilities(const matrix<feature_type> & feature_matrix) const override;
+		const matrix<feature_t> probabilities(const matrix<feature_t> & feature_matrix) const override;
 		bool load(istream &in) override;
 		bool save(ostream &out) override;
-		feature_type objective_function(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
-		feature_type accuracy(const matrix<feature_type> &feature_matrix, const matrix<label_type> &label_matrix) const override;
-		const matrix<label_type> predict(const matrix<feature_type> & feature_matrix) const override;
+		feature_t objective_function(const matrix<feature_t> &feature_matrix, const matrix<label_t> &label_matrix) const override;
+		const matrix<label_t> predict(const matrix<feature_t> & feature_matrix) const override;
 		void print(ostream & out = cout) const override;
 	protected:
 		tree<c45_tree_node> tr;
